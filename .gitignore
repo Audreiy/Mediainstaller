@@ -1,0 +1,22 @@
+# Build directories
+build/
+build-*/
+cmake-build-*/
+out/
+
+# Visual Studio / MSVC
+.vs/
+*.user
+*.suo
+*.VC.db
+
+# Qt Creator
+*.qmlproject.user
+CMakeLists.txt.user
+
+# Binaries
+*.exe
+*.dll
+*.obj
+*.pdb
+*.ilk
