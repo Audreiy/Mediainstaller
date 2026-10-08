@@ -40,6 +40,10 @@ target_include_directories(MediaGrab PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/media
 )
 
+set_source_files_properties(qml/Theme.qml PROPERTIES
+    QT_QML_SINGLETON_TYPE TRUE
+)
+
 qt_add_qml_module(MediaGrab
     URI MediaGrab
     VERSION 1.0
@@ -54,6 +58,10 @@ qt_add_qml_module(MediaGrab
         qml/views/DashboardView.qml
         qml/views/QueueView.qml
         qml/views/SettingsView.qml
+)
+
+set_target_properties(MediaGrab PROPERTIES
+    OUTPUT_NAME "MediaGrabApp"
 )
 
 target_link_libraries(MediaGrab PRIVATE
@@ -72,11 +80,4 @@ if(CURL_FOUND)
     message(STATUS "libcurl found and linked")
 else()
     message(STATUS "libcurl not found yet; will use Qt Network or bundled curl worker")
-endif()
-
-# Deployment post-build helper for Windows
-if(WIN32)
-    set_target_properties(MediaGrab PROPERTIES
-        WIN32_EXECUTABLE TRUE
-    )
 endif()

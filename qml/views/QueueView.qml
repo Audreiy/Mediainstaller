@@ -31,7 +31,7 @@ Item {
                 }
             }
 
-            Item { Layout.fillWidth: true; width: parent.width - 320 }
+            Item { width: Math.max(10, parent.width - 320) }
 
             // Clear Completed Button
             Rectangle {

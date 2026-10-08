@@ -132,7 +132,7 @@ Rectangle {
                     font.family: Theme.fontFamily
                 }
 
-                Item { Layout.fillWidth: true; width: 10 }
+                Item { width: 10 }
 
                 Text {
                     text: Math.round(model.progress) + "%"

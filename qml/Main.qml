@@ -21,12 +21,8 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: -100
-        opacity: 0.12
-        gradient: Gradient {
-            orientation: Gradient.Radial
-            GradientStop { position: 0.0; color: Theme.accentPurple }
-            GradientStop { position: 1.0; color: "transparent" }
-        }
+        opacity: 0.10
+        color: Theme.accentPurple
     }
 
     Rectangle {
@@ -34,14 +30,10 @@ ApplicationWindow {
         height: 450
         radius: 225
         anchors.bottom: parent.bottom
-        anchors.left: sidebarNav.right
+        anchors.left: parent.left
         anchors.margins: -120
         opacity: 0.08
-        gradient: Gradient {
-            orientation: Gradient.Radial
-            GradientStop { position: 0.0; color: Theme.accent }
-            GradientStop { position: 1.0; color: "transparent" }
-        }
+        color: Theme.accent
     }
 
     Row {
@@ -65,6 +57,7 @@ ApplicationWindow {
 
                 DashboardView {
                     id: dashboardView
+                    onNavigateToQueue: sidebarNav.activeTab = 1
                 }
 
                 QueueView {

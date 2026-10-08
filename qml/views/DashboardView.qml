@@ -7,6 +7,8 @@ Item {
 
     property string currentErrorMessage: ""
 
+    signal navigateToQueue()
+
     Connections {
         target: urlAnalyzer
         function onAnalysisError(msg) {
@@ -89,9 +91,7 @@ Item {
 
                 onDownloadTriggered: function(url, title, formatId, folder) {
                     downloadManager.addDownload(url, title, formatId, folder)
-                    // Reset input
-                    // Navigate to queue tab
-                    sidebarNav.activeTab = 1
+                    root.navigateToQueue()
                 }
             }
 
