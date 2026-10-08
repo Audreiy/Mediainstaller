@@ -2,6 +2,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QFileInfo>
+#include <QDir>
 #include <QProcess>
 
 DownloadQueueModel::DownloadQueueModel(QObject *parent)

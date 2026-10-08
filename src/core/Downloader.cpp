@@ -28,7 +28,8 @@ void Downloader::start() {
         return;
     }
 
-    QNetworkRequest request(QUrl(m_url));
+    QNetworkRequest request;
+    request.setUrl(QUrl(m_url));
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) MediaGrab/1.0");
 
