@@ -13,7 +13,7 @@ Rectangle {
     border.width: 1
 
     property var mediaInfo: null
-    property string selectedOptionId: "original"
+    property string selectedOptionId: "best_video"
     property string customFolder: downloadManager.defaultDownloadPath
 
     signal downloadTriggered(string url, string title, string formatId, string folder)
@@ -26,35 +26,46 @@ Rectangle {
         anchors.margins: 20
         spacing: 16
 
-        // Header: Title & Direct Badge
+        // Header: Thumbnail & Title & Metadata
         Row {
             width: parent.width
-            spacing: 12
+            spacing: 14
 
+            // Media Thumbnail Preview
             Rectangle {
-                width: 44
-                height: 44
+                width: 72
+                height: 48
                 radius: Theme.radiusMd
                 color: Theme.bgElevated
                 border.color: Theme.borderDim
                 border.width: 1
+                clip: true
+
+                Image {
+                    id: thumbImg
+                    anchors.fill: parent
+                    source: root.mediaInfo ? root.mediaInfo.thumbnailUrl : ""
+                    fillMode: Image.PreserveAspectCrop
+                    visible: status === Image.Ready
+                }
 
                 Text {
                     anchors.centerIn: parent
+                    visible: !thumbImg.visible
                     text: (root.selectedOptionId === "audio_mp3") ? "🎵" : "🎬"
                     font.pixelSize: 22
                 }
             }
 
             Column {
-                width: parent.width - 60
+                width: parent.width - 86
                 spacing: 4
 
                 Text {
                     width: parent.width
-                    text: root.mediaInfo ? root.mediaInfo.title : "Medya Dosyası"
+                    text: root.mediaInfo ? root.mediaInfo.title : "Media Item"
                     color: Theme.textPrimary
-                    font.pixelSize: 15
+                    font.pixelSize: 14
                     font.family: Theme.fontFamily
                     font.weight: Font.DemiBold
                     elide: Text.ElideMiddle
@@ -73,7 +84,7 @@ Rectangle {
                         Text {
                             id: badgeText
                             anchors.centerIn: parent
-                            text: "Doğrudan İndirme"
+                            text: (root.mediaInfo && root.mediaInfo.isDirectFile) ? "Direct Media" : "Online Stream"
                             color: Theme.accentHover
                             font.pixelSize: 10
                             font.family: Theme.fontFamily
@@ -82,12 +93,21 @@ Rectangle {
                     }
 
                     Text {
+                        visible: root.mediaInfo && root.mediaInfo.author.length > 0
+                        text: root.mediaInfo ? root.mediaInfo.author : ""
+                        color: Theme.accentCyan
+                        font.pixelSize: 11
+                        font.family: Theme.fontFamily
+                        font.weight: Font.Medium
+                    }
+
+                    Text {
                         text: root.mediaInfo ? root.mediaInfo.url : ""
                         color: Theme.textMuted
                         font.pixelSize: 11
                         font.family: Theme.fontFamily
                         elide: Text.ElideRight
-                        width: 300
+                        width: 260
                     }
                 }
             }
@@ -101,7 +121,7 @@ Rectangle {
 
         // Section: Format / Quality Options
         Text {
-            text: "Format ve Kalite Seçimi"
+            text: "Format & Quality Selection"
             color: Theme.textSecondary
             font.pixelSize: 12
             font.family: Theme.fontFamily
@@ -112,18 +132,18 @@ Rectangle {
             width: parent.width
             spacing: 12
 
-            // Option 1: Video (Original)
+            // Option 1: Video (Best Quality)
             Rectangle {
                 id: videoCard
                 width: (parent.width - 12) / 2
                 height: 70
                 radius: Theme.radiusMd
-                color: (root.selectedOptionId === "original") ? (Theme.accent + "18") : (videoHover.hovered ? Theme.bgCardHover : Theme.bgInput)
-                border.color: (root.selectedOptionId === "original") ? Theme.accent : Theme.borderDim
-                border.width: (root.selectedOptionId === "original") ? 2 : 1
+                color: (root.selectedOptionId !== "audio_mp3") ? (Theme.accent + "18") : (videoHover.hovered ? Theme.bgCardHover : Theme.bgInput)
+                border.color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.borderDim
+                border.width: (root.selectedOptionId !== "audio_mp3") ? 2 : 1
 
                 HoverHandler { id: videoHover }
-                TapHandler { onTapped: root.selectedOptionId = "original" }
+                TapHandler { onTapped: root.selectedOptionId = "best_video" }
 
                 Row {
                     anchors.fill: parent
@@ -141,7 +161,7 @@ Rectangle {
                         spacing: 2
 
                         Text {
-                            text: "Video (MP4 / Orijinal)"
+                            text: "Video (MP4 / Best Quality)"
                             color: Theme.textPrimary
                             font.pixelSize: 13
                             font.family: Theme.fontFamily
@@ -149,7 +169,7 @@ Rectangle {
                         }
 
                         Text {
-                            text: "En yüksek kalite video + ses"
+                            text: "Highest resolution video + merged audio"
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -187,7 +207,7 @@ Rectangle {
                         spacing: 2
 
                         Text {
-                            text: "Yalnızca Ses (MP3)"
+                            text: "Audio Only (MP3)"
                             color: Theme.textPrimary
                             font.pixelSize: 13
                             font.family: Theme.fontFamily
@@ -195,7 +215,7 @@ Rectangle {
                         }
 
                         Text {
-                            text: "FFmpeg ile 320 kbps MP3"
+                            text: "Converted to 320 kbps HQ MP3"
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -268,7 +288,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "İndirmeyi Başlat"
+                        text: "Start Download"
                         color: "#FFFFFF"
                         font.pixelSize: 13
                         font.family: Theme.fontFamily

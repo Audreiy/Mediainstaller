@@ -27,6 +27,8 @@ qt_add_executable(MediaGrab
     src/core/UrlAnalyzer.cpp
     src/core/Downloader.h
     src/core/Downloader.cpp
+    src/core/YtDlpDownloader.h
+    src/core/YtDlpDownloader.cpp
     src/core/DownloadManager.h
     src/core/DownloadManager.cpp
     src/media/FFmpegProcessor.h

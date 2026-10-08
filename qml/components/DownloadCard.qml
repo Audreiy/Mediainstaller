@@ -73,11 +73,11 @@ Rectangle {
                         id: statusText
                         anchors.centerIn: parent
                         text: {
-                            if (model.status === "Completed") return "Tamamlandı"
-                            if (model.status === "Downloading") return "İndiriliyor"
-                            if (model.status === "Converting") return "Dönüştürülüyor (MP3)"
-                            if (model.status === "Paused") return "Duraklatıldı"
-                            if (model.status === "Failed") return "Hata"
+                            if (model.status === "Completed") return "Completed"
+                            if (model.status === "Downloading") return "Downloading"
+                            if (model.status === "Converting") return "Converting (MP3)"
+                            if (model.status === "Paused") return "Paused"
+                            if (model.status === "Failed") return "Failed"
                             return model.status
                         }
                         color: {
@@ -126,7 +126,7 @@ Rectangle {
 
                 Text {
                     visible: model.status === "Downloading" && model.eta.length > 0
-                    text: "•  Kalan: " + model.eta
+                    text: "•  ETA: " + model.eta
                     color: Theme.textSecondary
                     font.pixelSize: 11
                     font.family: Theme.fontFamily

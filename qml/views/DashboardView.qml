@@ -35,14 +35,14 @@ Item {
             Column {
                 spacing: 6
                 Text {
-                    text: "Medya İndirici & Dönüştürücü"
+                    text: "Media Downloader & Converter"
                     color: Theme.textPrimary
                     font.pixelSize: 24
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
-                    text: "Doğrudan video ve ses bağlantılarını analiz edin, kaliteyi seçin ve yüksek hızla indirin."
+                    text: "Paste any video or audio URL, select your desired quality, and download at maximum speed."
                     color: Theme.textSecondary
                     font.pixelSize: 13
                     font.family: Theme.fontFamily
@@ -117,7 +117,7 @@ Item {
                             spacing: 8
                             Text { text: "⚡"; font.pixelSize: 16 }
                             Text {
-                                text: "Çoklu Akış & Hız"
+                                text: "High-Speed Stream Engine"
                                 color: Theme.textPrimary
                                 font.pixelSize: 13
                                 font.family: Theme.fontFamily
@@ -125,7 +125,7 @@ Item {
                             }
                         }
                         Text {
-                            text: "Bellek tasarruflu doğrudan diske yazma motoru ile büyük dosyalarda sıfır RAM şişmesi."
+                            text: "Direct-to-disk streaming architecture ensures blazing fast speeds with zero memory overhead."
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -152,7 +152,7 @@ Item {
                             spacing: 8
                             Text { text: "🎧"; font.pixelSize: 16 }
                             Text {
-                                text: "320 kbps MP3 Çıkarıcı"
+                                text: "320 kbps MP3 Converter"
                                 color: Theme.textPrimary
                                 font.pixelSize: 13
                                 font.family: Theme.fontFamily
@@ -160,7 +160,7 @@ Item {
                             }
                         }
                         Text {
-                            text: "FFmpeg entegrasyonu ile videolardan stüdyo kalitesinde MP3, AAC ve WAV ses çıkarma."
+                            text: "Integrated FFmpeg processor seamlessly extracts studio-quality MP3 and AAC audio directly from videos."
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily

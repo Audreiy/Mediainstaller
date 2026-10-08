@@ -17,14 +17,14 @@ Item {
             Column {
                 spacing: 4
                 Text {
-                    text: "İndirme Kuyruğu"
+                    text: "Download Queue"
                     color: Theme.textPrimary
                     font.pixelSize: 22
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
-                    text: queueModel.activeDownloadCount + " aktif işlem • Toplam " + queueModel.totalDownloadCount + " dosya"
+                    text: queueModel.activeDownloadCount + " active • Total " + queueModel.totalDownloadCount + " items"
                     color: Theme.textSecondary
                     font.pixelSize: 12
                     font.family: Theme.fontFamily
@@ -51,7 +51,7 @@ Item {
                     spacing: 6
                     Text { text: "🧹"; font.pixelSize: 12 }
                     Text {
-                        text: "Bitmişleri Temizle"
+                        text: "Clear Finished"
                         color: clearHover.hovered ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 12
                         font.family: Theme.fontFamily
@@ -91,7 +91,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "İndirme Kuyruğu Boş"
+                    text: "No Downloads in Queue"
                     color: Theme.textPrimary
                     font.pixelSize: 15
                     font.family: Theme.fontFamily
@@ -100,7 +100,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "İndirmek istediğiniz bir bağlantıyı 'İndirici' sekmesinden ekleyin."
+                    text: "Paste a media link in the Downloader tab to begin."
                     color: Theme.textMuted
                     font.pixelSize: 12
                     font.family: Theme.fontFamily

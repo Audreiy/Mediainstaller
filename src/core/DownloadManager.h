@@ -7,6 +7,7 @@
 #include "DownloadQueueModel.h"
 #include "UrlAnalyzer.h"
 #include "Downloader.h"
+#include "YtDlpDownloader.h"
 #include "FFmpegProcessor.h"
 
 class DownloadManager : public QObject {
@@ -46,12 +47,14 @@ private slots:
 
 private:
     QString generateUniqueId() const;
+    QString sanitizeFileName(const QString &name) const;
 
     DownloadQueueModel m_queueModel;
     UrlAnalyzer m_urlAnalyzer;
     FFmpegProcessor m_ffmpegProcessor;
     QString m_defaultDownloadPath;
 
-    QMap<QString, QPointer<Downloader>> m_activeDownloads;
+    QMap<QString, QPointer<Downloader>> m_activeHttpDownloads;
+    QMap<QString, QPointer<YtDlpDownloader>> m_activeYtDlpDownloads;
     QMap<QString, bool> m_pendingAudioConversion;
 };

@@ -1,0 +1,59 @@
+#pragma once
+
+#include <QObject>
+#include <QString>
+#include <QProcess>
+
+class YtDlpDownloader : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(QString id READ id CONSTANT)
+    Q_PROPERTY(bool isRunning READ isRunning NOTIFY runningChanged)
+    Q_PROPERTY(double progress READ progress NOTIFY progressUpdated)
+
+public:
+    explicit YtDlpDownloader(const QString &id,
+                             const QString &url,
+                             const QString &targetPath,
+                             const QString &formatId,
+                             QObject *parent = nullptr);
+    ~YtDlpDownloader() override;
+
+    QString id() const { return m_id; }
+    QString url() const { return m_url; }
+    QString targetPath() const { return m_targetPath; }
+    bool isRunning() const { return m_isRunning; }
+    double progress() const { return m_progress; }
+
+    void start();
+    void pause();
+    void resume();
+    void cancel();
+
+signals:
+    void runningChanged();
+    void progressUpdated(double percent, const QString &speedStr, const QString &etaStr, qint64 downloaded, qint64 total);
+    void downloadCompleted(const QString &id, const QString &filePath);
+    void downloadFailed(const QString &id, const QString &errorMessage);
+    void downloadCancelled(const QString &id);
+
+private slots:
+    void onReadyReadStandardOutput();
+    void onReadyReadStandardError();
+    void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void onProcessError(QProcess::ProcessError error);
+
+private:
+    void parseOutputLine(const QString &line);
+
+    QString m_id;
+    QString m_url;
+    QString m_targetPath;
+    QString m_formatId;
+    bool m_isRunning = false;
+    bool m_isPaused = false;
+    double m_progress = 0.0;
+    QString m_speedString;
+    QString m_etaString;
+
+    QProcess *m_process = nullptr;
+};

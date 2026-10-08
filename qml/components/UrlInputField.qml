@@ -56,7 +56,7 @@ Item {
                 Text {
                     anchors.fill: parent
                     verticalAlignment: Text.AlignVCenter
-                    text: "Video veya ses bağlantısını buraya yapıştırın (https://...)"
+                    text: "Paste video or audio link here (https://...)"
                     color: Theme.textMuted
                     font.pixelSize: 14
                     font.family: Theme.fontFamily
@@ -85,7 +85,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "Yapıştır"
+                    text: "Paste"
                     color: pasteHover.hovered ? Theme.textPrimary : Theme.textSecondary
                     font.pixelSize: 12
                     font.family: Theme.fontFamily
@@ -140,7 +140,7 @@ Item {
                     }
 
                     Text {
-                        text: urlAnalyzer.isAnalyzing ? "İnceleniyor" : "Analiz Et"
+                        text: urlAnalyzer.isAnalyzing ? "Analyzing..." : "Analyze"
                         color: "#FFFFFF"
                         font.pixelSize: 13
                         font.family: Theme.fontFamily

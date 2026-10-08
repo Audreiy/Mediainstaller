@@ -14,30 +14,104 @@ FFmpegProcessor::~FFmpegProcessor() {
     cancel();
 }
 
+#include <QDirIterator>
+
 QString FFmpegProcessor::findFFmpegExecutable() {
     // 1. Check in application directory
     QString localApp = QCoreApplication::applicationDirPath() + "/ffmpeg.exe";
     if (QFileInfo::exists(localApp)) {
-        return localApp;
+        return QDir::toNativeSeparators(localApp);
     }
 
-    // 2. Check in PATH
+    // 2. Check in current directory or build subdirectory
+    QString currentApp = QDir::currentPath() + "/ffmpeg.exe";
+    if (QFileInfo::exists(currentApp)) {
+        return QDir::toNativeSeparators(currentApp);
+    }
+    QString currentBuild = QDir::currentPath() + "/build/ffmpeg.exe";
+    if (QFileInfo::exists(currentBuild)) {
+        return QDir::toNativeSeparators(currentBuild);
+    }
+
+    // 3. Check in parent build directory
+    QString parentBuild = QCoreApplication::applicationDirPath() + "/../build/ffmpeg.exe";
+    if (QFileInfo::exists(parentBuild)) {
+        return QDir::cleanPath(parentBuild);
+    }
+
+    // 4. Check in PATH
     QString pathExe = QStandardPaths::findExecutable("ffmpeg");
     if (!pathExe.isEmpty()) {
         return pathExe;
     }
 
-    // 3. Check common Windows installation paths
+    // 5. Check WinGet Links and common install locations
     QStringList potentialPaths = {
+        QDir::homePath() + "/AppData/Local/Microsoft/WinGet/Links/ffmpeg.exe",
         "C:/ffmpeg/bin/ffmpeg.exe",
         "C:/Program Files/ffmpeg/bin/ffmpeg.exe",
-        QDir::homePath() + "/AppData/Local/Microsoft/WinGet/Links/ffmpeg.exe",
         QDir::homePath() + "/AppData/Local/Programs/ffmpeg/bin/ffmpeg.exe"
     };
 
     for (const QString &p : potentialPaths) {
         if (QFileInfo::exists(p)) {
-            return p;
+            return QDir::toNativeSeparators(p);
+        }
+    }
+
+    // 6. Search WinGet Packages directory
+    QDir wingetDir(QDir::homePath() + "/AppData/Local/Microsoft/WinGet/Packages");
+    if (wingetDir.exists()) {
+        QDirIterator it(wingetDir.absolutePath(), QStringList() << "ffmpeg.exe", QDir::Files, QDirIterator::Subdirectories);
+        if (it.hasNext()) {
+            return QDir::toNativeSeparators(it.next());
+        }
+    }
+
+    return QString();
+}
+
+QString FFmpegProcessor::findYtDlpExecutable() {
+    // 1. Check in application directory
+    QString localApp = QCoreApplication::applicationDirPath() + "/yt-dlp.exe";
+    if (QFileInfo::exists(localApp)) {
+        return QDir::toNativeSeparators(localApp);
+    }
+
+    // 2. Check in current directory or build subdirectory
+    QString currentApp = QDir::currentPath() + "/yt-dlp.exe";
+    if (QFileInfo::exists(currentApp)) {
+        return QDir::toNativeSeparators(currentApp);
+    }
+    QString currentBuild = QDir::currentPath() + "/build/yt-dlp.exe";
+    if (QFileInfo::exists(currentBuild)) {
+        return QDir::toNativeSeparators(currentBuild);
+    }
+
+    // 3. Check in parent build directory
+    QString parentBuild = QCoreApplication::applicationDirPath() + "/../build/yt-dlp.exe";
+    if (QFileInfo::exists(parentBuild)) {
+        return QDir::cleanPath(parentBuild);
+    }
+
+    // 4. Check in PATH
+    QString pathExe = QStandardPaths::findExecutable("yt-dlp");
+    if (!pathExe.isEmpty()) {
+        return pathExe;
+    }
+
+    // 5. Check WinGet Links
+    QString wingetLink = QDir::homePath() + "/AppData/Local/Microsoft/WinGet/Links/yt-dlp.exe";
+    if (QFileInfo::exists(wingetLink)) {
+        return QDir::toNativeSeparators(wingetLink);
+    }
+
+    // 6. Search WinGet Packages directory
+    QDir wingetDir(QDir::homePath() + "/AppData/Local/Microsoft/WinGet/Packages");
+    if (wingetDir.exists()) {
+        QDirIterator it(wingetDir.absolutePath(), QStringList() << "yt-dlp.exe", QDir::Files, QDirIterator::Subdirectories);
+        if (it.hasNext()) {
+            return QDir::toNativeSeparators(it.next());
         }
     }
 
@@ -48,15 +122,23 @@ bool FFmpegProcessor::isFFmpegAvailable() const {
     return !findFFmpegExecutable().isEmpty();
 }
 
+bool FFmpegProcessor::isYtDlpAvailable() const {
+    return !findYtDlpExecutable().isEmpty();
+}
+
+void FFmpegProcessor::refreshTools() {
+    emit toolsStatusChanged();
+}
+
 void FFmpegProcessor::extractAudio(const QString &inputFilePath, const QString &outputFilePath, const QString &format, int bitrateKbps) {
     if (m_isProcessing) {
-        emit finished(false, "", QString::fromUtf8("Hâlihazırda devam eden bir dönüştürme işlemi var."));
+        emit finished(false, "", "Another conversion process is already running.");
         return;
     }
 
     QString ffmpegPath = findFFmpegExecutable();
     if (ffmpegPath.isEmpty()) {
-        emit finished(false, "", QString::fromUtf8("FFmpeg sistemde bulunamadı. Lütfen FFmpeg'in kurulu olduğundan emin olun."));
+        emit finished(false, "", "FFmpeg was not found. Please ensure FFmpeg is installed.");
         return;
     }
 
@@ -64,7 +146,7 @@ void FFmpegProcessor::extractAudio(const QString &inputFilePath, const QString &
     m_progress = 0.0;
     m_totalDurationSec = 0.0;
     m_isProcessing = true;
-    m_statusMessage = QString::fromUtf8("Ses dönüştürülüyor...");
+    m_statusMessage = "Converting audio to " + format.toUpper() + "...";
     emit processingChanged();
     emit statusChanged(m_statusMessage);
 
@@ -99,7 +181,7 @@ void FFmpegProcessor::mergeStreams(const QString &videoPath, const QString &audi
 
     QString ffmpegPath = findFFmpegExecutable();
     if (ffmpegPath.isEmpty()) {
-        emit finished(false, "", QString::fromUtf8("FFmpeg bulunamadı."));
+        emit finished(false, "", "FFmpeg was not found.");
         return;
     }
 
@@ -107,7 +189,7 @@ void FFmpegProcessor::mergeStreams(const QString &videoPath, const QString &audi
     m_progress = 0.0;
     m_totalDurationSec = 0.0;
     m_isProcessing = true;
-    m_statusMessage = QString::fromUtf8("Video ve ses birleştiriliyor...");
+    m_statusMessage = "Merging video and audio streams...";
     emit processingChanged();
 
     QStringList args;
@@ -184,7 +266,7 @@ void FFmpegProcessor::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
         emit progressChanged(100.0);
         emit finished(true, m_currentOutputFile, "");
     } else {
-        emit finished(false, "", QString::fromUtf8("Dönüştürme işlemi hata ile sonuçlandı (Kod: %1)").arg(exitCode));
+        emit finished(false, "", QString("Media processing failed with exit code: %1").arg(exitCode));
     }
 
     if (m_process) {
@@ -197,7 +279,7 @@ void FFmpegProcessor::onProcessError(QProcess::ProcessError error) {
     Q_UNUSED(error);
     m_isProcessing = false;
     emit processingChanged();
-    emit finished(false, "", QString::fromUtf8("FFmpeg çalıştırılırken bir hata oluştu."));
+    emit finished(false, "", "An error occurred while executing FFmpeg.");
 
     if (m_process) {
         m_process->deleteLater();

@@ -5,13 +5,14 @@
 #include <QUrl>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QProcess>
 #include "MediaInfo.h"
 
 enum class UrlCategory {
     DirectVideo,     // .mp4, .webm, .mkv
     DirectAudio,     // .mp3, .m4a, .wav, .aac
     HlsStream,       // .m3u8
-    GenericWebPage,  // Web video landing page
+    GenericWebPage,  // Web video platform (YouTube, Twitter, TikTok, etc.)
     Unknown
 };
 
@@ -38,14 +39,21 @@ signals:
 
 private slots:
     void onHeadFinished();
+    void onOembedFinished();
+    void onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
+    void startYouTubeOembedProbe(const QUrl &url);
+    void startYtDlpProbe(const QString &rawUrl);
     void startDirectProbe(const QUrl &url);
     void populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, const QString &mimeType, const QString &fileName);
+    void populateWebStreamOptions(MediaInfo *info);
     QString extractFileName(const QUrl &url, const QString &contentDisposition);
 
     bool m_isAnalyzing = false;
     MediaInfo *m_currentInfo = nullptr;
     QNetworkAccessManager m_netManager;
     QNetworkReply *m_currentReply = nullptr;
+    QProcess *m_ytDlpProcess = nullptr;
+    QString m_analyzingUrl;
 };

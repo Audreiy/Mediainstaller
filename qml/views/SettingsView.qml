@@ -8,7 +8,7 @@ Item {
 
     FolderDialog {
         id: folderDialog
-        title: "İndirme Klasörünü Seçin"
+        title: "Select Download Folder"
         currentFolder: "file:///" + downloadManager.defaultDownloadPath
         onAccepted: {
             var path = selectedFolder.toString().replace("file:///", "")
@@ -31,14 +31,14 @@ Item {
             Column {
                 spacing: 4
                 Text {
-                    text: "Ayarlar ve Tercihler"
+                    text: "Settings & Preferences"
                     color: Theme.textPrimary
                     font.pixelSize: 22
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
-                    text: "Depolama konumu, medya motoru ve ağ ayarlarını yapılandırın."
+                    text: "Configure download directory, media processing engine, and system tools."
                     color: Theme.textSecondary
                     font.pixelSize: 12
                     font.family: Theme.fontFamily
@@ -60,7 +60,7 @@ Item {
                     spacing: 12
 
                     Text {
-                        text: "📁 Varsayılan Kayıt Klasörü"
+                        text: "📁 Default Download Folder"
                         color: Theme.textPrimary
                         font.pixelSize: 14
                         font.family: Theme.fontFamily
@@ -104,7 +104,7 @@ Item {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: "Değiştir"
+                                text: "Browse"
                                 color: Theme.textPrimary
                                 font.pixelSize: 12
                                 font.family: Theme.fontFamily
@@ -144,23 +144,25 @@ Item {
                         width: parent.width - 170
 
                         Text {
-                            text: "FFmpeg Medya İşlemcisi"
+                            text: "FFmpeg Media Processor"
                             color: Theme.textPrimary
                             font.pixelSize: 14
                             font.family: Theme.fontFamily
                             font.weight: Font.DemiBold
                         }
                         Text {
-                            text: ffmpegProcessor.isFFmpegAvailable ? "FFmpeg tespit edildi ve ses dönüştürmeye hazır." : "FFmpeg sistemde bulunamadı."
+                            text: ffmpegProcessor.isFFmpegAvailable ? "FFmpeg is installed and ready for media merging & audio conversion." : "FFmpeg was not detected on this system."
                             color: Theme.textMuted
                             font.pixelSize: 12
                             font.family: Theme.fontFamily
+                            wrapMode: Text.WordWrap
+                            width: parent.width
                         }
                     }
 
                     Rectangle {
                         height: 28
-                        width: ffmpegBadgeText.width + 16
+                        width: ffmpegBadgeText.width + 18
                         radius: 14
                         anchors.verticalCenter: parent.verticalCenter
                         color: ffmpegProcessor.isFFmpegAvailable ? Theme.success + "22" : Theme.warning + "22"
@@ -170,7 +172,7 @@ Item {
                         Text {
                             id: ffmpegBadgeText
                             anchors.centerIn: parent
-                            text: ffmpegProcessor.isFFmpegAvailable ? "Aktif" : "Eksik"
+                            text: ffmpegProcessor.isFFmpegAvailable ? "Ready" : "Missing"
                             color: ffmpegProcessor.isFFmpegAvailable ? Theme.success : Theme.warning
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -180,7 +182,74 @@ Item {
                 }
             }
 
-            // Setting Card 3: About MediaGrab Architecture
+            // Setting Card 3: yt-dlp Status
+            Rectangle {
+                width: parent.width
+                implicitHeight: 100
+                radius: Theme.radiusLg
+                color: Theme.bgCard
+                border.color: Theme.borderDim
+                border.width: 1
+
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    spacing: 16
+
+                    Rectangle {
+                        width: 44
+                        height: 44
+                        radius: Theme.radiusMd
+                        color: Theme.bgElevated
+                        anchors.verticalCenter: parent.verticalCenter
+                        Text { anchors.centerIn: parent; text: "⚡"; font.pixelSize: 22 }
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        width: parent.width - 170
+
+                        Text {
+                            text: "yt-dlp Video Engine"
+                            color: Theme.textPrimary
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                        }
+                        Text {
+                            text: ffmpegProcessor.isYtDlpAvailable ? "yt-dlp is installed and ready for YouTube & online video downloads." : "yt-dlp was not detected on this system."
+                            color: Theme.textMuted
+                            font.pixelSize: 12
+                            font.family: Theme.fontFamily
+                            wrapMode: Text.WordWrap
+                            width: parent.width
+                        }
+                    }
+
+                    Rectangle {
+                        height: 28
+                        width: ytdlpBadgeText.width + 18
+                        radius: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: ffmpegProcessor.isYtDlpAvailable ? Theme.success + "22" : Theme.warning + "22"
+                        border.color: ffmpegProcessor.isYtDlpAvailable ? Theme.success : Theme.warning
+                        border.width: 1
+
+                        Text {
+                            id: ytdlpBadgeText
+                            anchors.centerIn: parent
+                            text: ffmpegProcessor.isYtDlpAvailable ? "Ready" : "Missing"
+                            color: ffmpegProcessor.isYtDlpAvailable ? Theme.success : Theme.warning
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                        }
+                    }
+                }
+            }
+
+            // Setting Card 4: About MediaGrab Architecture
             Rectangle {
                 width: parent.width
                 implicitHeight: 130
@@ -195,7 +264,7 @@ Item {
                     spacing: 8
 
                     Text {
-                        text: "⚡ MediaGrab Hakkında"
+                        text: "ℹ️ About MediaGrab"
                         color: Theme.textPrimary
                         font.pixelSize: 14
                         font.family: Theme.fontFamily
@@ -203,7 +272,7 @@ Item {
                     }
 
                     Text {
-                        text: "MediaGrab; C++20, Qt 6 Quick / QML, FFmpeg ve libcurl teknolojileri kullanılarak geliştirilmiş modern bir Windows medya yönetim ve indirme uygulamasıdır."
+                        text: "MediaGrab is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction."
                         color: Theme.textSecondary
                         font.pixelSize: 12
                         font.family: Theme.fontFamily
@@ -212,7 +281,7 @@ Item {
                     }
 
                     Text {
-                        text: "Sürüm 1.0.0 Pro • Donanım Hızlandırmalı QML Arayüzü"
+                        text: "Version 1.0.0 Pro • Hardware-Accelerated QML Interface"
                         color: Theme.accentHover
                         font.pixelSize: 11
                         font.family: Theme.fontFamily

@@ -90,7 +90,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "İndirici"
+                        text: "Downloader"
                         color: (root.activeTab === 0) ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
@@ -100,7 +100,7 @@ Rectangle {
                 }
             }
 
-            // Tab 1: Queue (İndirme Kuyruğu)
+            // Tab 1: Queue
             Rectangle {
                 width: parent.width
                 height: 44
@@ -124,7 +124,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "Kuyruk"
+                        text: "Queue"
                         color: (root.activeTab === 1) ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
@@ -154,7 +154,7 @@ Rectangle {
                 }
             }
 
-            // Tab 2: Settings (Ayarlar)
+            // Tab 2: Settings
             Rectangle {
                 width: parent.width
                 height: 44
@@ -178,7 +178,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "Ayarlar"
+                        text: "Settings"
                         color: (root.activeTab === 2) ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
@@ -208,12 +208,12 @@ Rectangle {
                     width: 8
                     height: 8
                     radius: 4
-                    color: ffmpegProcessor.isFFmpegAvailable ? Theme.success : Theme.warning
+                    color: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? Theme.success : (ffmpegProcessor.isFFmpegAvailable ? Theme.accentHover : Theme.warning)
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
                 Text {
-                    text: ffmpegProcessor.isFFmpegAvailable ? "FFmpeg Motoru Hazır" : "FFmpeg Aranıyor"
+                    text: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? "Core Engine Ready" : (ffmpegProcessor.isFFmpegAvailable ? "FFmpeg Ready" : "Engine Missing")
                     color: Theme.textSecondary
                     font.pixelSize: 11
                     font.family: Theme.fontFamily
