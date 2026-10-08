@@ -24,6 +24,9 @@ public:
     bool isRunning() const { return m_isRunning; }
     double progress() const { return m_progress; }
 
+    void setReferer(const QString &ref) { m_referer = ref; }
+    QString referer() const { return m_referer; }
+
     void start();
     void pause();
     void resume();
@@ -32,6 +35,7 @@ public:
 signals:
     void runningChanged();
     void progressUpdated(double percent, const QString &speedStr, const QString &etaStr, qint64 downloaded, qint64 total);
+    void conversionStarted(const QString &id);
     void downloadCompleted(const QString &id, const QString &filePath);
     void downloadFailed(const QString &id, const QString &errorMessage);
     void downloadCancelled(const QString &id);
@@ -49,6 +53,7 @@ private:
     QString m_url;
     QString m_targetPath;
     QString m_formatId;
+    QString m_referer;
     bool m_isRunning = false;
     bool m_isPaused = false;
     double m_progress = 0.0;

@@ -119,6 +119,10 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
             m_queueModel.updateProgress(id, pct, speed, eta, down, tot);
         });
 
+        connect(ytDownloader, &YtDlpDownloader::conversionStarted, this, [this, id]() {
+            m_queueModel.updateStatus(id, "Converting");
+        });
+
         connect(ytDownloader, &YtDlpDownloader::downloadCompleted, this, &DownloadManager::handleDownloadCompleted);
         connect(ytDownloader, &YtDlpDownloader::downloadFailed, this, &DownloadManager::handleDownloadFailed);
         connect(ytDownloader, &YtDlpDownloader::downloadCancelled, this, &DownloadManager::handleDownloadCancelled);

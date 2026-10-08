@@ -56,7 +56,7 @@ Item {
                 Text {
                     anchors.fill: parent
                     verticalAlignment: Text.AlignVCenter
-                    text: "Paste video or audio link here (https://...)"
+                    text: "Paste URL from YouTube, Animecix, Vidmoly, Sibnet, or any media link..."
                     color: Theme.textMuted
                     font.pixelSize: 14
                     font.family: Theme.fontFamily

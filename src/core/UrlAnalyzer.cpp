@@ -27,6 +27,9 @@ UrlAnalyzer::~UrlAnalyzer() {
 
 UrlCategory UrlAnalyzer::categorizeUrl(const QString &rawUrl) {
     QString lower = rawUrl.trimmed().toLower();
+    if (lower.endsWith(".m3u8") || lower.contains(".m3u8?")) {
+        return UrlCategory::HlsStream;
+    }
     if (lower.endsWith(".mp4") || lower.endsWith(".webm") || lower.endsWith(".mkv") ||
         lower.contains(".mp4?") || lower.contains(".webm?")) {
         return UrlCategory::DirectVideo;
@@ -35,14 +38,14 @@ UrlCategory UrlAnalyzer::categorizeUrl(const QString &rawUrl) {
         lower.endsWith(".aac") || lower.contains(".mp3?")) {
         return UrlCategory::DirectAudio;
     }
-    if (lower.endsWith(".m3u8") || lower.contains(".m3u8?")) {
-        return UrlCategory::HlsStream;
-    }
     if (lower.contains("youtube.com") || lower.contains("youtu.be") ||
+        lower.contains("animecix.") || lower.contains("vidmoly.") || lower.contains("sibnet.ru") ||
         lower.contains("twitter.com") || lower.contains("x.com") ||
         lower.contains("tiktok.com") || lower.contains("instagram.com") ||
         lower.contains("vimeo.com") || lower.contains("reddit.com") ||
         lower.contains("soundcloud.com") || lower.contains("twitch.tv") ||
+        lower.contains("dailymotion.com") || lower.contains("streamtape.com") ||
+        lower.contains("dood") || lower.contains("filemoon") ||
         lower.contains("facebook.com")) {
         return UrlCategory::GenericWebPage;
     }
@@ -78,23 +81,33 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
     m_isAnalyzing = true;
     emit analyzingChanged();
 
-    UrlCategory cat = categorizeUrl(trimmed);
     QString lower = trimmed.toLower();
 
+    // 1. YouTube specific fast oEmbed
     if (lower.contains("youtube.com") || lower.contains("youtu.be")) {
         startYouTubeOembedProbe(url);
-    } else if (cat == UrlCategory::GenericWebPage) {
-        startYtDlpProbe(trimmed);
-    } else if (cat == UrlCategory::DirectVideo || cat == UrlCategory::DirectAudio) {
-        startDirectProbe(url);
-    } else {
-        // Unknown: try yt-dlp first if available, else probe directly
-        if (!FFmpegProcessor::findYtDlpExecutable().isEmpty()) {
-            startYtDlpProbe(trimmed);
-        } else {
-            startDirectProbe(url);
-        }
+        return;
     }
+
+    // 2. Direct HLS Stream (.m3u8)
+    if (lower.contains(".m3u8")) {
+        QString baseName = QFileInfo(url.path()).completeBaseName();
+        if (baseName.isEmpty() || baseName.toLower() == "master" || baseName.toLower() == "playlist" || baseName.toLower() == "index") {
+            baseName = "Stream_Video_" + QString::number(QDateTime::currentSecsSinceEpoch());
+        }
+        setupStreamMediaInfo(trimmed, baseName, "HLS Stream (M3U8)");
+        return;
+    }
+
+    // 3. Direct Video / Audio file
+    if (lower.endsWith(".mp4") || lower.endsWith(".mp3") || lower.endsWith(".webm") || lower.endsWith(".mkv") || lower.endsWith(".m4a")) {
+        startDirectProbe(url);
+        return;
+    }
+
+    // 4. Any Web Page (Animecix, Vidmoly, Sibnet, streaming platforms, etc.)
+    // First, scrape the webpage HTML with intelligent video sniffer
+    startWebPageScrape(url);
 }
 
 void UrlAnalyzer::startYouTubeOembedProbe(const QUrl &url) {
@@ -148,14 +161,145 @@ void UrlAnalyzer::onOembedFinished() {
         }
     }
 
-    // If oEmbed fails or is private/blocked, fallback to yt-dlp probe
+    // Fallback to yt-dlp probe if oEmbed fails
     startYtDlpProbe(m_analyzingUrl);
+}
+
+void UrlAnalyzer::startWebPageScrape(const QUrl &url) {
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    request.setRawHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+    request.setRawHeader("Accept-Language", "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7");
+
+    m_currentReply = m_netManager.get(request);
+    connect(m_currentReply, &QNetworkReply::finished, this, &UrlAnalyzer::onWebPageScrapeFinished);
+}
+
+void UrlAnalyzer::onWebPageScrapeFinished() {
+    if (!m_currentReply) return;
+
+    QUrl finalUrl = m_currentReply->url();
+    int httpCode = m_currentReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray htmlBytes = m_currentReply->readAll();
+    m_currentReply->deleteLater();
+    m_currentReply = nullptr;
+
+    if (httpCode >= 200 && httpCode < 400 && !htmlBytes.isEmpty()) {
+        QString html = QString::fromUtf8(htmlBytes);
+        parseHtmlForMedia(html, finalUrl);
+    } else {
+        // Fallback to yt-dlp probe
+        startYtDlpProbe(m_analyzingUrl);
+    }
+}
+
+void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
+    // 1. Extract clean page title
+    QString title;
+    QRegularExpression titleRe(R"(<title[^>]*>(.*?)</title>)", QRegularExpression::CaseInsensitiveOption | QRegularExpression::DotMatchesEverythingOption);
+    auto titleMatch = titleRe.match(html);
+    if (titleMatch.hasMatch()) {
+        title = titleMatch.captured(1).trimmed();
+        title.replace("&amp;", "&").replace("&#039;", "'").replace("&quot;", "\"");
+        // Remove site branding suffixes (e.g. " - Animecix", " | Animecix", "izle", etc.)
+        title.remove(QRegularExpression(R"(\s*[-|]\s*Animecix.*$)", QRegularExpression::CaseInsensitiveOption));
+        title.remove(QRegularExpression(R"(\s*[-|]\s*Dizipal.*$)", QRegularExpression::CaseInsensitiveOption));
+        title.remove(QRegularExpression(R"(\s*izle.*$)", QRegularExpression::CaseInsensitiveOption));
+        title = title.trimmed();
+    }
+    if (title.isEmpty()) {
+        title = "Anime_Video_" + QString::number(QDateTime::currentSecsSinceEpoch());
+    }
+
+    // 2. Extract thumbnail if available
+    QString thumb;
+    QRegularExpression thumbRe(R"(<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+    auto thumbMatch = thumbRe.match(html);
+    if (thumbMatch.hasMatch()) {
+        thumb = thumbMatch.captured(1).trimmed();
+    }
+
+    // 3. Scan for direct HLS stream (.m3u8) in HTML / script tags
+    QRegularExpression m3u8Re(R"((https?://[^"'\s<>]+\.m3u8[^"'\s<>]*))", QRegularExpression::CaseInsensitiveOption);
+    auto m3u8Match = m3u8Re.match(html);
+    if (m3u8Match.hasMatch()) {
+        QString streamUrl = m3u8Match.captured(1);
+        setupStreamMediaInfo(streamUrl, title, "Animecix HLS Stream", thumb);
+        return;
+    }
+
+    // 4. Scan for embedded iframe players (Vidmoly, Sibnet, Streamtape, Doodstream, Filemoon, Voe, etc.)
+    QRegularExpression iframeRe(R"(<iframe[^>]+src=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+    auto it = iframeRe.globalMatch(html);
+    QString foundIframe;
+    QString providerName = "Online Video Player";
+
+    while (it.hasNext()) {
+        auto m = it.next();
+        QString src = m.captured(1).trimmed();
+        if (src.startsWith("//")) src = "https:" + src;
+        else if (src.startsWith("/")) src = baseUrl.resolved(QUrl(src)).toString();
+
+        QString lowerSrc = src.toLower();
+        if (lowerSrc.contains("vidmoly")) {
+            foundIframe = src;
+            providerName = "Vidmoly Player";
+            break;
+        } else if (lowerSrc.contains("sibnet")) {
+            foundIframe = src;
+            providerName = "Sibnet Player";
+            break;
+        } else if (lowerSrc.contains("streamtape") || lowerSrc.contains("dood") ||
+                   lowerSrc.contains("filemoon") || lowerSrc.contains("voe") ||
+                   lowerSrc.contains("dailymotion")) {
+            foundIframe = src;
+            providerName = "Embedded Player";
+            break;
+        }
+    }
+
+    if (!foundIframe.isEmpty()) {
+        setupStreamMediaInfo(foundIframe, title, providerName, thumb);
+        return;
+    }
+
+    // 5. Scan for direct MP4 stream in HTML
+    QRegularExpression mp4Re(R"((https?://[^"'\s<>]+\.mp4[^"'\s<>]*))", QRegularExpression::CaseInsensitiveOption);
+    auto mp4Match = mp4Re.match(html);
+    if (mp4Match.hasMatch()) {
+        QString streamUrl = mp4Match.captured(1);
+        setupStreamMediaInfo(streamUrl, title, "Direct MP4 Stream", thumb);
+        return;
+    }
+
+    // 6. If static HTML didn't expose the video stream, run yt-dlp probe with referer
+    startYtDlpProbe(m_analyzingUrl);
+}
+
+void UrlAnalyzer::setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail) {
+    m_isAnalyzing = false;
+    emit analyzingChanged();
+
+    if (m_currentInfo) {
+        m_currentInfo->deleteLater();
+    }
+    m_currentInfo = new MediaInfo(this);
+    m_currentInfo->setUrl(streamUrl);
+    m_currentInfo->setTitle(title);
+    m_currentInfo->setAuthor(sourceName);
+    m_currentInfo->setThumbnailUrl(thumbnail);
+    m_currentInfo->setIsDirectFile(false);
+
+    populateWebStreamOptions(m_currentInfo);
+
+    emit mediaInfoChanged();
+    emit analysisSuccess(m_currentInfo);
 }
 
 void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
     QString ytDlpExe = FFmpegProcessor::findYtDlpExecutable();
     if (ytDlpExe.isEmpty()) {
-        // Fallback to direct probe if yt-dlp isn't installed
         startDirectProbe(QUrl(rawUrl));
         return;
     }
@@ -165,6 +309,8 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
     args << "--print" << "%(title)s|||%(uploader)s|||%(duration_string)s|||%(thumbnail)s";
     args << "--no-warnings";
     args << "--no-playlist";
+    args << "--no-check-certificates";
+    args << "--referer" << rawUrl;
     args << rawUrl;
 
     connect(m_ytDlpProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &UrlAnalyzer::onYtDlpFinished);
@@ -209,8 +355,8 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
         }
     }
 
-    // If both failed, try direct probe as final fallback
-    startDirectProbe(QUrl(m_analyzingUrl));
+    // Informative guidance error if extraction failed
+    emit analysisError("Could not auto-detect video stream on this page. Tip: If using an anime/movie site (like Animecix), right-click the video player, copy the player/embed URL (Vidmoly, Sibnet, or .m3u8), and paste it directly!");
 }
 
 void UrlAnalyzer::startDirectProbe(const QUrl &url) {
@@ -291,12 +437,10 @@ QString UrlAnalyzer::extractFileName(const QUrl &url, const QString &contentDisp
     QFileInfo fi(path);
     QString base = fi.fileName().trimmed();
 
-    // Never use "watch" or empty base name for video files!
     if (!base.isEmpty() && base.toLower() != "watch" && base.toLower() != "watch.mp4") {
         return base;
     }
 
-    // If it's a YouTube URL with ?v=..., use the video ID
     QUrlQuery query(url);
     if (query.hasQueryItem("v")) {
         return "YouTube_Video_" + query.queryItemValue("v");
@@ -322,7 +466,6 @@ void UrlAnalyzer::populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, c
         else ext = "mp4";
     }
 
-    // Option 1: Original stream
     MediaStreamOption original;
     original.id = "original";
     original.resolution = "Original Quality (Highest)";
@@ -333,7 +476,6 @@ void UrlAnalyzer::populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, c
     original.isAudioOnly = (ext == "mp3" || ext == "m4a" || ext == "wav" || ext == "aac");
     options.append(original);
 
-    // Option 2: Extract audio as MP3
     if (!original.isAudioOnly) {
         MediaStreamOption audioOpt;
         audioOpt.id = "audio_mp3";
@@ -352,17 +494,15 @@ void UrlAnalyzer::populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, c
 void UrlAnalyzer::populateWebStreamOptions(MediaInfo *info) {
     QList<MediaStreamOption> options;
 
-    // Option 1: Highest resolution video
     MediaStreamOption bestVideo;
     bestVideo.id = "best_video";
     bestVideo.resolution = "Video (MP4 / Best Quality)";
     bestVideo.container = "mp4";
     bestVideo.codec = "H.264 / AAC (HD/4K)";
-    bestVideo.sizeFormatted = "Best Quality";
+    bestVideo.sizeFormatted = "Full Quality";
     bestVideo.isAudioOnly = false;
     options.append(bestVideo);
 
-    // Option 2: Studio Quality Audio (MP3 320 kbps)
     MediaStreamOption audioMp3;
     audioMp3.id = "audio_mp3";
     audioMp3.resolution = "Audio Only (320 kbps MP3)";
@@ -371,16 +511,6 @@ void UrlAnalyzer::populateWebStreamOptions(MediaInfo *info) {
     audioMp3.sizeFormatted = "Studio Quality";
     audioMp3.isAudioOnly = true;
     options.append(audioMp3);
-
-    // Option 3: Original Audio Stream (M4A)
-    MediaStreamOption audioM4a;
-    audioM4a.id = "audio_m4a";
-    audioM4a.resolution = "Audio Only (Original M4A)";
-    audioM4a.container = "m4a";
-    audioM4a.codec = "AAC Original";
-    audioM4a.sizeFormatted = "Original Stream";
-    audioM4a.isAudioOnly = true;
-    options.append(audioM4a);
 
     info->setStreamOptions(options);
 }

@@ -27,7 +27,7 @@ void YtDlpDownloader::start() {
 
     QString ytDlpExe = FFmpegProcessor::findYtDlpExecutable();
     if (ytDlpExe.isEmpty()) {
-        emit downloadFailed(m_id, "yt-dlp executable not found. Please install yt-dlp.");
+        emit downloadFailed(m_id, "yt-dlp executable not found. Please ensure yt-dlp is installed.");
         return;
     }
 
@@ -41,6 +41,12 @@ void YtDlpDownloader::start() {
     args << "--newline";
     args << "--no-warnings";
     args << "--no-playlist";
+    args << "--no-check-certificates";
+    args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+
+    if (!m_referer.isEmpty()) {
+        args << "--referer" << m_referer;
+    }
 
     if (!ffmpegExe.isEmpty()) {
         args << "--ffmpeg-location" << QFileInfo(ffmpegExe).absolutePath();
@@ -51,12 +57,14 @@ void YtDlpDownloader::start() {
     } else if (m_formatId == "audio_m4a") {
         args << "-x" << "--audio-format" << "m4a";
     } else {
-        // High quality video with merged audio
-        args << "-f" << "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best";
+        // High quality video with merged audio or best direct stream
+        args << "-f" << "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best";
     }
 
-    // Output template to exact path
-    args << "-o" << m_targetPath;
+    // Output template: use %(ext)s so yt-dlp correctly writes the target extension without duplication
+    QFileInfo fi(m_targetPath);
+    QString templatePath = fi.dir().filePath(fi.completeBaseName() + ".%(ext)s");
+    args << "-o" << templatePath;
 
     // Progress template: DOWNLOAD_PROGRESS:percent|speed|eta|downloaded_bytes|total_bytes
     args << "--progress-template" << "DOWNLOAD_PROGRESS:%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s";
@@ -126,6 +134,16 @@ void YtDlpDownloader::onReadyReadStandardError() {
 void YtDlpDownloader::parseOutputLine(const QString &line) {
     if (line.isEmpty()) return;
 
+    // Check for post-processing conversions: [ExtractAudio] or [Merger]
+    if (line.contains("[ExtractAudio]") || line.contains("[Merger]") || line.contains("[Fixup")) {
+        m_progress = 99.0;
+        m_speedString = (m_formatId == "audio_mp3") ? "Encoding 320k MP3..." : "Merging Audio & Video...";
+        m_etaString = "Finishing";
+        emit conversionStarted(m_id);
+        emit progressUpdated(99.0, m_speedString, m_etaString, 0, 0);
+        return;
+    }
+
     // Pattern 1: Custom progress template
     if (line.startsWith("DOWNLOAD_PROGRESS:")) {
         QString data = line.mid(18).trimmed();
@@ -159,15 +177,6 @@ void YtDlpDownloader::parseOutputLine(const QString &line) {
         m_speedString = speed;
         m_etaString = eta;
         emit progressUpdated(m_progress, m_speedString, m_etaString, 0, 0);
-        return;
-    }
-
-    // Pattern 3: Post-processing states
-    if (line.contains("[ExtractAudio]") || line.contains("[Merger]") || line.contains("[Fixup")) {
-        m_progress = 98.0;
-        m_speedString = "Processing...";
-        m_etaString = "Finishing";
-        emit progressUpdated(98.0, m_speedString, m_etaString, 0, 0);
     }
 }
 
@@ -188,13 +197,19 @@ void YtDlpDownloader::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
         // Verify destination file exists
         QString finalPath = m_targetPath;
         if (!QFile::exists(finalPath)) {
-            // Check if yt-dlp converted to an extension like .mp3 or .mp4
             QFileInfo fi(m_targetPath);
             QDir dir = fi.dir();
             QString baseName = fi.completeBaseName();
-            QStringList matches = dir.entryList(QStringList() << (baseName + ".*"), QDir::Files);
-            if (!matches.isEmpty()) {
-                finalPath = dir.filePath(matches.first());
+            QString expectedExt = (m_formatId == "audio_mp3") ? "mp3" : ((m_formatId == "audio_m4a") ? "m4a" : "mp4");
+            QString preferredFile = dir.filePath(baseName + "." + expectedExt);
+
+            if (QFile::exists(preferredFile)) {
+                finalPath = preferredFile;
+            } else {
+                QStringList matches = dir.entryList(QStringList() << (baseName + ".*"), QDir::Files);
+                if (!matches.isEmpty()) {
+                    finalPath = dir.filePath(matches.first());
+                }
             }
         }
 
@@ -215,7 +230,7 @@ void YtDlpDownloader::onProcessError(QProcess::ProcessError error) {
 
     m_isRunning = false;
     emit runningChanged();
-    emit downloadFailed(m_id, "yt-dlp process encountered an error.");
+    emit downloadFailed(m_id, "yt-dlp encountered an execution error.");
 
     if (m_process) {
         m_process->deleteLater();

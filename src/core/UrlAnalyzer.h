@@ -12,7 +12,7 @@ enum class UrlCategory {
     DirectVideo,     // .mp4, .webm, .mkv
     DirectAudio,     // .mp3, .m4a, .wav, .aac
     HlsStream,       // .m3u8
-    GenericWebPage,  // Web video platform (YouTube, Twitter, TikTok, etc.)
+    GenericWebPage,  // Web video platform (YouTube, Animecix, Vidmoly, etc.)
     Unknown
 };
 
@@ -40,12 +40,16 @@ signals:
 private slots:
     void onHeadFinished();
     void onOembedFinished();
+    void onWebPageScrapeFinished();
     void onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     void startYouTubeOembedProbe(const QUrl &url);
+    void startWebPageScrape(const QUrl &url);
+    void parseHtmlForMedia(const QString &html, const QUrl &baseUrl);
     void startYtDlpProbe(const QString &rawUrl);
     void startDirectProbe(const QUrl &url);
+    void setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail = QString());
     void populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, const QString &mimeType, const QString &fileName);
     void populateWebStreamOptions(MediaInfo *info);
     QString extractFileName(const QUrl &url, const QString &contentDisposition);
