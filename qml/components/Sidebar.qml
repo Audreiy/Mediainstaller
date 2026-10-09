@@ -364,27 +364,6 @@ Rectangle {
             }
         }
 
-        Item { height: Math.max(parent.height - 290, 20); width: 1 }
 
-        // Clean minimal footer
-        Row {
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 6
-            opacity: 0.65
-
-            Rectangle {
-                width: 6; height: 6; radius: 3
-                color: Theme.accent
-                anchors.verticalCenter: parent.verticalCenter
-            }
-
-            Text {
-                text: "YuYuInstaller " + I18n.t("appVersion")
-                color: Theme.textMuted
-                font.pixelSize: 10
-                font.family: Theme.fontFamily
-                anchors.verticalCenter: parent.verticalCenter
-            }
-        }
     }
 }

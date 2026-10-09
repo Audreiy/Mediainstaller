@@ -31,4 +31,5 @@ setup_output/
 # Logs & scratch
 *.log
 scratch/
+build_app.bat
 

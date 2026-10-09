@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName(QString::fromUtf8("YuYuİnstaller"));
     app.setOrganizationName("YuYuDev");
-    app.setApplicationVersion("1.0.1");
+    app.setApplicationVersion("1.0.2");
 
     QIcon appIcon;
     const QStringList iconCandidates = {
