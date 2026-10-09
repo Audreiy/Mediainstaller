@@ -40,9 +40,9 @@ int main(int argc, char *argv[]) {
     );
 
     QGuiApplication app(argc, argv);
-    app.setApplicationName(QString::fromUtf8("YuYuİnstaller"));
+    app.setApplicationName("YuYuInstaller");
     app.setOrganizationName("YuYuDev");
-    app.setApplicationVersion("1.0.6");
+    app.setApplicationVersion("1.0.7");
 
     QIcon appIcon;
     const QStringList iconCandidates = {

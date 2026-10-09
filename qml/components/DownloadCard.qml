@@ -127,7 +127,15 @@ Rectangle {
 
                 Text {
                     visible: model.status === "Downloading" && model.speed.length > 0
-                    text: "•  " + model.speed
+                    text: {
+                        var sp = model.speed
+                        if (sp === "Connecting..." || sp === "Bağlanıyor..." || sp === "Connecting") return "•  " + I18n.t("statusConnecting")
+                        if (sp === "Resuming..." || sp === "Sürdürülüyor..." || sp === "Resuming") return "•  " + I18n.t("statusResuming")
+                        if (sp === "Starting..." || sp === "Başlatılıyor..." || sp === "Starting") return "•  " + I18n.t("statusStarting")
+                        if (sp === "Encoding 320k MP3..." || sp === "320k MP3 Kodlanıyor...") return "•  " + I18n.t("statusEncodingMp3")
+                        if (sp === "Merging Audio & Video..." || sp === "Ses ve Video Birleştiriliyor...") return "•  " + I18n.t("statusMerging")
+                        return "•  " + sp
+                    }
                     color: Theme.accentCyan
                     font.pixelSize: 11
                     font.family: Theme.fontFamily
@@ -139,6 +147,16 @@ Rectangle {
                     color: Theme.accentCyan
                     font.pixelSize: 11
                     font.family: Theme.fontFamily
+                }
+
+                Text {
+                    visible: model.status === "Failed" && model.speed.length > 0
+                    text: "•  " + model.speed
+                    color: Theme.error
+                    font.pixelSize: 11
+                    font.family: Theme.fontFamily
+                    elide: Text.ElideRight
+                    width: Math.min(implicitWidth, 260)
                 }
 
                 Text {

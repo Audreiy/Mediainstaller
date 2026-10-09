@@ -1,36 +1,36 @@
-# YuYuInstaller 🎥⚡
+# YuYuInstaller
 
-[🇹🇷 Türkçe](README.md) | [🇺🇦 Українська](README_uk.md)
+[Türkçe](README.md) | [Українська](README_uk.md)
 
-YuYuInstaller is a next-generation Windows media downloader and audio converter built with modern C++20 and Qt 6 Quick / QML. It features a hardware-accelerated anime video background, multi-language support (English 🇬🇧, Turkish 🇹🇷, Ukrainian 🇺🇦), and a high-performance streaming engine.
+YuYuInstaller is a next-generation Windows media downloader and audio converter built with modern C++20 and Qt 6 Quick / QML. It features a hardware-accelerated anime video background, multi-language support (English, Turkish, Ukrainian), and a high-performance streaming engine.
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-- **🎨 Modern & Fluid QML User Interface:**
+- **Modern & Fluid QML User Interface:**
   - DirectX/Direct3D/Vulkan hardware-accelerated dark anime theme.
-  - Video background engine capped at 45 FPS; when paused, it freezes on the last displayed frame just like a YouTube video player with **0% idle CPU utilization**.
-- **⚡ High-Speed Direct Stream Engine:**
+  - Video background engine capped at 45 FPS; when paused, it freezes on the last displayed frame just like a YouTube video player with 0% idle CPU utilization.
+- **High-Speed Direct Stream Engine:**
   - Direct-to-disk streaming architecture over HTTP/HTTPS ensuring blazing-fast download speeds without memory overhead.
-- **🎵 Studio-Quality 320 kbps MP3 Conversion via FFmpeg:**
+- **Studio-Quality 320 kbps MP3 Conversion via FFmpeg:**
   - Lossless audio extraction from online videos converted to crisp 320 kbps MP3 or AAC tracks.
-- **🌐 Multi-Platform & Stream Resolving:**
+- **Multi-Platform & Stream Resolving:**
   - Automatically identifies and resolves media streams from YouTube, Animecix (Tau Video), Vidmoly, Sibnet, TikTok, Instagram, Twitter (X), and direct media links.
-- **📊 Advanced Download Queue:**
-  - Concurrent (all-at-once) and sequential download modes.
+- **Advanced Download Queue:**
+  - Concurrent (all-at-once), sequential, and custom download limit modes.
   - Real-time download speed meters (MB/s), estimated time remaining (ETA), and animated progress bars.
   - Pause, resume, cancel, clear finished downloads, and direct file reveal in Windows Explorer.
-- **🌍 Multi-Language System (i18n):**
+- **Multi-Language System (i18n):**
   - Seamless, instant language switching between English (default), Turkish, and Ukrainian from the Settings tab.
-- **🔄 Automatic & Secure Self-Updating:**
+- **Automatic & Secure Self-Updating:**
   - SSL/HTTPS-encrypted update checking directly against GitHub Releases. When a new version is released, downloads the setup package and updates seamlessly in silent mode with auto-restart.
-- **📦 Clean Windows Installer:**
-  - Packaged with Inno Setup 6 featuring modern aesthetics, automatic process termination on install/update, and complete cleanup on uninstallation.
+- **Clean Windows Installer:**
+  - Packaged with Inno Setup 6 featuring modern aesthetics, desktop shortcut position preservation, and complete cleanup on uninstallation.
 
 ---
 
-## 📖 User Guide
+## User Guide
 
 Using YuYuInstaller is fast and effortless:
 
@@ -61,7 +61,7 @@ Using YuYuInstaller is fast and effortless:
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 * **Core Language:** C++20 (MSVC 2026)
 * **User Interface:** Qt 6.8 (Qt Quick, QML, Qt Quick Controls 2)
@@ -71,7 +71,7 @@ Using YuYuInstaller is fast and effortless:
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 YuYuInstaller/
@@ -92,12 +92,12 @@ YuYuInstaller/
     ├── Theme.qml               # Design tokens, color palette, and styling constants
     ├── I18n.qml                # Multi-language localization singleton
     ├── components/             # Reusable UI components
-    └── views/                  # Primary views (Dashboard, Queue, Settings)
+    └── views/                  # Primary views (Dashboard, Queue, Settings, Updates)
 ```
 
 ---
 
-## 🔨 Building from Source
+## Building from Source
 
 ### Prerequisites
 * Windows 10 / 11 (64-bit)

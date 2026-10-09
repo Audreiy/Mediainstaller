@@ -21,7 +21,18 @@ DownloadManager::DownloadManager(QObject *parent)
         }
     }
 
-    m_sequentialMode = settings.value("sequentialMode", false).toBool();
+    m_downloadLimitEnabled = settings.value("downloadLimitEnabled", false).toBool();
+    m_maxConcurrentDownloads = settings.value("maxConcurrentDownloads", 2).toInt();
+    if (m_maxConcurrentDownloads < 1) m_maxConcurrentDownloads = 1;
+    if (settings.contains("sequentialMode")) {
+        m_sequentialMode = settings.value("sequentialMode", false).toBool();
+        if (m_sequentialMode) {
+            m_downloadLimitEnabled = true;
+            m_maxConcurrentDownloads = 1;
+        }
+    } else {
+        m_sequentialMode = m_downloadLimitEnabled && (m_maxConcurrentDownloads == 1);
+    }
     m_videoBackgroundEnabled = settings.value("videoBackgroundEnabled", true).toBool();
     m_language = settings.value("appLanguage", "en").toString();
 
@@ -54,15 +65,45 @@ void DownloadManager::setDefaultDownloadPath(const QString &path) {
 }
 
 void DownloadManager::setSequentialMode(bool seq) {
-    if (m_sequentialMode != seq) {
-        m_sequentialMode = seq;
+    if (seq) {
+        setDownloadLimitEnabled(true);
+        setMaxConcurrentDownloads(1);
+    } else {
+        setDownloadLimitEnabled(false);
+    }
+}
+
+void DownloadManager::setDownloadLimitEnabled(bool enabled) {
+    if (m_downloadLimitEnabled != enabled) {
+        m_downloadLimitEnabled = enabled;
+        m_sequentialMode = m_downloadLimitEnabled && (m_maxConcurrentDownloads == 1);
         QSettings settings("YuYuDev", "YuYuInstaller");
+        settings.setValue("downloadLimitEnabled", m_downloadLimitEnabled);
         settings.setValue("sequentialMode", m_sequentialMode);
+        emit downloadLimitEnabledChanged();
         emit sequentialModeChanged();
 
-        if (!m_sequentialMode) {
+        if (!m_downloadLimitEnabled) {
             startAllQueuedTasks();
         } else {
+            checkNextQueueItem();
+        }
+    }
+}
+
+void DownloadManager::setMaxConcurrentDownloads(int limit) {
+    if (limit < 1) limit = 1;
+    if (limit > 10) limit = 10;
+    if (m_maxConcurrentDownloads != limit) {
+        m_maxConcurrentDownloads = limit;
+        m_sequentialMode = m_downloadLimitEnabled && (m_maxConcurrentDownloads == 1);
+        QSettings settings("YuYuDev", "YuYuInstaller");
+        settings.setValue("maxConcurrentDownloads", m_maxConcurrentDownloads);
+        settings.setValue("sequentialMode", m_sequentialMode);
+        emit maxConcurrentDownloadsChanged();
+        emit sequentialModeChanged();
+
+        if (m_downloadLimitEnabled) {
             checkNextQueueItem();
         }
     }
@@ -78,7 +119,7 @@ void DownloadManager::setVideoBackgroundEnabled(bool enabled) {
 }
 
 void DownloadManager::setLanguage(const QString &lang) {
-    if (m_language != lang && (lang == "en" || lang == "tr" || lang == "ru")) {
+    if (m_language != lang && (lang == "en" || lang == "tr" || lang == "uk")) {
         m_language = lang;
         QSettings settings("YuYuDev", "YuYuInstaller");
         settings.setValue("appLanguage", m_language);
@@ -183,48 +224,55 @@ void DownloadManager::startAllQueuedTasks() {
     }
 }
 
+int DownloadManager::countActiveDownloads() const {
+    int count = 0;
+    for (int i = 0; i < m_queueModel.rowCount(); ++i) {
+        DownloadItem it = m_queueModel.getItemAt(i);
+        if (it.status == "Downloading" || it.status == "Converting") {
+            count++;
+        }
+    }
+    return count;
+}
+
 void DownloadManager::checkNextQueueItem() {
-    if (!m_sequentialMode) {
+    if (!m_downloadLimitEnabled || m_maxConcurrentDownloads <= 0) {
         startAllQueuedTasks();
         return;
     }
 
-    // Find the first unfinished item in the queue (from top to bottom)
-    int targetIndex = -1;
-    for (int i = 0; i < m_queueModel.rowCount(); ++i) {
-        DownloadItem it = m_queueModel.getItemAt(i);
-        if (it.status != "Completed" && it.status != "Failed" && it.status != "Cancelled") {
-            targetIndex = i;
-            break;
+    int activeCount = countActiveDownloads();
+
+    // If active count exceeds the limit (e.g. user lowered limit), pause excess from the bottom
+    if (activeCount > m_maxConcurrentDownloads) {
+        for (int i = m_queueModel.rowCount() - 1; i >= 0 && activeCount > m_maxConcurrentDownloads; --i) {
+            DownloadItem it = m_queueModel.getItemAt(i);
+            if (it.status == "Downloading") {
+                onQueuePause(it.id);
+                activeCount--;
+            }
         }
     }
 
-    if (targetIndex < 0) {
-        return;
-    }
-
-    DownloadItem targetItem = m_queueModel.getItemAt(targetIndex);
-
-    // If the top unfinished item is ALREADY downloading or converting, ensure other downloads are paused
-    if (targetItem.status == "Downloading" || targetItem.status == "Converting") {
-        pauseActiveDownloadsExcept(targetItem.id);
-        return;
-    }
-
-    // The top unfinished item is not downloading yet (e.g. "Queued" or "Paused").
-    // Since it is at the top of unfinished items, it MUST start now!
-    pauseActiveDownloadsExcept(targetItem.id);
-
-    if (m_queuedTasks.contains(targetItem.id)) {
-        startTask(m_queuedTasks.take(targetItem.id));
-    } else if (m_activeHttpDownloads.contains(targetItem.id) && m_activeHttpDownloads[targetItem.id]) {
-        m_queueModel.updateStatus(targetItem.id, "Downloading");
-        m_queueModel.updateProgress(targetItem.id, -1, "Sürdürülüyor...", "--:--", -1, -1);
-        m_activeHttpDownloads[targetItem.id]->resume();
-    } else if (m_activeYtDlpDownloads.contains(targetItem.id) && m_activeYtDlpDownloads[targetItem.id]) {
-        m_queueModel.updateStatus(targetItem.id, "Downloading");
-        m_queueModel.updateProgress(targetItem.id, -1, "Sürdürülüyor...", "--:--", -1, -1);
-        m_activeYtDlpDownloads[targetItem.id]->resume();
+    // If active count is below limit, start next queued/paused tasks from top to bottom
+    for (int i = 0; i < m_queueModel.rowCount() && activeCount < m_maxConcurrentDownloads; ++i) {
+        DownloadItem it = m_queueModel.getItemAt(i);
+        if (it.status == "Queued" || it.status == "Paused") {
+            if (m_queuedTasks.contains(it.id)) {
+                startTask(m_queuedTasks.take(it.id));
+                activeCount++;
+            } else if (m_activeHttpDownloads.contains(it.id) && m_activeHttpDownloads[it.id]) {
+                m_queueModel.updateStatus(it.id, "Downloading");
+                m_queueModel.updateProgress(it.id, -1, "Resuming...", "--:--", -1, -1);
+                m_activeHttpDownloads[it.id]->resume();
+                activeCount++;
+            } else if (m_activeYtDlpDownloads.contains(it.id) && m_activeYtDlpDownloads[it.id]) {
+                m_queueModel.updateStatus(it.id, "Downloading");
+                m_queueModel.updateProgress(it.id, -1, "Resuming...", "--:--", -1, -1);
+                m_activeYtDlpDownloads[it.id]->resume();
+                activeCount++;
+            }
+        }
     }
 }
 
@@ -306,7 +354,8 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
     item.isAudioOnly = isAudioOnly;
     item.createdTime = QDateTime::currentDateTime();
 
-    if (m_sequentialMode && hasActiveDownload()) {
+    int activeCount = countActiveDownloads();
+    if (m_downloadLimitEnabled && m_maxConcurrentDownloads > 0 && activeCount >= m_maxConcurrentDownloads) {
         item.status = "Queued";
         item.speed = "";
         item.eta = "--:--";
@@ -416,8 +465,14 @@ void DownloadManager::onQueuePause(const QString &id) {
 }
 
 void DownloadManager::onQueueResume(const QString &id) {
-    if (m_sequentialMode) {
-        pauseActiveDownloadsExcept(id);
+    if (m_downloadLimitEnabled && countActiveDownloads() >= m_maxConcurrentDownloads) {
+        for (int i = m_queueModel.rowCount() - 1; i >= 0; --i) {
+            DownloadItem it = m_queueModel.getItemAt(i);
+            if (it.id != id && it.status == "Downloading") {
+                onQueuePause(it.id);
+                break;
+            }
+        }
     }
     if (m_queuedTasks.contains(id)) {
         startTask(m_queuedTasks.take(id));
@@ -425,11 +480,11 @@ void DownloadManager::onQueueResume(const QString &id) {
     }
     if (m_activeHttpDownloads.contains(id) && m_activeHttpDownloads[id]) {
         m_queueModel.updateStatus(id, "Downloading");
-        m_queueModel.updateProgress(id, -1, "Bağlanıyor...", "--:--", -1, -1);
+        m_queueModel.updateProgress(id, -1, "Connecting...", "--:--", -1, -1);
         m_activeHttpDownloads[id]->resume();
     } else if (m_activeYtDlpDownloads.contains(id) && m_activeYtDlpDownloads[id]) {
         m_queueModel.updateStatus(id, "Downloading");
-        m_queueModel.updateProgress(id, -1, "Sürdürülüyor...", "--:--", -1, -1);
+        m_queueModel.updateProgress(id, -1, "Resuming...", "--:--", -1, -1);
         m_activeYtDlpDownloads[id]->resume();
     }
 }

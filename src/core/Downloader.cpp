@@ -30,13 +30,13 @@ void Downloader::start() {
 
     if (existingBytes > 0 && m_isPaused) {
         if (!m_outputFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
-            emit downloadFailed(m_id, QString::fromUtf8("Dosya açılamadı: ") + m_outputFile.errorString());
+            emit downloadFailed(m_id, QString("Cannot open file: ") + m_outputFile.errorString());
             return;
         }
         m_downloadedBytes = existingBytes;
     } else {
         if (!m_outputFile.open(QIODevice::WriteOnly)) {
-            emit downloadFailed(m_id, QString::fromUtf8("Dosya oluşturulamadı: ") + m_outputFile.errorString());
+            emit downloadFailed(m_id, QString("Cannot create file: ") + m_outputFile.errorString());
             return;
         }
         m_downloadedBytes = 0;

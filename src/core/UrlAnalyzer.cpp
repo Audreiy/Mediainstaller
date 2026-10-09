@@ -80,13 +80,13 @@ void UrlAnalyzer::clear() {
 void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
     QString trimmed = rawUrl.trimmed();
     if (trimmed.isEmpty()) {
-        emit analysisError(QString::fromUtf8("Lütfen geçerli bir bağlantı adresi girin."));
+        emit analysisError("Please enter a valid media URL.");
         return;
     }
 
     QUrl url(trimmed);
     if (!url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
-        emit analysisError(QString::fromUtf8("Geçersiz bağlantı formatı. Bağlantı 'http://' veya 'https://' ile başlamalıdır."));
+        emit analysisError("Invalid URL format. URL must start with 'http://' or 'https://'.");
         return;
     }
 
@@ -394,7 +394,7 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
                     } else {
                         m_isAnalyzing = false;
                         emit analyzingChanged();
-                        emit analysisError(QString("Animecix: Sezon %1 Bölüm %2 için video akışı bulunamadı.").arg(targetSeason).arg(targetEp));
+                        emit analysisError(QString("Animecix: Video stream not found for Season %1 Episode %2.").arg(targetSeason).arg(targetEp));
                     }
                 });
             });
@@ -491,7 +491,7 @@ void UrlAnalyzer::startTauVideoResolve(const QString &tauId, const QString &anim
 
         m_isAnalyzing = false;
         emit analyzingChanged();
-        emit analysisError("Animecix (Tau Video): Video akış adresine ulaşılamadı veya sunucu yanıt vermedi.");
+        emit analysisError("Animecix: Video stream URL unreachable or server did not respond.");
     });
 }
 
@@ -744,7 +744,7 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
     }
 
     // Informative guidance error if extraction failed
-    emit analysisError(QString::fromUtf8("Bu sayfadaki video akışı doğrudan algılanamadı.\n💡 İpucu: Bu gibi harici film/dizi sitelerinde (FullHDFilmizlesene vb.) doğrudan video oynatıcısının üzerine sağ tıklayıp oynatıcı linkini (Vidmoly, Sibnet, Rapid veya .m3u8) kopyalayarak buraya yapıştırabilirsiniz."));
+    emit analysisError("Could not detect media stream from this page.");
 }
 
 void UrlAnalyzer::startDirectProbe(const QUrl &url) {
@@ -784,7 +784,7 @@ void UrlAnalyzer::onHeadFinished() {
         QString errStr = m_currentReply->errorString();
         m_currentReply->deleteLater();
         m_currentReply = nullptr;
-        emit analysisError(QString::fromUtf8("Bağlantı analizi başarısız oldu: ") + errStr);
+        emit analysisError(QString("Media analysis failed: ") + errStr);
         return;
     }
 
@@ -936,7 +936,7 @@ void UrlAnalyzer::onSpotifyOembedFinished() {
     reply->deleteLater();
 
     if (reply->error() != QNetworkReply::NoError) {
-        emit analysisError("Spotify parçası çözümlenemedi veya DRM korumalı. Lütfen doğrudan bir video veya müzik bağlantısı girin.");
+        emit analysisError("Spotify track could not be resolved or is DRM-protected. Please enter a direct media link.");
         m_isAnalyzing = false;
         emit analyzingChanged();
         return;
@@ -1002,7 +1002,7 @@ void UrlAnalyzer::onSpotifyOembedFinished() {
     }
 
     if (m_spotifyTitle.isEmpty()) {
-        emit analysisError("Spotify parça bilgisi okunamadı. Lütfen doğrudan YouTube veya medya bağlantısı girin.");
+        emit analysisError("Spotify track info could not be read. Please enter a direct YouTube or media link.");
         m_isAnalyzing = false;
         emit analyzingChanged();
         return;
@@ -1014,7 +1014,7 @@ void UrlAnalyzer::onSpotifyOembedFinished() {
 
     QString ytDlpExe = FFmpegProcessor::findYtDlpExecutable();
     if (ytDlpExe.isEmpty()) {
-        emit analysisError("yt-dlp video motoru bulunamadı.");
+        emit analysisError("yt-dlp video engine was not found.");
         m_isAnalyzing = false;
         emit analyzingChanged();
         return;
@@ -1069,5 +1069,5 @@ void UrlAnalyzer::onSpotifySearchFinished(int exitCode, QProcess::ExitStatus exi
         return;
     }
 
-    emit analysisError(QString("Spotify parçası bulundu (%1), ancak ses akışı getirilemedi.").arg(m_spotifyTitle));
+    emit analysisError(QString("Spotify track found (%1), but audio stream could not be retrieved.").arg(m_spotifyTitle));
 }

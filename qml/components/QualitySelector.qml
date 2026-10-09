@@ -349,10 +349,10 @@ Rectangle {
 
                 Repeater {
                     model: [
-                        { id: "audio_mp3_320", label: "320 kbps (Stüdyo)" },
-                        { id: "audio_mp3_256", label: "256 kbps (Yüksek)" },
-                        { id: "audio_mp3_192", label: "192 kbps (Standart)" },
-                        { id: "audio_mp3_128", label: "128 kbps (Hafif)" }
+                        { id: "audio_mp3_320", label: I18n.t("bitrateStudio") },
+                        { id: "audio_mp3_256", label: I18n.t("bitrateHigh") },
+                        { id: "audio_mp3_192", label: I18n.t("bitrateStandard") },
+                        { id: "audio_mp3_128", label: I18n.t("bitrateLight") }
                     ]
 
                     delegate: Rectangle {

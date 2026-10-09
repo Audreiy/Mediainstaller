@@ -116,7 +116,7 @@ ApplicationWindow {
             spacing: 12
 
             Text {
-                text: "🚀 " + ((typeof updateManager !== "undefined" && updateManager.latestVersion) ? I18n.t("updateBannerTitle").arg(updateManager.latestVersion) : "")
+                text: (typeof updateManager !== "undefined" && updateManager.latestVersion) ? I18n.t("updateBannerTitle").arg(updateManager.latestVersion) : ""
                 color: Theme.textPrimary
                 font.pixelSize: 12
                 font.family: Theme.fontFamily
