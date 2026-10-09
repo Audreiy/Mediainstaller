@@ -66,6 +66,7 @@ Rectangle {
                         if (model.status === "Converting") return Theme.accentPurple + "22"
                         if (model.status === "Paused") return Theme.warning + "22"
                         if (model.status === "Failed") return Theme.error + "22"
+                        if (model.status === "Cancelled") return Theme.error + "22"
                         return Theme.bgElevated
                     }
 
@@ -78,6 +79,7 @@ Rectangle {
                             if (model.status === "Converting") return "Converting (MP3)"
                             if (model.status === "Paused") return "Paused"
                             if (model.status === "Failed") return "Failed"
+                            if (model.status === "Cancelled") return "Cancelled"
                             return model.status
                         }
                         color: {
@@ -86,6 +88,7 @@ Rectangle {
                             if (model.status === "Converting") return Theme.accentPurple
                             if (model.status === "Paused") return Theme.warning
                             if (model.status === "Failed") return Theme.error
+                            if (model.status === "Cancelled") return Theme.error
                             return Theme.textSecondary
                         }
                         font.pixelSize: 10
@@ -156,12 +159,17 @@ Rectangle {
                 width: 34
                 height: 34
                 radius: Theme.radiusSm
-                color: folderHover.hovered ? Theme.bgCardHover : Theme.bgElevated
-                border.color: Theme.borderDim
+                color: folderMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
+                border.color: folderMouse.containsMouse ? Theme.accent : Theme.borderDim
                 border.width: 1
 
-                HoverHandler { id: folderHover }
-                TapHandler { onTapped: queueModel.openFileFolder(model.id) }
+                MouseArea {
+                    id: folderMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: queueModel.openFileFolder(model.id)
+                }
 
                 Text {
                     anchors.centerIn: parent
@@ -176,13 +184,16 @@ Rectangle {
                 width: 34
                 height: 34
                 radius: Theme.radiusSm
-                color: pauseHover.hovered ? Theme.bgCardHover : Theme.bgElevated
-                border.color: Theme.borderDim
+                color: pauseMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
+                border.color: pauseMouse.containsMouse ? Theme.accent : Theme.borderDim
                 border.width: 1
 
-                HoverHandler { id: pauseHover }
-                TapHandler {
-                    onTapped: {
+                MouseArea {
+                    id: pauseMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
                         if (model.status === "Downloading") {
                             queueModel.pauseDownload(model.id)
                         } else {
@@ -204,17 +215,22 @@ Rectangle {
                 width: 34
                 height: 34
                 radius: Theme.radiusSm
-                color: cancelHover.hovered ? Theme.error + "22" : Theme.bgElevated
-                border.color: cancelHover.hovered ? Theme.error + "55" : Theme.borderDim
+                color: cancelMouse.containsMouse ? Theme.error + "22" : Theme.bgElevated
+                border.color: cancelMouse.containsMouse ? Theme.error + "66" : Theme.borderDim
                 border.width: 1
 
-                HoverHandler { id: cancelHover }
-                TapHandler { onTapped: queueModel.cancelDownload(model.id) }
+                MouseArea {
+                    id: cancelMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: queueModel.cancelDownload(model.id)
+                }
 
                 Text {
                     anchors.centerIn: parent
                     text: "✕"
-                    color: cancelHover.hovered ? Theme.error : Theme.textSecondary
+                    color: cancelMouse.containsMouse ? Theme.error : Theme.textSecondary
                     font.pixelSize: 13
                     font.weight: Font.Bold
                 }

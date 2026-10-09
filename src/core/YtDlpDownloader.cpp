@@ -19,7 +19,14 @@ YtDlpDownloader::YtDlpDownloader(const QString &id,
 }
 
 YtDlpDownloader::~YtDlpDownloader() {
-    cancel();
+    if (m_process) {
+        if (m_process->state() != QProcess::NotRunning) {
+            m_process->kill();
+            m_process->waitForFinished(300);
+        }
+        delete m_process;
+        m_process = nullptr;
+    }
 }
 
 void YtDlpDownloader::start() {
@@ -95,6 +102,10 @@ void YtDlpDownloader::resume() {
 }
 
 void YtDlpDownloader::cancel() {
+    if (!m_isRunning) return;
+    m_isRunning = false;
+    emit runningChanged();
+
     if (m_process) {
         if (m_process->state() != QProcess::NotRunning) {
             m_process->kill();
@@ -103,8 +114,6 @@ void YtDlpDownloader::cancel() {
         m_process->deleteLater();
         m_process = nullptr;
     }
-    m_isRunning = false;
-    emit runningChanged();
 
     // Clean up partial files if any
     QString partFile = m_targetPath + ".part";

@@ -62,6 +62,7 @@ void Downloader::resume() {
 }
 
 void Downloader::cancel() {
+    if (!m_isRunning) return;
     m_isRunning = false;
     if (m_reply) {
         m_reply->abort();

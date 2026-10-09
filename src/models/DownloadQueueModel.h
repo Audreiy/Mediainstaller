@@ -61,6 +61,7 @@ public:
     Q_INVOKABLE void pauseDownload(const QString &id);
     Q_INVOKABLE void resumeDownload(const QString &id);
     Q_INVOKABLE void cancelDownload(const QString &id);
+    Q_INVOKABLE void removeItem(const QString &id);
     Q_INVOKABLE void openFileFolder(const QString &id);
     Q_INVOKABLE void clearCompleted();
 

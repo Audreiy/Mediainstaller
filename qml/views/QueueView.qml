@@ -11,10 +11,13 @@ Item {
         spacing: 20
 
         // Header Line
-        Row {
+        Item {
             width: parent.width
+            height: 44
 
             Column {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
                 spacing: 4
                 Text {
                     text: "Download Queue"
@@ -31,28 +34,35 @@ Item {
                 }
             }
 
-            Item { width: Math.max(10, parent.width - 320) }
-
             // Clear Completed Button
             Rectangle {
                 visible: queueModel.totalDownloadCount > 0
-                width: 150
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                width: 140
                 height: 38
                 radius: Theme.radiusMd
-                color: clearHover.hovered ? Theme.bgCardHover : Theme.bgElevated
-                border.color: Theme.borderDim
+                color: clearMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
+                border.color: clearMouse.containsMouse ? Theme.accent : Theme.borderDim
                 border.width: 1
 
-                HoverHandler { id: clearHover }
-                TapHandler { onTapped: queueModel.clearCompleted() }
+                MouseArea {
+                    id: clearMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        queueModel.clearCompleted();
+                    }
+                }
 
                 Row {
                     anchors.centerIn: parent
                     spacing: 6
-                    Text { text: "🧹"; font.pixelSize: 12 }
+                    Text { text: "🧹"; font.pixelSize: 13 }
                     Text {
                         text: "Clear Finished"
-                        color: clearHover.hovered ? Theme.textPrimary : Theme.textSecondary
+                        color: clearMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 12
                         font.family: Theme.fontFamily
                         font.weight: Font.Medium

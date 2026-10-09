@@ -207,7 +207,10 @@ void DownloadManager::handleDownloadFailed(const QString &id, const QString &err
 }
 
 void DownloadManager::handleDownloadCancelled(const QString &id) {
-    m_queueModel.updateStatus(id, "Cancelled");
+    DownloadItem item = m_queueModel.getItem(id);
+    if (item.status != "Completed") {
+        m_queueModel.updateStatus(id, "Cancelled");
+    }
     if (m_activeHttpDownloads.contains(id)) {
         if (m_activeHttpDownloads[id]) m_activeHttpDownloads[id]->deleteLater();
         m_activeHttpDownloads.remove(id);

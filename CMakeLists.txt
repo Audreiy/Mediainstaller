@@ -18,6 +18,7 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Quick Qml QuickControls2)
 qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(MediaGrab
+    WIN32
     src/main.cpp
     src/models/MediaInfo.h
     src/models/MediaInfo.cpp
@@ -33,6 +34,7 @@ qt_add_executable(MediaGrab
     src/core/DownloadManager.cpp
     src/media/FFmpegProcessor.h
     src/media/FFmpegProcessor.cpp
+    app.rc
 )
 
 target_include_directories(MediaGrab PRIVATE
@@ -49,6 +51,8 @@ set_source_files_properties(qml/Theme.qml PROPERTIES
 qt_add_qml_module(MediaGrab
     URI MediaGrab
     VERSION 1.0
+    RESOURCES
+        assets/logo.png
     QML_FILES
         qml/Main.qml
         qml/Theme.qml
@@ -64,6 +68,7 @@ qt_add_qml_module(MediaGrab
 
 set_target_properties(MediaGrab PROPERTIES
     OUTPUT_NAME "MediaGrabApp"
+    WIN32_EXECUTABLE TRUE
 )
 
 target_link_libraries(MediaGrab PRIVATE

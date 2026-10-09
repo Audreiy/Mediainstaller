@@ -19,19 +19,20 @@ Rectangle {
         Row {
             spacing: 12
             Rectangle {
-                width: 38
-                height: 38
-                radius: Theme.radiusMd
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: Theme.accent }
-                    GradientStop { position: 1.0; color: Theme.accentPurple }
-                }
+                width: 42
+                height: 42
+                radius: 12
+                color: Theme.bgElevated
+                border.color: Theme.accent
+                border.width: 1.5
+                clip: true
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "⚡"
-                    font.pixelSize: 18
+                Image {
+                    anchors.fill: parent
+                    source: "qrc:/qt/qml/MediaGrab/assets/logo.png"
+                    fillMode: Image.PreserveAspectCrop
+                    smooth: true
+                    mipmap: true
                 }
             }
 

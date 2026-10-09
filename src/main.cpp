@@ -35,6 +35,17 @@ int main(int argc, char *argv[]) {
     app.setOrganizationName("MediaGrabDev");
     app.setApplicationVersion("1.0.0");
 
+    QIcon appIcon(":/qt/qml/MediaGrab/assets/logo.png");
+    if (appIcon.isNull()) {
+        appIcon = QIcon(":/MediaGrab/assets/logo.png");
+    }
+    if (appIcon.isNull()) {
+        appIcon = QIcon(QCoreApplication::applicationDirPath() + "/assets/logo.png");
+    }
+    if (!appIcon.isNull()) {
+        app.setWindowIcon(appIcon);
+    }
+
     // Modern dark controls style
     QQuickStyle::setStyle("Basic");
 

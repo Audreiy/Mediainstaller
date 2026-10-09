@@ -131,6 +131,18 @@ void DownloadQueueModel::resumeDownload(const QString &id) {
 
 void DownloadQueueModel::cancelDownload(const QString &id) {
     emit requestCancel(id);
+    removeItem(id);
+}
+
+void DownloadQueueModel::removeItem(const QString &id) {
+    int idx = findIndexById(id);
+    if (idx >= 0) {
+        beginRemoveRows(QModelIndex(), idx, idx);
+        m_items.removeAt(idx);
+        endRemoveRows();
+        emit countChanged();
+        emit activeCountChanged();
+    }
 }
 
 void DownloadQueueModel::openFileFolder(const QString &id) {
@@ -151,7 +163,11 @@ void DownloadQueueModel::openFileFolder(const QString &id) {
 
 void DownloadQueueModel::clearCompleted() {
     for (int i = m_items.size() - 1; i >= 0; --i) {
-        if (m_items.at(i).status == "Completed" || m_items.at(i).status == "Failed") {
+        const QString &st = m_items.at(i).status;
+        if (st.compare("Completed", Qt::CaseInsensitive) == 0 ||
+            st.compare("Failed", Qt::CaseInsensitive) == 0 ||
+            st.compare("Cancelled", Qt::CaseInsensitive) == 0 ||
+            st.compare("Canceled", Qt::CaseInsensitive) == 0) {
             beginRemoveRows(QModelIndex(), i, i);
             m_items.removeAt(i);
             endRemoveRows();

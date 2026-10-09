@@ -10,4 +10,8 @@ echo === Building MediaGrab ===
 cmake --build build --config Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
+copy /Y build\MediaGrabApp.exe build\MediaGrab.exe >nul 2>&1
+if not exist build\assets mkdir build\assets >nul 2>&1
+copy /Y assets\* build\assets\ >nul 2>&1
+
 echo === Build Successful! ===
