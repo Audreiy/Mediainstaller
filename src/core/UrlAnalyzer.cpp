@@ -40,6 +40,7 @@ UrlCategory UrlAnalyzer::categorizeUrl(const QString &rawUrl) {
         return UrlCategory::DirectAudio;
     }
     if (lower.contains("youtube.com") || lower.contains("youtu.be") ||
+        lower.contains("spotify.com") ||
         lower.contains("animecix.") || lower.contains("vidmoly.") || lower.contains("sibnet.ru") ||
         lower.contains("twitter.com") || lower.contains("x.com") ||
         lower.contains("tiktok.com") || lower.contains("instagram.com") ||
@@ -51,6 +52,29 @@ UrlCategory UrlAnalyzer::categorizeUrl(const QString &rawUrl) {
         return UrlCategory::GenericWebPage;
     }
     return UrlCategory::Unknown;
+}
+
+void UrlAnalyzer::clear() {
+    if (m_currentReply) {
+        m_currentReply->abort();
+        m_currentReply->deleteLater();
+        m_currentReply = nullptr;
+    }
+    if (m_ytDlpProcess) {
+        m_ytDlpProcess->kill();
+        m_ytDlpProcess->deleteLater();
+        m_ytDlpProcess = nullptr;
+    }
+    if (m_currentInfo) {
+        m_currentInfo->deleteLater();
+        m_currentInfo = nullptr;
+        emit mediaInfoChanged();
+    }
+    m_analyzingUrl.clear();
+    if (m_isAnalyzing) {
+        m_isAnalyzing = false;
+        emit analyzingChanged();
+    }
 }
 
 void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
@@ -98,6 +122,12 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
             startTauVideoResolve(m.captured(1), "Tau Video", 0, 0, "", "");
             return;
         }
+    }
+
+    // 0.2 Spotify music track resolver
+    if (lower.contains("spotify.com/")) {
+        startSpotifyResolve(url);
+        return;
     }
 
     // 1. YouTube specific fast oEmbed
@@ -751,4 +781,111 @@ void UrlAnalyzer::populateWebStreamOptions(MediaInfo *info) {
     options.append(audioMp3);
 
     info->setStreamOptions(options);
+}
+
+void UrlAnalyzer::startSpotifyResolve(const QUrl &url) {
+    m_spotifyTitle.clear();
+    m_spotifyThumb.clear();
+
+    QUrl oembedUrl("https://open.spotify.com/oembed?url=" + QUrl::toPercentEncoding(url.toString()));
+    QNetworkRequest request(oembedUrl);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0 Safari/537.36");
+
+    m_currentReply = m_netManager.get(request);
+    connect(m_currentReply, &QNetworkReply::finished, this, &UrlAnalyzer::onSpotifyOembedFinished);
+}
+
+void UrlAnalyzer::onSpotifyOembedFinished() {
+    if (!m_currentReply) return;
+
+    QNetworkReply *reply = m_currentReply;
+    m_currentReply = nullptr;
+    reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        emit analysisError("Spotify parçası çözümlenemedi veya DRM korumalı. Lütfen doğrudan bir video veya müzik bağlantısı girin.");
+        m_isAnalyzing = false;
+        emit analyzingChanged();
+        return;
+    }
+
+    QByteArray data = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isObject()) {
+        emit analysisError("Spotify parça bilgisi alınamadı.");
+        m_isAnalyzing = false;
+        emit analyzingChanged();
+        return;
+    }
+
+    QJsonObject obj = doc.object();
+    m_spotifyTitle = obj.value("title").toString().trimmed();
+    m_spotifyThumb = obj.value("thumbnail_url").toString().trimmed();
+
+    if (m_spotifyTitle.isEmpty()) {
+        emit analysisError("Spotify parça başlığı okunamadı.");
+        m_isAnalyzing = false;
+        emit analyzingChanged();
+        return;
+    }
+
+    QString ytDlpExe = FFmpegProcessor::findYtDlpExecutable();
+    if (ytDlpExe.isEmpty()) {
+        emit analysisError("yt-dlp video motoru bulunamadı.");
+        m_isAnalyzing = false;
+        emit analyzingChanged();
+        return;
+    }
+
+    m_ytDlpProcess = new QProcess(this);
+    QStringList args;
+    args << "--print" << "%(title)s|||%(uploader)s|||%(duration_string)s|||%(thumbnail)s|||%(webpage_url)s";
+    args << "--no-warnings";
+    args << "--no-playlist";
+    args << "--no-check-certificates";
+    args << QString("ytsearch1:%1 audio").arg(m_spotifyTitle);
+
+    connect(m_ytDlpProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &UrlAnalyzer::onSpotifySearchFinished);
+    m_ytDlpProcess->start(ytDlpExe, args);
+}
+
+void UrlAnalyzer::onSpotifySearchFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+    m_isAnalyzing = false;
+    emit analyzingChanged();
+
+    if (!m_ytDlpProcess) return;
+
+    QString output = QString::fromUtf8(m_ytDlpProcess->readAllStandardOutput()).trimmed();
+    m_ytDlpProcess->deleteLater();
+    m_ytDlpProcess = nullptr;
+
+    if (exitStatus == QProcess::NormalExit && exitCode == 0 && !output.isEmpty()) {
+        QStringList parts = output.split("|||");
+        QString title = parts.value(0).trimmed();
+        QString author = (parts.size() > 1) ? parts.value(1).trimmed() : "";
+        QString duration = (parts.size() > 2) ? parts.value(2).trimmed() : "";
+        QString ytThumb = (parts.size() > 3) ? parts.value(3).trimmed() : "";
+        QString webpageUrl = (parts.size() > 4) ? parts.value(4).trimmed() : "";
+
+        if (m_currentInfo) {
+            m_currentInfo->deleteLater();
+        }
+        m_currentInfo = new MediaInfo(this);
+        m_currentInfo->setUrl(webpageUrl.isEmpty() ? m_analyzingUrl : webpageUrl);
+        m_currentInfo->setTitle(m_spotifyTitle.isEmpty() ? title : m_spotifyTitle);
+        m_currentInfo->setAuthor(author.isEmpty() ? "Spotify" : QString("Spotify • %1").arg(author));
+        m_currentInfo->setDuration(duration);
+        m_currentInfo->setThumbnailUrl(m_spotifyThumb.isEmpty() ? ytThumb : m_spotifyThumb);
+        m_currentInfo->setIsDirectFile(false);
+        m_currentInfo->setIsAudioOnly(true);
+
+        populateWebStreamOptions(m_currentInfo);
+
+        emit mediaInfoChanged();
+        emit analysisSuccess(m_currentInfo);
+        return;
+    }
+
+    emit analysisError(QString("Spotify parçası bulundu (%1), ancak ses akışı getirilemedi.").arg(m_spotifyTitle));
 }

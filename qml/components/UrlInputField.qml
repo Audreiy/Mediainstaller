@@ -10,6 +10,10 @@ Item {
     property alias text: textInput.text
     signal analyzeRequested(string url)
 
+    function clear() {
+        textInput.text = ""
+    }
+
     Rectangle {
         id: container
         anchors.fill: parent

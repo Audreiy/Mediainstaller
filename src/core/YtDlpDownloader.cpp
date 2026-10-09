@@ -59,10 +59,22 @@ void YtDlpDownloader::start() {
         args << "--ffmpeg-location" << QFileInfo(ffmpegExe).absolutePath();
     }
 
-    if (m_formatId == "audio_mp3") {
-        args << "-x" << "--audio-format" << "mp3" << "--audio-quality" << "320k";
+    if (m_formatId.startsWith("audio_mp3") || m_formatId == "audio_mp3") {
+        QString bitrate = "320k";
+        if (m_formatId.contains("256")) bitrate = "256k";
+        else if (m_formatId.contains("192")) bitrate = "192k";
+        else if (m_formatId.contains("128")) bitrate = "128k";
+        args << "-x" << "--audio-format" << "mp3" << "--audio-quality" << bitrate;
     } else if (m_formatId == "audio_m4a") {
         args << "-x" << "--audio-format" << "m4a";
+    } else if (m_formatId == "video_1080p") {
+        args << "-f" << "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best";
+    } else if (m_formatId == "video_720p") {
+        args << "-f" << "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best";
+    } else if (m_formatId == "video_480p") {
+        args << "-f" << "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/best";
+    } else if (m_formatId == "video_360p") {
+        args << "-f" << "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]/best";
     } else {
         // High quality video with merged audio or best direct stream
         args << "-f" << "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best";

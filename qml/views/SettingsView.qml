@@ -328,13 +328,13 @@ Item {
                         border.color: Theme.borderDim
                         border.width: 1
                         anchors.verticalCenter: parent.verticalCenter
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "FF"
-                            color: Theme.accentCyan
-                            font.pixelSize: 14
-                            font.family: Theme.fontFamily
-                            font.weight: Font.Bold
+                            width: 28; height: 28
+                            source: "qrc:/qt/qml/MediaGrab/assets/ffmpeg.png"
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            mipmap: true
                         }
                     }
 
@@ -404,13 +404,13 @@ Item {
                         border.color: Theme.borderDim
                         border.width: 1
                         anchors.verticalCenter: parent.verticalCenter
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "DL"
-                            color: Theme.accent
-                            font.pixelSize: 14
-                            font.family: Theme.fontFamily
-                            font.weight: Font.Bold
+                            width: 28; height: 28
+                            source: "qrc:/qt/qml/MediaGrab/assets/ytdlp.png"
+                            fillMode: Image.PreserveAspectFit
+                            smooth: true
+                            mipmap: true
                         }
                     }
 

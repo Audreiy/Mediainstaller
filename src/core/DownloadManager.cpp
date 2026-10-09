@@ -5,13 +5,20 @@
 #include <QUuid>
 #include <QDateTime>
 #include <QRegularExpression>
+#include <QSettings>
 
 DownloadManager::DownloadManager(QObject *parent)
     : QObject(parent)
 {
-    m_defaultDownloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-    if (m_defaultDownloadPath.isEmpty()) {
-        m_defaultDownloadPath = QDir::homePath() + "/Downloads";
+    QSettings settings("YuYuDev", "YuYuInstaller");
+    QString savedPath = settings.value("defaultDownloadPath").toString();
+    if (!savedPath.isEmpty() && QDir(savedPath).exists()) {
+        m_defaultDownloadPath = savedPath;
+    } else {
+        m_defaultDownloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+        if (m_defaultDownloadPath.isEmpty()) {
+            m_defaultDownloadPath = QDir::homePath() + "/Downloads";
+        }
     }
 
     connect(&m_queueModel, &DownloadQueueModel::requestPause, this, &DownloadManager::onQueuePause);
@@ -35,6 +42,8 @@ QString DownloadManager::getDefaultDownloadDirectory() const {
 void DownloadManager::setDefaultDownloadPath(const QString &path) {
     if (m_defaultDownloadPath != path && !path.isEmpty()) {
         m_defaultDownloadPath = path;
+        QSettings settings("YuYuDev", "YuYuInstaller");
+        settings.setValue("defaultDownloadPath", m_defaultDownloadPath);
         emit defaultDownloadPathChanged();
     }
 }
@@ -69,8 +78,8 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
     QDir().mkpath(targetDir);
 
     QString id = generateUniqueId();
-    bool isAudioOnly = (formatId == "audio_mp3" || formatId == "audio_m4a");
-    QString extension = (formatId == "audio_mp3") ? ".mp3" : ((formatId == "audio_m4a") ? ".m4a" : ".mp4");
+    bool isAudioOnly = formatId.startsWith("audio_");
+    QString extension = isAudioOnly ? (formatId.contains("m4a") ? ".m4a" : ".mp3") : ".mp4";
 
     QString safeBaseName = sanitizeFileName(title);
 

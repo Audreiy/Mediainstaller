@@ -13,8 +13,21 @@ Rectangle {
     border.width: 1
 
     property var mediaInfo: null
+    property string selectedFormatType: "video"
+    property string selectedVideoQuality: "best_video"
+    property string selectedAudioQuality: "audio_mp3_320"
     property string selectedOptionId: "best_video"
     property string customFolder: downloadManager.defaultDownloadPath
+
+    onMediaInfoChanged: {
+        if (mediaInfo && mediaInfo.isAudioOnly) {
+            selectedFormatType = "audio"
+            selectedOptionId = selectedAudioQuality
+        } else {
+            selectedFormatType = "video"
+            selectedOptionId = selectedVideoQuality
+        }
+    }
 
     signal downloadTriggered(string url, string title, string formatId, string folder)
 
@@ -142,18 +155,23 @@ Rectangle {
             width: parent.width
             spacing: 12
 
-            // Option 1: Video (Best Quality)
+            // Option 1: Video (MP4)
             Rectangle {
                 id: videoCard
                 width: (parent.width - 12) / 2
                 height: 70
                 radius: Theme.radiusMd
-                color: (root.selectedOptionId !== "audio_mp3") ? Theme.activeTabBg : (videoHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
-                border.color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.borderDim
-                border.width: (root.selectedOptionId !== "audio_mp3") ? 2 : 1
+                color: (root.selectedFormatType === "video") ? Theme.activeTabBg : (videoHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
+                border.color: (root.selectedFormatType === "video") ? Theme.accent : Theme.borderDim
+                border.width: (root.selectedFormatType === "video") ? 2 : 1
 
                 HoverHandler { id: videoHover }
-                TapHandler { onTapped: root.selectedOptionId = "best_video" }
+                TapHandler {
+                    onTapped: {
+                        root.selectedFormatType = "video"
+                        root.selectedOptionId = root.selectedVideoQuality
+                    }
+                }
 
                 Row {
                     anchors.fill: parent
@@ -162,13 +180,13 @@ Rectangle {
 
                     Rectangle {
                         width: 38; height: 26; radius: 6
-                        color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.bgElevated
-                        border.color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.borderDim
+                        color: (root.selectedFormatType === "video") ? Theme.accent : Theme.bgElevated
+                        border.color: (root.selectedFormatType === "video") ? Theme.accent : Theme.borderDim
                         anchors.verticalCenter: parent.verticalCenter
                         Text {
                             anchors.centerIn: parent
                             text: "MP4"
-                            color: (root.selectedOptionId !== "audio_mp3") ? "#07090e" : Theme.textPrimary
+                            color: (root.selectedFormatType === "video") ? "#07090e" : Theme.textPrimary
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
                             font.weight: Font.Bold
@@ -181,7 +199,7 @@ Rectangle {
 
                         Text {
                             text: I18n.t("videoAudio")
-                            color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.textPrimary
+                            color: (root.selectedFormatType === "video") ? Theme.accent : Theme.textPrimary
                             font.pixelSize: 13
                             font.family: Theme.fontFamily
                             font.weight: Font.DemiBold
@@ -203,12 +221,17 @@ Rectangle {
                 width: (parent.width - 12) / 2
                 height: 70
                 radius: Theme.radiusMd
-                color: (root.selectedOptionId === "audio_mp3") ? Theme.activeTabBg : (audioHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
-                border.color: (root.selectedOptionId === "audio_mp3") ? Theme.accent : Theme.borderDim
-                border.width: (root.selectedOptionId === "audio_mp3") ? 2 : 1
+                color: (root.selectedFormatType === "audio") ? Theme.activeTabBg : (audioHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
+                border.color: (root.selectedFormatType === "audio") ? Theme.accent : Theme.borderDim
+                border.width: (root.selectedFormatType === "audio") ? 2 : 1
 
                 HoverHandler { id: audioHover }
-                TapHandler { onTapped: root.selectedOptionId = "audio_mp3" }
+                TapHandler {
+                    onTapped: {
+                        root.selectedFormatType = "audio"
+                        root.selectedOptionId = root.selectedAudioQuality
+                    }
+                }
 
                 Row {
                     anchors.fill: parent
@@ -217,13 +240,13 @@ Rectangle {
 
                     Rectangle {
                         width: 38; height: 26; radius: 6
-                        color: (root.selectedOptionId === "audio_mp3") ? Theme.accent : Theme.bgElevated
-                        border.color: (root.selectedOptionId === "audio_mp3") ? Theme.accent : Theme.borderDim
+                        color: (root.selectedFormatType === "audio") ? Theme.accent : Theme.bgElevated
+                        border.color: (root.selectedFormatType === "audio") ? Theme.accent : Theme.borderDim
                         anchors.verticalCenter: parent.verticalCenter
                         Text {
                             anchors.centerIn: parent
                             text: "MP3"
-                            color: (root.selectedOptionId === "audio_mp3") ? "#07090e" : Theme.textPrimary
+                            color: (root.selectedFormatType === "audio") ? "#07090e" : Theme.textPrimary
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
                             font.weight: Font.Bold
@@ -236,7 +259,7 @@ Rectangle {
 
                         Text {
                             text: I18n.t("audioMp3")
-                            color: Theme.textPrimary
+                            color: (root.selectedFormatType === "audio") ? Theme.accent : Theme.textPrimary
                             font.pixelSize: 13
                             font.family: Theme.fontFamily
                             font.weight: Font.DemiBold
@@ -247,6 +270,115 @@ Rectangle {
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
+                        }
+                    }
+                }
+            }
+        }
+
+        // Sub-Options: Resolution (if MP4) or Bitrate (if MP3)
+        Column {
+            width: parent.width
+            spacing: 8
+
+            Row {
+                spacing: 8
+                Rectangle {
+                    width: 4; height: 14; radius: 2
+                    color: Theme.accent
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Text {
+                    text: root.selectedFormatType === "video" ? I18n.t("selectResolution") : I18n.t("selectBitrate")
+                    color: Theme.textSecondary
+                    font.pixelSize: 12
+                    font.family: Theme.fontFamily
+                    font.weight: Font.DemiBold
+                }
+            }
+
+            // Video Qualities Pills
+            Row {
+                width: parent.width
+                spacing: 8
+                visible: root.selectedFormatType === "video"
+
+                Repeater {
+                    model: [
+                        { id: "best_video", label: I18n.t("qualityBest") },
+                        { id: "video_1080p", label: "1080p Full HD" },
+                        { id: "video_720p", label: "720p HD" },
+                        { id: "video_480p", label: "480p SD" },
+                        { id: "video_360p", label: "360p" }
+                    ]
+
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: (parent.width - 32) / 5
+                        height: 34
+                        radius: Theme.radiusSm
+                        color: root.selectedVideoQuality === modelData.id ? Theme.activeTabBg : (vPillHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
+                        border.color: root.selectedVideoQuality === modelData.id ? Theme.accent : Theme.borderDim
+                        border.width: root.selectedVideoQuality === modelData.id ? 1.5 : 1
+
+                        HoverHandler { id: vPillHover }
+                        TapHandler {
+                            onTapped: {
+                                root.selectedVideoQuality = modelData.id
+                                root.selectedOptionId = modelData.id
+                            }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.label
+                            color: root.selectedVideoQuality === modelData.id ? Theme.accent : Theme.textPrimary
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            font.weight: root.selectedVideoQuality === modelData.id ? Font.Bold : Font.Normal
+                        }
+                    }
+                }
+            }
+
+            // Audio Bitrates Pills
+            Row {
+                width: parent.width
+                spacing: 8
+                visible: root.selectedFormatType === "audio"
+
+                Repeater {
+                    model: [
+                        { id: "audio_mp3_320", label: "320 kbps (Stüdyo)" },
+                        { id: "audio_mp3_256", label: "256 kbps (Yüksek)" },
+                        { id: "audio_mp3_192", label: "192 kbps (Standart)" },
+                        { id: "audio_mp3_128", label: "128 kbps (Hafif)" }
+                    ]
+
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: (parent.width - 24) / 4
+                        height: 34
+                        radius: Theme.radiusSm
+                        color: root.selectedAudioQuality === modelData.id ? Theme.activeTabBg : (aPillHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
+                        border.color: root.selectedAudioQuality === modelData.id ? Theme.accent : Theme.borderDim
+                        border.width: root.selectedAudioQuality === modelData.id ? 1.5 : 1
+
+                        HoverHandler { id: aPillHover }
+                        TapHandler {
+                            onTapped: {
+                                root.selectedAudioQuality = modelData.id
+                                root.selectedOptionId = modelData.id
+                            }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: modelData.label
+                            color: root.selectedAudioQuality === modelData.id ? Theme.accent : Theme.textPrimary
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            font.weight: root.selectedAudioQuality === modelData.id ? Font.Bold : Font.Normal
                         }
                     }
                 }

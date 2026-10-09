@@ -48,6 +48,13 @@ void MediaInfo::setIsDirectFile(bool direct) {
     }
 }
 
+void MediaInfo::setIsAudioOnly(bool audioOnly) {
+    if (m_isAudioOnly != audioOnly) {
+        m_isAudioOnly = audioOnly;
+        emit isAudioOnlyChanged();
+    }
+}
+
 void MediaInfo::setStreamOptions(const QList<MediaStreamOption> &options) {
     m_streamOptions = options;
     emit streamOptionsChanged();

@@ -51,6 +51,7 @@ Item {
 
             // URL Input Area
             UrlInputField {
+                id: urlInputField
                 width: parent.width
                 onAnalyzeRequested: function(rawUrl) {
                     root.currentErrorMessage = ""
@@ -102,6 +103,8 @@ Item {
 
                 onDownloadTriggered: function(url, title, formatId, folder) {
                     downloadManager.addDownload(url, title, formatId, folder)
+                    urlInputField.clear()
+                    urlAnalyzer.clear()
                     root.navigateToQueue()
                 }
             }

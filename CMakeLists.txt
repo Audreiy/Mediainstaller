@@ -55,6 +55,8 @@ qt_add_qml_module(MediaGrab
     VERSION 1.0
     RESOURCES
         assets/logo.png
+        assets/ffmpeg.png
+        assets/ytdlp.png
     QML_FILES
         qml/Main.qml
         qml/Theme.qml
@@ -84,6 +86,7 @@ target_link_libraries(MediaGrab PRIVATE
     mfreadwrite
     mfuuid
     propsys
+    dwmapi
 )
 
 # Optional libcurl linking if found

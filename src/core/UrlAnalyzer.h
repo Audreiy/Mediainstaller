@@ -29,6 +29,7 @@ public:
     MediaInfo* currentMediaInfo() const { return m_currentInfo; }
 
     Q_INVOKABLE void analyzeUrl(const QString &rawUrl);
+    Q_INVOKABLE void clear();
     static UrlCategory categorizeUrl(const QString &rawUrl);
 
 signals:
@@ -42,8 +43,11 @@ private slots:
     void onOembedFinished();
     void onWebPageScrapeFinished();
     void onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void onSpotifyOembedFinished();
+    void onSpotifySearchFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
+    void startSpotifyResolve(const QUrl &url);
     void startYouTubeOembedProbe(const QUrl &url);
     void startAnimecixResolve(const QUrl &url);
     void startTauVideoResolve(const QString &tauId, const QString &animeTitle, int season, int episode, const QString &epName, const QString &poster);
@@ -62,4 +66,6 @@ private:
     QNetworkReply *m_currentReply = nullptr;
     QProcess *m_ytDlpProcess = nullptr;
     QString m_analyzingUrl;
+    QString m_spotifyTitle;
+    QString m_spotifyThumb;
 };

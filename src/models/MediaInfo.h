@@ -32,6 +32,7 @@ class MediaInfo : public QObject {
     Q_PROPERTY(QString duration READ duration WRITE setDuration NOTIFY durationChanged)
     Q_PROPERTY(QString thumbnailUrl READ thumbnailUrl WRITE setThumbnailUrl NOTIFY thumbnailUrlChanged)
     Q_PROPERTY(bool isDirectFile READ isDirectFile WRITE setIsDirectFile NOTIFY isDirectFileChanged)
+    Q_PROPERTY(bool isAudioOnly READ isAudioOnly WRITE setIsAudioOnly NOTIFY isAudioOnlyChanged)
     Q_PROPERTY(QVariantList streamOptions READ streamOptionsVariant NOTIFY streamOptionsChanged)
 
 public:
@@ -55,6 +56,9 @@ public:
     bool isDirectFile() const { return m_isDirectFile; }
     void setIsDirectFile(bool direct);
 
+    bool isAudioOnly() const { return m_isAudioOnly; }
+    void setIsAudioOnly(bool audioOnly);
+
     QList<MediaStreamOption> streamOptions() const { return m_streamOptions; }
     void setStreamOptions(const QList<MediaStreamOption> &options);
 
@@ -67,6 +71,7 @@ signals:
     void durationChanged();
     void thumbnailUrlChanged();
     void isDirectFileChanged();
+    void isAudioOnlyChanged();
     void streamOptionsChanged();
 
 private:
@@ -76,5 +81,6 @@ private:
     QString m_duration;
     QString m_thumbnailUrl;
     bool m_isDirectFile = false;
+    bool m_isAudioOnly = false;
     QList<MediaStreamOption> m_streamOptions;
 };
