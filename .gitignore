@@ -23,3 +23,10 @@ CMakeLists.txt.user
 
 # Uploaded raw files
 69b9646e68d825f8edc4e57cQh1EywLy07.mp4
+
+# Installer & output packages
+setup_output/
+*.7z
+*.zip
+*.rar
+

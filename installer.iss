@@ -19,6 +19,10 @@ PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
+; Ensure running app is closed before install/uninstall so files are not locked
+CloseApplications=yes
+CloseApplicationsFilter=YuYuInstaller.exe,*.dll
+
 ; Output
 OutputDir=setup_output
 OutputBaseFilename=YuYuInstaller_Setup
@@ -27,7 +31,6 @@ OutputBaseFilename=YuYuInstaller_Setup
 SetupIconFile=assets\app.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 WizardStyle=modern
-WizardResizable=no
 WizardImageFile=assets\wizard_large.bmp
 WizardSmallImageFile=assets\wizard_small.bmp
 
@@ -71,3 +74,26 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}"
+
+[Code]
+// Automatically terminate running app before uninstall so Windows file-locks are released
+function InitializeUninstall(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := True;
+  Exec('taskkill.exe', '/f /im YuYuInstaller.exe', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Sleep(500);
+end;
+
+// Clean up entire folder and any runtime generated cache
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall then
+  begin
+    DelTree(ExpandConstant('{app}'), True, True, True);
+  end;
+end;
