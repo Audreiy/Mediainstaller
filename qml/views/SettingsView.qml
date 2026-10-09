@@ -175,21 +175,21 @@ Item {
                             }
                         }
 
-                        // Option 3: Русский
+                        // Option 3: Українська
                         Rectangle {
                             width: (parent.width - 24) / 3
                             height: 42
                             radius: Theme.radiusMd
-                            color: (I18n.language === "ru") ? Theme.activeTabBg : (ruMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
-                            border.color: (I18n.language === "ru") ? Theme.accent : Theme.borderDim
-                            border.width: (I18n.language === "ru") ? 2 : 1
+                            color: (I18n.language === "uk") ? Theme.activeTabBg : (ukMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
+                            border.color: (I18n.language === "uk") ? Theme.accent : Theme.borderDim
+                            border.width: (I18n.language === "uk") ? 2 : 1
 
                             MouseArea {
-                                id: ruMouse
+                                id: ukMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: I18n.setLanguage("ru")
+                                onClicked: I18n.setLanguage("uk")
                             }
 
                             Row {
@@ -197,23 +197,23 @@ Item {
                                 spacing: 10
                                 Rectangle {
                                     width: 28; height: 20; radius: 4
-                                    color: (I18n.language === "ru") ? Theme.accent : Theme.borderBright
+                                    color: (I18n.language === "uk") ? Theme.accent : Theme.borderBright
                                     anchors.verticalCenter: parent.verticalCenter
                                     Text {
                                         anchors.centerIn: parent
-                                        text: "RU"
-                                        color: (I18n.language === "ru") ? "#07090e" : Theme.textPrimary
+                                        text: "UA"
+                                        color: (I18n.language === "uk") ? "#07090e" : Theme.textPrimary
                                         font.pixelSize: 11
                                         font.family: Theme.fontFamily
                                         font.weight: Font.Bold
                                     }
                                 }
                                 Text {
-                                    text: I18n.t("langRu")
-                                    color: (I18n.language === "ru") ? Theme.activeTabText : Theme.textPrimary
+                                    text: I18n.t("langUk")
+                                    color: (I18n.language === "uk") ? Theme.activeTabText : Theme.textPrimary
                                     font.pixelSize: 12
                                     font.family: Theme.fontFamily
-                                    font.weight: (I18n.language === "ru") ? Font.Bold : Font.Medium
+                                    font.weight: (I18n.language === "uk") ? Font.Bold : Font.Medium
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
