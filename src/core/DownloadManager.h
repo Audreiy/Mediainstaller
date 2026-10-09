@@ -10,12 +10,24 @@
 #include "YtDlpDownloader.h"
 #include "FFmpegProcessor.h"
 
+struct QueuedTask {
+    QString id;
+    QString url;
+    QString title;
+    QString formatId;
+    QString customFolder;
+    QString finalFilePath;
+    bool isAudioOnly = false;
+    bool useYtDlp = false;
+};
+
 class DownloadManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(DownloadQueueModel* queueModel READ queueModel CONSTANT)
     Q_PROPERTY(UrlAnalyzer* urlAnalyzer READ urlAnalyzer CONSTANT)
     Q_PROPERTY(FFmpegProcessor* ffmpegProcessor READ ffmpegProcessor CONSTANT)
     Q_PROPERTY(QString defaultDownloadPath READ defaultDownloadPath NOTIFY defaultDownloadPathChanged)
+    Q_PROPERTY(bool sequentialMode READ sequentialMode WRITE setSequentialMode NOTIFY sequentialModeChanged)
 
 public:
     explicit DownloadManager(QObject *parent = nullptr);
@@ -25,15 +37,21 @@ public:
     UrlAnalyzer* urlAnalyzer() { return &m_urlAnalyzer; }
     FFmpegProcessor* ffmpegProcessor() { return &m_ffmpegProcessor; }
     QString defaultDownloadPath() const { return m_defaultDownloadPath; }
+    bool sequentialMode() const { return m_sequentialMode; }
 
     Q_INVOKABLE void addDownload(const QString &url, const QString &title, const QString &formatId, const QString &customFolder = QString());
     Q_INVOKABLE QString getDefaultDownloadDirectory() const;
     Q_INVOKABLE void setDefaultDownloadPath(const QString &path);
+    Q_INVOKABLE void setSequentialMode(bool seq);
 
 signals:
     void defaultDownloadPathChanged();
+    void sequentialModeChanged();
     void downloadStarted(const QString &id, const QString &title);
     void downloadFinished(const QString &id, const QString &title);
+
+public slots:
+    void checkNextQueueItem();
 
 private slots:
     void handleProgressUpdated(double percent, const QString &speedStr, const QString &etaStr, qint64 downloaded, qint64 total);
@@ -48,12 +66,17 @@ private slots:
 private:
     QString generateUniqueId() const;
     QString sanitizeFileName(const QString &name) const;
+    bool hasActiveDownload() const;
+    void startTask(const QueuedTask &task);
+    void startAllQueuedTasks();
 
     DownloadQueueModel m_queueModel;
     UrlAnalyzer m_urlAnalyzer;
     FFmpegProcessor m_ffmpegProcessor;
     QString m_defaultDownloadPath;
+    bool m_sequentialMode = false;
 
+    QMap<QString, QueuedTask> m_queuedTasks;
     QMap<QString, QPointer<Downloader>> m_activeHttpDownloads;
     QMap<QString, QPointer<YtDlpDownloader>> m_activeYtDlpDownloads;
     QMap<QString, bool> m_pendingAudioConversion;

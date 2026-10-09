@@ -74,8 +74,8 @@ int DownloadQueueModel::findIndexById(const QString &id) const {
 }
 
 void DownloadQueueModel::addItem(const DownloadItem &item) {
-    beginInsertRows(QModelIndex(), 0, 0);
-    m_items.prepend(item);
+    beginInsertRows(QModelIndex(), m_items.size(), m_items.size());
+    m_items.append(item);
     endInsertRows();
     emit countChanged();
     emit activeCountChanged();
@@ -184,3 +184,40 @@ void DownloadQueueModel::clearCompleted() {
     emit countChanged();
     emit activeCountChanged();
 }
+
+DownloadItem DownloadQueueModel::getItemAt(int index) const {
+    if (index >= 0 && index < m_items.size()) {
+        return m_items.at(index);
+    }
+    return DownloadItem();
+}
+
+void DownloadQueueModel::moveItem(int fromIndex, int toIndex) {
+    if (fromIndex < 0 || fromIndex >= m_items.size() ||
+        toIndex < 0 || toIndex >= m_items.size() ||
+        fromIndex == toIndex) {
+        return;
+    }
+
+    int destChild = toIndex > fromIndex ? toIndex + 1 : toIndex;
+    if (beginMoveRows(QModelIndex(), fromIndex, fromIndex, QModelIndex(), destChild)) {
+        m_items.move(fromIndex, toIndex);
+        endMoveRows();
+        emit queueOrderChanged();
+    }
+}
+
+void DownloadQueueModel::moveItemUp(const QString &id) {
+    int idx = findIndexById(id);
+    if (idx > 0) {
+        moveItem(idx, idx - 1);
+    }
+}
+
+void DownloadQueueModel::moveItemDown(const QString &id) {
+    int idx = findIndexById(id);
+    if (idx >= 0 && idx < m_items.size() - 1) {
+        moveItem(idx, idx + 1);
+    }
+}
+

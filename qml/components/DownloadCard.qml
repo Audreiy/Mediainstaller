@@ -68,6 +68,7 @@ Rectangle {
                         if (model.status === "Downloading") return Theme.accent + "22"
                         if (model.status === "Converting") return Theme.accentPurple + "22"
                         if (model.status === "Paused") return Theme.warning + "22"
+                        if (model.status === "Queued") return Theme.accentCyan + "22"
                         if (model.status === "Failed") return Theme.error + "22"
                         if (model.status === "Cancelled") return Theme.error + "22"
                         return Theme.bgElevated
@@ -81,6 +82,7 @@ Rectangle {
                             if (model.status === "Downloading") return I18n.t("statusDownloading")
                             if (model.status === "Converting") return I18n.t("statusConverting")
                             if (model.status === "Paused") return I18n.t("statusPaused")
+                            if (model.status === "Queued") return I18n.t("statusQueued")
                             if (model.status === "Failed") return I18n.t("statusFailed")
                             if (model.status === "Cancelled") return I18n.t("statusCancelled")
                             return model.status
@@ -90,6 +92,7 @@ Rectangle {
                             if (model.status === "Downloading") return Theme.accentHover
                             if (model.status === "Converting") return Theme.accentPurple
                             if (model.status === "Paused") return Theme.warning
+                            if (model.status === "Queued") return Theme.accentCyan
                             if (model.status === "Failed") return Theme.error
                             if (model.status === "Cancelled") return Theme.error
                             return Theme.textSecondary
@@ -106,8 +109,8 @@ Rectangle {
                 width: parent.width
                 value: model.progress
                 barHeight: 5
-                barColor: (model.status === "Completed") ? Theme.success : ((model.status === "Converting") ? Theme.accentPurple : Theme.accent)
-                barColorEnd: (model.status === "Completed") ? "#34D399" : ((model.status === "Converting") ? Theme.accentPink : Theme.accentPurple)
+                barColor: (model.status === "Completed") ? Theme.success : ((model.status === "Converting") ? Theme.accentPurple : ((model.status === "Queued") ? Theme.accentCyan : Theme.accent))
+                barColorEnd: (model.status === "Completed") ? "#34D399" : ((model.status === "Converting") ? Theme.accentPink : ((model.status === "Queued") ? Theme.accent : Theme.accentPurple))
             }
 
             // Stats Line (Downloaded, Speed, ETA, Percentage)
@@ -125,6 +128,14 @@ Rectangle {
                 Text {
                     visible: model.status === "Downloading" && model.speed.length > 0
                     text: "•  " + model.speed
+                    color: Theme.accentCyan
+                    font.pixelSize: 11
+                    font.family: Theme.fontFamily
+                }
+
+                Text {
+                    visible: model.status === "Queued"
+                    text: "•  " + I18n.t("waitingInQueue")
                     color: Theme.accentCyan
                     font.pixelSize: 11
                     font.family: Theme.fontFamily
@@ -150,11 +161,69 @@ Rectangle {
             }
         }
 
-        // Action Buttons (Pause / Resume / Cancel / Show in Explorer)
+        // Action Buttons (Up / Down / Pause / Resume / Cancel / Show in Explorer)
         Row {
             id: actionButtons
             anchors.verticalCenter: parent.verticalCenter
             spacing: 6
+
+            // Move Up (▲)
+            Rectangle {
+                visible: queueModel.totalDownloadCount > 1
+                opacity: index > 0 ? 1.0 : 0.25
+                width: 34
+                height: 34
+                radius: Theme.radiusSm
+                color: (upMouse.containsMouse && index > 0) ? Theme.bgCardHover : Theme.bgElevated
+                border.color: (upMouse.containsMouse && index > 0) ? Theme.accent : Theme.borderDim
+                border.width: 1
+
+                MouseArea {
+                    id: upMouse
+                    anchors.fill: parent
+                    hoverEnabled: index > 0
+                    cursorShape: index > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: {
+                        if (index > 0) queueModel.moveItemUp(model.id)
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "▲"
+                    color: (upMouse.containsMouse && index > 0) ? Theme.textPrimary : Theme.textSecondary
+                    font.pixelSize: 10
+                }
+            }
+
+            // Move Down (▼)
+            Rectangle {
+                visible: queueModel.totalDownloadCount > 1
+                opacity: index < (queueModel.totalDownloadCount - 1) ? 1.0 : 0.25
+                width: 34
+                height: 34
+                radius: Theme.radiusSm
+                color: (downMouse.containsMouse && index < (queueModel.totalDownloadCount - 1)) ? Theme.bgCardHover : Theme.bgElevated
+                border.color: (downMouse.containsMouse && index < (queueModel.totalDownloadCount - 1)) ? Theme.accent : Theme.borderDim
+                border.width: 1
+
+                MouseArea {
+                    id: downMouse
+                    anchors.fill: parent
+                    hoverEnabled: index < (queueModel.totalDownloadCount - 1)
+                    cursorShape: index < (queueModel.totalDownloadCount - 1) ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: {
+                        if (index < (queueModel.totalDownloadCount - 1)) queueModel.moveItemDown(model.id)
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "▼"
+                    color: (downMouse.containsMouse && index < (queueModel.totalDownloadCount - 1)) ? Theme.textPrimary : Theme.textSecondary
+                    font.pixelSize: 10
+                }
+            }
 
             // Open Folder (When completed)
             Rectangle {
@@ -203,9 +272,9 @@ Rectangle {
                 }
             }
 
-            // Pause / Resume (When downloading or paused)
+            // Pause / Resume / Start (When downloading, paused, or queued)
             Rectangle {
-                visible: model.status === "Downloading" || model.status === "Paused"
+                visible: model.status === "Downloading" || model.status === "Paused" || model.status === "Queued"
                 width: 34
                 height: 34
                 radius: Theme.radiusSm

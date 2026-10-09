@@ -57,6 +57,7 @@ public:
     void updateProgress(const QString &id, double progress, const QString &speed, const QString &eta, qint64 downloaded, qint64 total);
     void updateStatus(const QString &id, const QString &status, const QString &errorMsg = QString());
     DownloadItem getItem(const QString &id) const;
+    DownloadItem getItemAt(int index) const;
 
     Q_INVOKABLE void pauseDownload(const QString &id);
     Q_INVOKABLE void resumeDownload(const QString &id);
@@ -65,9 +66,14 @@ public:
     Q_INVOKABLE void openFileFolder(const QString &id);
     Q_INVOKABLE void clearCompleted();
 
+    Q_INVOKABLE void moveItemUp(const QString &id);
+    Q_INVOKABLE void moveItemDown(const QString &id);
+    Q_INVOKABLE void moveItem(int fromIndex, int toIndex);
+
 signals:
     void activeCountChanged();
     void countChanged();
+    void queueOrderChanged();
     void requestPause(const QString &id);
     void requestResume(const QString &id);
     void requestCancel(const QString &id);

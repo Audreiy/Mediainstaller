@@ -60,8 +60,14 @@ QtObject {
             "statusConverting": "Converting (MP3)",
             "statusCompleted": "Completed",
             "statusPaused": "Paused",
+            "statusQueued": "Queued",
             "statusFailed": "Failed",
             "statusCancelled": "Cancelled",
+            "waitingInQueue": "Waiting in queue...",
+            "downloadModeConcurrent": "All at Once",
+            "downloadModeSequential": "Sequential",
+            "moveUp": "Move Up",
+            "moveDown": "Move Down",
 
             // Settings
             "settingsTitle": "Settings & Preferences",
@@ -140,8 +146,14 @@ QtObject {
             "statusConverting": "Dönüştürülüyor (MP3)",
             "statusCompleted": "Tamamlandı",
             "statusPaused": "Duraklatıldı",
+            "statusQueued": "Sırada",
             "statusFailed": "Başarısız",
             "statusCancelled": "İptal Edildi",
+            "waitingInQueue": "Sırada bekliyor...",
+            "downloadModeConcurrent": "Aynı Anda",
+            "downloadModeSequential": "Sırayla İndir",
+            "moveUp": "Yukarı Taşı",
+            "moveDown": "Aşağı Taşı",
 
             // Settings
             "settingsTitle": "Ayarlar ve Tercihler",
@@ -220,8 +232,14 @@ QtObject {
             "statusConverting": "Конвертация (MP3)",
             "statusCompleted": "Завершено",
             "statusPaused": "Приостановлено",
+            "statusQueued": "В очереди",
             "statusFailed": "Ошибка",
             "statusCancelled": "Отменено",
+            "waitingInQueue": "Ожидание очереди...",
+            "downloadModeConcurrent": "Одновременно",
+            "downloadModeSequential": "По очереди",
+            "moveUp": "Вверх",
+            "moveDown": "Вниз",
 
             // Settings
             "settingsTitle": "Настройки и Параметры",

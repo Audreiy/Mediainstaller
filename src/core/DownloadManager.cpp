@@ -21,9 +21,12 @@ DownloadManager::DownloadManager(QObject *parent)
         }
     }
 
+    m_sequentialMode = settings.value("sequentialMode", false).toBool();
+
     connect(&m_queueModel, &DownloadQueueModel::requestPause, this, &DownloadManager::onQueuePause);
     connect(&m_queueModel, &DownloadQueueModel::requestResume, this, &DownloadManager::onQueueResume);
     connect(&m_queueModel, &DownloadQueueModel::requestCancel, this, &DownloadManager::onQueueCancel);
+    connect(&m_queueModel, &DownloadQueueModel::queueOrderChanged, this, &DownloadManager::checkNextQueueItem);
 }
 
 DownloadManager::~DownloadManager() {
@@ -45,6 +48,100 @@ void DownloadManager::setDefaultDownloadPath(const QString &path) {
         QSettings settings("YuYuDev", "YuYuInstaller");
         settings.setValue("defaultDownloadPath", m_defaultDownloadPath);
         emit defaultDownloadPathChanged();
+    }
+}
+
+void DownloadManager::setSequentialMode(bool seq) {
+    if (m_sequentialMode != seq) {
+        m_sequentialMode = seq;
+        QSettings settings("YuYuDev", "YuYuInstaller");
+        settings.setValue("sequentialMode", m_sequentialMode);
+        emit sequentialModeChanged();
+
+        if (!m_sequentialMode) {
+            startAllQueuedTasks();
+        } else {
+            checkNextQueueItem();
+        }
+    }
+}
+
+bool DownloadManager::hasActiveDownload() const {
+    return !m_activeHttpDownloads.isEmpty() || !m_activeYtDlpDownloads.isEmpty() || !m_pendingAudioConversion.isEmpty();
+}
+
+void DownloadManager::startTask(const QueuedTask &task) {
+    m_queueModel.updateStatus(task.id, "Downloading");
+    m_queueModel.updateProgress(task.id, 0.0, "Starting...", "--:--", -1, -1);
+
+    if (task.useYtDlp) {
+        YtDlpDownloader *ytDownloader = new YtDlpDownloader(task.id, task.url, task.finalFilePath, task.formatId, this);
+        m_activeYtDlpDownloads[task.id] = ytDownloader;
+
+        connect(ytDownloader, &YtDlpDownloader::progressUpdated, this, [this, id = task.id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
+            m_queueModel.updateProgress(id, pct, speed, eta, down, tot);
+        });
+
+        connect(ytDownloader, &YtDlpDownloader::conversionStarted, this, [this, id = task.id]() {
+            m_queueModel.updateStatus(id, "Converting");
+        });
+
+        connect(ytDownloader, &YtDlpDownloader::downloadCompleted, this, &DownloadManager::handleDownloadCompleted);
+        connect(ytDownloader, &YtDlpDownloader::downloadFailed, this, &DownloadManager::handleDownloadFailed);
+        connect(ytDownloader, &YtDlpDownloader::downloadCancelled, this, &DownloadManager::handleDownloadCancelled);
+
+        ytDownloader->start();
+    } else {
+        // Direct HTTP download
+        QString downloadPath = task.finalFilePath;
+        QString targetDir = QFileInfo(task.finalFilePath).absolutePath();
+        if (task.isAudioOnly && !task.url.toLower().endsWith(".mp3")) {
+            downloadPath = targetDir + "/temp_" + task.id + ".mp4";
+            m_pendingAudioConversion[task.id] = true;
+        }
+
+        Downloader *downloader = new Downloader(task.id, task.url, downloadPath, this);
+        m_activeHttpDownloads[task.id] = downloader;
+
+        connect(downloader, &Downloader::progressUpdated, this, [this, id = task.id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
+            m_queueModel.updateProgress(id, pct, speed, eta, down, tot);
+        });
+
+        connect(downloader, &Downloader::downloadCompleted, this, &DownloadManager::handleDownloadCompleted);
+        connect(downloader, &Downloader::downloadFailed, this, &DownloadManager::handleDownloadFailed);
+        connect(downloader, &Downloader::downloadCancelled, this, &DownloadManager::handleDownloadCancelled);
+
+        downloader->start();
+    }
+
+    emit downloadStarted(task.id, task.title);
+}
+
+void DownloadManager::startAllQueuedTasks() {
+    auto keys = m_queuedTasks.keys();
+    for (const QString &id : keys) {
+        if (m_queuedTasks.contains(id)) {
+            startTask(m_queuedTasks.take(id));
+        }
+    }
+}
+
+void DownloadManager::checkNextQueueItem() {
+    if (!m_sequentialMode) {
+        startAllQueuedTasks();
+        return;
+    }
+
+    if (hasActiveDownload()) {
+        return;
+    }
+
+    for (int i = 0; i < m_queueModel.rowCount(); ++i) {
+        DownloadItem item = m_queueModel.getItemAt(i);
+        if (item.status == "Queued" && m_queuedTasks.contains(item.id)) {
+            startTask(m_queuedTasks.take(item.id));
+            break;
+        }
     }
 }
 
@@ -107,60 +204,38 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
 
     bool useYtDlp = isWebPlatform || (!isDirectFile && !FFmpegProcessor::findYtDlpExecutable().isEmpty());
 
+    QueuedTask task;
+    task.id = id;
+    task.url = url;
+    task.title = finalFileName;
+    task.formatId = formatId;
+    task.customFolder = customFolder;
+    task.finalFilePath = finalFilePath;
+    task.isAudioOnly = isAudioOnly;
+    task.useYtDlp = useYtDlp;
+
     DownloadItem item;
     item.id = id;
     item.title = finalFileName;
     item.url = url;
     item.destinationPath = finalFilePath;
-    item.status = "Downloading";
     item.progress = 0.0;
-    item.speed = "Starting...";
-    item.eta = "--:--";
     item.isAudioOnly = isAudioOnly;
     item.createdTime = QDateTime::currentDateTime();
 
-    m_queueModel.addItem(item);
-
-    if (useYtDlp) {
-        YtDlpDownloader *ytDownloader = new YtDlpDownloader(id, url, finalFilePath, formatId, this);
-        m_activeYtDlpDownloads[id] = ytDownloader;
-
-        connect(ytDownloader, &YtDlpDownloader::progressUpdated, this, [this, id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
-            m_queueModel.updateProgress(id, pct, speed, eta, down, tot);
-        });
-
-        connect(ytDownloader, &YtDlpDownloader::conversionStarted, this, [this, id]() {
-            m_queueModel.updateStatus(id, "Converting");
-        });
-
-        connect(ytDownloader, &YtDlpDownloader::downloadCompleted, this, &DownloadManager::handleDownloadCompleted);
-        connect(ytDownloader, &YtDlpDownloader::downloadFailed, this, &DownloadManager::handleDownloadFailed);
-        connect(ytDownloader, &YtDlpDownloader::downloadCancelled, this, &DownloadManager::handleDownloadCancelled);
-
-        ytDownloader->start();
+    if (m_sequentialMode && hasActiveDownload()) {
+        item.status = "Queued";
+        item.speed = "";
+        item.eta = "--:--";
+        m_queuedTasks[id] = task;
+        m_queueModel.addItem(item);
     } else {
-        // Direct HTTP download
-        QString downloadPath = finalFilePath;
-        if (isAudioOnly && !lowerUrl.endsWith(".mp3")) {
-            downloadPath = targetDir + "/temp_" + id + ".mp4";
-            m_pendingAudioConversion[id] = true;
-        }
-
-        Downloader *downloader = new Downloader(id, url, downloadPath, this);
-        m_activeHttpDownloads[id] = downloader;
-
-        connect(downloader, &Downloader::progressUpdated, this, [this, id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
-            m_queueModel.updateProgress(id, pct, speed, eta, down, tot);
-        });
-
-        connect(downloader, &Downloader::downloadCompleted, this, &DownloadManager::handleDownloadCompleted);
-        connect(downloader, &Downloader::downloadFailed, this, &DownloadManager::handleDownloadFailed);
-        connect(downloader, &Downloader::downloadCancelled, this, &DownloadManager::handleDownloadCancelled);
-
-        downloader->start();
+        item.status = "Downloading";
+        item.speed = "Starting...";
+        item.eta = "--:--";
+        m_queueModel.addItem(item);
+        startTask(task);
     }
-
-    emit downloadStarted(id, finalFileName);
 }
 
 void DownloadManager::handleProgressUpdated(double percent, const QString &speedStr, const QString &etaStr, qint64 downloaded, qint64 total) {
@@ -187,9 +262,19 @@ void DownloadManager::handleDownloadCompleted(const QString &id, const QString &
             } else {
                 m_queueModel.updateStatus(id, "Failed", err);
             }
+            if (m_activeHttpDownloads.contains(id)) {
+                if (m_activeHttpDownloads[id]) m_activeHttpDownloads[id]->deleteLater();
+                m_activeHttpDownloads.remove(id);
+            }
+            if (m_activeYtDlpDownloads.contains(id)) {
+                if (m_activeYtDlpDownloads[id]) m_activeYtDlpDownloads[id]->deleteLater();
+                m_activeYtDlpDownloads.remove(id);
+            }
+            QMetaObject::invokeMethod(this, &DownloadManager::checkNextQueueItem, Qt::QueuedConnection);
         });
 
         m_ffmpegProcessor.extractAudio(filePath, finalMp3Path, "mp3", 320);
+        return;
     } else {
         m_queueModel.updateStatus(id, "Completed");
     }
@@ -202,6 +287,8 @@ void DownloadManager::handleDownloadCompleted(const QString &id, const QString &
         if (m_activeYtDlpDownloads[id]) m_activeYtDlpDownloads[id]->deleteLater();
         m_activeYtDlpDownloads.remove(id);
     }
+
+    QMetaObject::invokeMethod(this, &DownloadManager::checkNextQueueItem, Qt::QueuedConnection);
 }
 
 void DownloadManager::handleDownloadFailed(const QString &id, const QString &errorMsg) {
@@ -214,6 +301,7 @@ void DownloadManager::handleDownloadFailed(const QString &id, const QString &err
         if (m_activeYtDlpDownloads[id]) m_activeYtDlpDownloads[id]->deleteLater();
         m_activeYtDlpDownloads.remove(id);
     }
+    QMetaObject::invokeMethod(this, &DownloadManager::checkNextQueueItem, Qt::QueuedConnection);
 }
 
 void DownloadManager::handleDownloadCancelled(const QString &id) {
@@ -229,6 +317,7 @@ void DownloadManager::handleDownloadCancelled(const QString &id) {
         if (m_activeYtDlpDownloads[id]) m_activeYtDlpDownloads[id]->deleteLater();
         m_activeYtDlpDownloads.remove(id);
     }
+    QMetaObject::invokeMethod(this, &DownloadManager::checkNextQueueItem, Qt::QueuedConnection);
 }
 
 void DownloadManager::onQueuePause(const QString &id) {
@@ -244,6 +333,10 @@ void DownloadManager::onQueuePause(const QString &id) {
 }
 
 void DownloadManager::onQueueResume(const QString &id) {
+    if (m_queuedTasks.contains(id)) {
+        startTask(m_queuedTasks.take(id));
+        return;
+    }
     if (m_activeHttpDownloads.contains(id) && m_activeHttpDownloads[id]) {
         m_queueModel.updateStatus(id, "Downloading");
         m_queueModel.updateProgress(id, -1, "Bağlanıyor...", "--:--", -1, -1);
@@ -256,6 +349,12 @@ void DownloadManager::onQueueResume(const QString &id) {
 }
 
 void DownloadManager::onQueueCancel(const QString &id) {
+    if (m_queuedTasks.contains(id)) {
+        m_queuedTasks.remove(id);
+        m_queueModel.removeItem(id);
+        QMetaObject::invokeMethod(this, &DownloadManager::checkNextQueueItem, Qt::QueuedConnection);
+        return;
+    }
     if (m_activeHttpDownloads.contains(id) && m_activeHttpDownloads[id]) {
         m_activeHttpDownloads[id]->cancel();
     }
