@@ -23,6 +23,7 @@ ApplicationWindow {
         anchors.fill: parent
         source: "assets/bg.mp4"
         playing: true
+        targetFps: 60
     }
 
     // Frosted dark overlay for high contrast readability

@@ -12,6 +12,7 @@ class VideoBackgroundItem : public QQuickPaintedItem {
     Q_OBJECT
     Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(bool playing READ isPlaying WRITE setPlaying NOTIFY playingChanged)
+    Q_PROPERTY(int targetFps READ targetFps WRITE setTargetFps NOTIFY targetFpsChanged)
 
 public:
     explicit VideoBackgroundItem(QQuickItem *parent = nullptr);
@@ -23,11 +24,15 @@ public:
     bool isPlaying() const { return m_playing; }
     void setPlaying(bool play);
 
+    int targetFps() const { return m_targetFps; }
+    void setTargetFps(int fps);
+
     void paint(QPainter *painter) override;
 
 signals:
     void sourceChanged();
     void playingChanged();
+    void targetFpsChanged();
 
 private slots:
     void onTimerTick();
@@ -39,6 +44,8 @@ private:
 
     QString m_source;
     bool m_playing = true;
+    int m_targetFps = 60;
+    int m_frameIntervalMs = 16;
     QTimer m_timer;
     QImage m_currentFrame;
     int m_videoWidth = 0;

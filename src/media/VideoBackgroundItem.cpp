@@ -17,6 +17,7 @@ VideoBackgroundItem::VideoBackgroundItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setOpaquePainting(true);
+    m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer, &QTimer::timeout, this, &VideoBackgroundItem::onTimerTick);
 }
 
@@ -42,9 +43,22 @@ void VideoBackgroundItem::setPlaying(bool play) {
     emit playingChanged();
 
     if (m_playing && m_pReader) {
-        m_timer.start(33); // ~30 fps
+        m_timer.start(m_frameIntervalMs);
     } else {
         m_timer.stop();
+    }
+}
+
+void VideoBackgroundItem::setTargetFps(int fps) {
+    if (m_targetFps == fps) return;
+    m_targetFps = fps;
+    emit targetFpsChanged();
+
+    if (m_targetFps > 0) {
+        m_frameIntervalMs = qMax(1, qRound(1000.0 / m_targetFps));
+    }
+    if (m_playing && m_pReader) {
+        m_timer.start(m_frameIntervalMs);
     }
 }
 
@@ -124,20 +138,33 @@ void VideoBackgroundItem::openMedia() {
         pMediaType->Release();
     }
 
-    // Determine dimensions
+    // Determine dimensions and frame rate
     IMFMediaType *pCurrentType = nullptr;
     if (SUCCEEDED(m_pReader->GetCurrentMediaType(static_cast<DWORD>(MF_SOURCE_READER_FIRST_VIDEO_STREAM), &pCurrentType))) {
         UINT32 w = 0, h = 0;
         MFGetAttributeSize(pCurrentType, MF_MT_FRAME_SIZE, &w, &h);
         m_videoWidth = static_cast<int>(w);
         m_videoHeight = static_cast<int>(h);
+
+        UINT32 num = 0, den = 0;
+        if (SUCCEEDED(MFGetAttributeRatio(pCurrentType, MF_MT_FRAME_RATE, &num, &den)) && den > 0 && num > 0) {
+            double nativeFps = static_cast<double>(num) / den;
+            qDebug() << "[VideoBackgroundItem] Detected stream FPS:" << nativeFps;
+            if (m_targetFps <= 0) {
+                m_frameIntervalMs = qMax(1, qRound(1000.0 / nativeFps));
+            }
+        }
         pCurrentType->Release();
+    }
+
+    if (m_targetFps > 0) {
+        m_frameIntervalMs = qMax(1, qRound(1000.0 / m_targetFps));
     }
 
     readNextFrame();
 
     if (m_playing) {
-        m_timer.start(33); // ~30 fps
+        m_timer.start(m_frameIntervalMs);
     }
 }
 
