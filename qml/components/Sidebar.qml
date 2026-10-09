@@ -354,11 +354,31 @@ Rectangle {
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
-                    Rectangle {
-                        width: 7; height: 7; radius: 3.5
-                        color: Theme.accent
+                    // Neon update notification badge with gentle breathing pulse
+                    Item {
+                        width: 14; height: 14
                         anchors.verticalCenter: parent.verticalCenter
                         visible: (typeof updateManager !== "undefined" && updateManager.updateAvailable)
+
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: 12; height: 12; radius: 6
+                            color: Theme.accent
+                            opacity: 0.35
+
+                            SequentialAnimation on scale {
+                                running: (typeof updateManager !== "undefined" && updateManager.updateAvailable)
+                                loops: Animation.Infinite
+                                NumberAnimation { from: 0.8; to: 1.35; duration: 1100; easing.type: Easing.InOutQuad }
+                                NumberAnimation { from: 1.35; to: 0.8; duration: 1100; easing.type: Easing.InOutQuad }
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: 7; height: 7; radius: 3.5
+                            color: Theme.accent
+                        }
                     }
                 }
             }

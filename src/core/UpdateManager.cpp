@@ -249,7 +249,7 @@ void UpdateManager::onDownloadFinished() {
         // Execute installer with silent and close parameters
         QString nativePath = QDir::toNativeSeparators(m_tempFilePath);
         QStringList args;
-        args << "/SILENT" << "/CLOSEAPPLICATIONS";
+        args << "/VERYSILENT" << "/SUPPRESSMSGBOXES" << "/NORESTART" << "/CLOSEAPPLICATIONS";
 
         bool started = QProcess::startDetached(nativePath, args);
         if (started) {
