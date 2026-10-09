@@ -67,7 +67,32 @@ void DownloadManager::setSequentialMode(bool seq) {
 }
 
 bool DownloadManager::hasActiveDownload() const {
-    return !m_activeHttpDownloads.isEmpty() || !m_activeYtDlpDownloads.isEmpty() || !m_pendingAudioConversion.isEmpty();
+    if (!m_pendingAudioConversion.isEmpty()) return true;
+
+    for (const auto &d : m_activeHttpDownloads) {
+        if (d && d->isRunning()) return true;
+    }
+    for (const auto &d : m_activeYtDlpDownloads) {
+        if (d && d->isRunning()) return true;
+    }
+    return false;
+}
+
+void DownloadManager::pauseActiveDownloadsExcept(const QString &keepId) {
+    for (auto it = m_activeHttpDownloads.begin(); it != m_activeHttpDownloads.end(); ++it) {
+        if (it.key() != keepId && it.value() && it.value()->isRunning()) {
+            it.value()->pause();
+            m_queueModel.updateStatus(it.key(), "Queued");
+            m_queueModel.updateProgress(it.key(), -1, "", "--:--", -1, -1);
+        }
+    }
+    for (auto it = m_activeYtDlpDownloads.begin(); it != m_activeYtDlpDownloads.end(); ++it) {
+        if (it.key() != keepId && it.value() && it.value()->isRunning()) {
+            it.value()->pause();
+            m_queueModel.updateStatus(it.key(), "Queued");
+            m_queueModel.updateProgress(it.key(), -1, "", "--:--", -1, -1);
+        }
+    }
 }
 
 void DownloadManager::startTask(const QueuedTask &task) {
@@ -124,6 +149,18 @@ void DownloadManager::startAllQueuedTasks() {
             startTask(m_queuedTasks.take(id));
         }
     }
+    for (auto it = m_activeHttpDownloads.begin(); it != m_activeHttpDownloads.end(); ++it) {
+        if (it.value() && !it.value()->isRunning()) {
+            m_queueModel.updateStatus(it.key(), "Downloading");
+            it.value()->resume();
+        }
+    }
+    for (auto it = m_activeYtDlpDownloads.begin(); it != m_activeYtDlpDownloads.end(); ++it) {
+        if (it.value() && !it.value()->isRunning()) {
+            m_queueModel.updateStatus(it.key(), "Downloading");
+            it.value()->resume();
+        }
+    }
 }
 
 void DownloadManager::checkNextQueueItem() {
@@ -132,16 +169,42 @@ void DownloadManager::checkNextQueueItem() {
         return;
     }
 
-    if (hasActiveDownload()) {
+    // Find the first unfinished item in the queue (from top to bottom)
+    int targetIndex = -1;
+    for (int i = 0; i < m_queueModel.rowCount(); ++i) {
+        DownloadItem it = m_queueModel.getItemAt(i);
+        if (it.status != "Completed" && it.status != "Failed" && it.status != "Cancelled") {
+            targetIndex = i;
+            break;
+        }
+    }
+
+    if (targetIndex < 0) {
         return;
     }
 
-    for (int i = 0; i < m_queueModel.rowCount(); ++i) {
-        DownloadItem item = m_queueModel.getItemAt(i);
-        if (item.status == "Queued" && m_queuedTasks.contains(item.id)) {
-            startTask(m_queuedTasks.take(item.id));
-            break;
-        }
+    DownloadItem targetItem = m_queueModel.getItemAt(targetIndex);
+
+    // If the top unfinished item is ALREADY downloading or converting, ensure other downloads are paused
+    if (targetItem.status == "Downloading" || targetItem.status == "Converting") {
+        pauseActiveDownloadsExcept(targetItem.id);
+        return;
+    }
+
+    // The top unfinished item is not downloading yet (e.g. "Queued" or "Paused").
+    // Since it is at the top of unfinished items, it MUST start now!
+    pauseActiveDownloadsExcept(targetItem.id);
+
+    if (m_queuedTasks.contains(targetItem.id)) {
+        startTask(m_queuedTasks.take(targetItem.id));
+    } else if (m_activeHttpDownloads.contains(targetItem.id) && m_activeHttpDownloads[targetItem.id]) {
+        m_queueModel.updateStatus(targetItem.id, "Downloading");
+        m_queueModel.updateProgress(targetItem.id, -1, "Sürdürülüyor...", "--:--", -1, -1);
+        m_activeHttpDownloads[targetItem.id]->resume();
+    } else if (m_activeYtDlpDownloads.contains(targetItem.id) && m_activeYtDlpDownloads[targetItem.id]) {
+        m_queueModel.updateStatus(targetItem.id, "Downloading");
+        m_queueModel.updateProgress(targetItem.id, -1, "Sürdürülüyor...", "--:--", -1, -1);
+        m_activeYtDlpDownloads[targetItem.id]->resume();
     }
 }
 
@@ -333,6 +396,9 @@ void DownloadManager::onQueuePause(const QString &id) {
 }
 
 void DownloadManager::onQueueResume(const QString &id) {
+    if (m_sequentialMode) {
+        pauseActiveDownloadsExcept(id);
+    }
     if (m_queuedTasks.contains(id)) {
         startTask(m_queuedTasks.take(id));
         return;

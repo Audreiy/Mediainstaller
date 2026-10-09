@@ -69,6 +69,7 @@ private:
     bool hasActiveDownload() const;
     void startTask(const QueuedTask &task);
     void startAllQueuedTasks();
+    void pauseActiveDownloadsExcept(const QString &keepId = QString());
 
     DownloadQueueModel m_queueModel;
     UrlAnalyzer m_urlAnalyzer;
