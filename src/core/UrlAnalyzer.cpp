@@ -787,7 +787,19 @@ void UrlAnalyzer::startSpotifyResolve(const QUrl &url) {
     m_spotifyTitle.clear();
     m_spotifyThumb.clear();
 
-    QNetworkRequest request(url);
+    QString urlStr = url.toString();
+    QRegularExpression trackIdRe(R"(track/([a-zA-Z0-9]+))");
+    auto match = trackIdRe.match(urlStr);
+    QString trackId = match.hasMatch() ? match.captured(1) : "";
+
+    QUrl targetUrl;
+    if (!trackId.isEmpty()) {
+        targetUrl = QUrl(QString("https://open.spotify.com/embed/track/%1").arg(trackId));
+    } else {
+        targetUrl = url;
+    }
+
+    QNetworkRequest request(targetUrl);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
     request.setRawHeader("Accept-Language", "en-US,en;q=0.9");
@@ -814,31 +826,58 @@ void UrlAnalyzer::onSpotifyOembedFinished() {
     QString html = QString::fromUtf8(data);
 
     QString artist;
-    QRegularExpression artistRe(R"(name=["']music:musician_description["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
-    auto mArtist = artistRe.match(html);
-    if (mArtist.hasMatch()) {
-        artist = mArtist.captured(1).trimmed();
+
+    // 1. Try Spotify embed JSON format: "artists":[{"name":"yayaheart"
+    QRegularExpression embedArtistRe(R"raw("artists"\s*:\s*\[\s*\{\s*"name"\s*:\s*"([^"]+)")raw", QRegularExpression::CaseInsensitiveOption);
+    auto mEmbedArtist = embedArtistRe.match(html);
+    if (mEmbedArtist.hasMatch()) {
+        artist = mEmbedArtist.captured(1).trimmed();
     }
 
-    QRegularExpression titleRe(R"(property=["']og:title["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
-    auto mTitle = titleRe.match(html);
-    if (mTitle.hasMatch()) {
-        m_spotifyTitle = mTitle.captured(1).trimmed();
+    // Embed name/title
+    QRegularExpression embedNameRe(R"raw("name"\s*:\s*"([^"]+)")raw", QRegularExpression::CaseInsensitiveOption);
+    auto mEmbedName = embedNameRe.match(html);
+    if (mEmbedName.hasMatch() && m_spotifyTitle.isEmpty()) {
+        m_spotifyTitle = mEmbedName.captured(1).trimmed();
     }
 
-    QRegularExpression imgRe(R"(property=["']og:image["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
-    auto mImg = imgRe.match(html);
-    if (mImg.hasMatch()) {
-        m_spotifyThumb = mImg.captured(1).trimmed();
+    // Embed cover image
+    QRegularExpression embedImgRe(R"raw("coverArt"\s*:\s*\{[^\}]*"url"\s*:\s*"([^"]+)")raw", QRegularExpression::CaseInsensitiveOption);
+    auto mEmbedImg = embedImgRe.match(html);
+    if (mEmbedImg.hasMatch() && m_spotifyThumb.isEmpty()) {
+        m_spotifyThumb = mEmbedImg.captured(1).trimmed();
     }
 
-    // Fallbacks if metadata was formatted differently in HTML
+    // 2. Standard page meta tags fallback
     if (artist.isEmpty()) {
+        QRegularExpression artistRe(R"(name=["']music:musician_description["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+        auto mArtist = artistRe.match(html);
+        if (mArtist.hasMatch()) {
+            artist = mArtist.captured(1).trimmed();
+        }
+    }
+    if (m_spotifyTitle.isEmpty()) {
+        QRegularExpression titleRe(R"(property=["']og:title["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+        auto mTitle = titleRe.match(html);
+        if (mTitle.hasMatch()) {
+            m_spotifyTitle = mTitle.captured(1).trimmed();
+        }
+    }
+    if (m_spotifyThumb.isEmpty()) {
+        QRegularExpression imgRe(R"(property=["']og:image["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+        auto mImg = imgRe.match(html);
+        if (mImg.hasMatch()) {
+            m_spotifyThumb = mImg.captured(1).trimmed();
+        }
+    }
+
+    // 3. Title tag fallback
+    if (artist.isEmpty() || m_spotifyTitle.isEmpty()) {
         QRegularExpression titleTagRe(R"(<title>([^<]+)\s*-\s*song\s*(?:and\s*lyrics)?\s*by\s*([^<|]+)\s*\|\s*Spotify</title>)", QRegularExpression::CaseInsensitiveOption);
         auto mTitleTag = titleTagRe.match(html);
         if (mTitleTag.hasMatch()) {
             if (m_spotifyTitle.isEmpty()) m_spotifyTitle = mTitleTag.captured(1).trimmed();
-            artist = mTitleTag.captured(2).trimmed();
+            if (artist.isEmpty()) artist = mTitleTag.captured(2).trimmed();
         }
     }
 
