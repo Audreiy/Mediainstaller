@@ -159,21 +159,27 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
 
 void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
     QString urlStr = url.toString();
-    QRegularExpression re(R"(animecix\.(?:tv|com|net)/titles/(\d+)(?:/([^/]+))?(?:/season/(\d+))?(?:/episode/(\d+))?)", QRegularExpression::CaseInsensitiveOption);
-    auto match = re.match(urlStr);
 
     int titleId = 0;
     int seasonNum = 0;
     int episodeNum = 0;
 
-    if (match.hasMatch()) {
-        titleId = match.captured(1).toInt();
-        if (!match.captured(3).isEmpty()) {
-            seasonNum = match.captured(3).toInt();
-        }
-        if (!match.captured(4).isEmpty()) {
-            episodeNum = match.captured(4).toInt();
-        }
+    QRegularExpression titleRe(R"(animecix\.(?:tv|com|net)/titles/(\d+))", QRegularExpression::CaseInsensitiveOption);
+    auto mTitle = titleRe.match(urlStr);
+    if (mTitle.hasMatch()) {
+        titleId = mTitle.captured(1).toInt();
+    }
+
+    QRegularExpression seasonRe(R"(/season/(\d+))", QRegularExpression::CaseInsensitiveOption);
+    auto mSeason = seasonRe.match(urlStr);
+    if (mSeason.hasMatch()) {
+        seasonNum = mSeason.captured(1).toInt();
+    }
+
+    QRegularExpression epRe(R"(/episode/(\d+))", QRegularExpression::CaseInsensitiveOption);
+    auto mEp = epRe.match(urlStr);
+    if (mEp.hasMatch()) {
+        episodeNum = mEp.captured(1).toInt();
     }
 
     if (titleId <= 0) {
@@ -181,17 +187,23 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
         return;
     }
 
-    // Step 1: Query batch-download/{titleId}/episodes
+    int targetSeason = (seasonNum > 0) ? seasonNum : 1;
+    int targetEp = (episodeNum > 0) ? episodeNum : 1;
+    bool isEpisodeSpecific = (seasonNum > 0 || episodeNum > 0);
+
+    // Step 1: Query batch-download/{titleId}/episodes to extract title, episode name, and poster
     QString episodesApiUrl = QString("https://animecix.tv/secure/batch-download/%1/episodes").arg(titleId);
     QNetworkRequest request((QUrl(episodesApiUrl)));
     request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
     request.setRawHeader("Accept", "application/json, text/plain, */*");
     request.setRawHeader("Referer", url.toString().toUtf8());
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
     QNetworkReply *reply = m_netManager.get(request);
+    reply->ignoreSslErrors();
     m_currentReply = reply;
 
-    connect(reply, &QNetworkReply::finished, this, [this, reply, titleId, seasonNum, episodeNum, url]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, titleId, targetSeason, targetEp, isEpisodeSpecific, url]() {
         if (m_currentReply == reply) {
             m_currentReply = nullptr;
         }
@@ -218,8 +230,6 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
 
                 QJsonArray seasons = rootObj.value("seasons").toArray();
                 if (!seasons.isEmpty()) {
-                    int targetSeason = (seasonNum > 0) ? seasonNum : 1;
-                    int targetEp = (episodeNum > 0) ? episodeNum : 1;
                     for (const QJsonValue &sVal : seasons) {
                         QJsonObject sObj = sVal.toObject();
                         if (sObj.value("number").toInt() == targetSeason) {
@@ -249,21 +259,23 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
         }
 
         if (!tauId.isEmpty()) {
-            startTauVideoResolve(tauId, animeTitle, seasonNum, episodeNum, episodeName, poster);
+            startTauVideoResolve(tauId, animeTitle, targetSeason, targetEp, episodeName, poster);
             return;
         }
 
-        // Step 2: Query secure/videos?titleId={titleId} (supports anime movies and unindexed episodes)
-        QString videosApiUrl = QString("https://animecix.tv/secure/videos?titleId=%1").arg(titleId);
+        // Step 2: Query secure/videos?titleId={titleId}&perPage=500 (covers all episodes and standalone movies)
+        QString videosApiUrl = QString("https://animecix.tv/secure/videos?titleId=%1&perPage=500").arg(titleId);
         QNetworkRequest vReq((QUrl(videosApiUrl)));
         vReq.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
         vReq.setRawHeader("Accept", "application/json, text/plain, */*");
         vReq.setRawHeader("Referer", url.toString().toUtf8());
+        vReq.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
         QNetworkReply *vReply = m_netManager.get(vReq);
+        vReply->ignoreSslErrors();
         m_currentReply = vReply;
 
-        connect(vReply, &QNetworkReply::finished, this, [this, vReply, titleId, animeTitle, seasonNum, episodeNum, episodeName, poster, url]() {
+        connect(vReply, &QNetworkReply::finished, this, [this, vReply, titleId, animeTitle, targetSeason, targetEp, isEpisodeSpecific, episodeName, poster, url]() {
             if (m_currentReply == vReply) {
                 m_currentReply = nullptr;
             }
@@ -284,8 +296,8 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
                     for (const QJsonValue &itemVal : items) {
                         QJsonObject item = itemVal.toObject();
                         if (item.value("category").toString().toLower() != "trailer") {
-                            if (seasonNum > 0 && episodeNum > 0) {
-                                if (item.value("season_num").toInt() == seasonNum && item.value("episode_num").toInt() == episodeNum) {
+                            if (isEpisodeSpecific) {
+                                if (item.value("season_num").toInt() == targetSeason && item.value("episode_num").toInt() == targetEp) {
                                     candidates.append(item);
                                 }
                             } else {
@@ -294,16 +306,7 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
                         }
                     }
 
-                    if (candidates.isEmpty() && (seasonNum > 0 || episodeNum > 0)) {
-                        for (const QJsonValue &itemVal : items) {
-                            QJsonObject item = itemVal.toObject();
-                            if (item.value("category").toString().toLower() != "trailer") {
-                                candidates.append(item);
-                            }
-                        }
-                    }
-
-                    // Priority 1: Check for Tau Video
+                    // Priority 1: Check for Tau Video in filtered candidates
                     for (const QJsonValue &cVal : candidates) {
                         QJsonObject cObj = cVal.toObject();
                         QString embedUrl = cObj.value("url").toString();
@@ -311,16 +314,17 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
                         auto m = tauEmbedRe.match(embedUrl);
                         if (m.hasMatch()) {
                             QString vTauId = m.captured(1);
-                            startTauVideoResolve(vTauId, animeTitle, seasonNum, episodeNum, episodeName, poster);
+                            startTauVideoResolve(vTauId, animeTitle, targetSeason, targetEp, episodeName, poster);
                             return;
                         }
                     }
 
-                    // Priority 2: Check for direct supported embeds (Vidmoly, Sibnet, Doodstream, Uqload)
+                    // Priority 2: Check for direct supported web embeds (Sibnet, Vidmoly, OK.ru, Dailymotion)
                     for (const QJsonValue &cVal : candidates) {
                         QJsonObject cObj = cVal.toObject();
                         QString embedUrl = cObj.value("url").toString();
-                        if (!embedUrl.isEmpty() && !embedUrl.contains("youtube")) {
+                        if (!embedUrl.isEmpty() &&
+                            (embedUrl.contains("sibnet.ru") || embedUrl.contains("vidmoly.") || embedUrl.contains("ok.ru") || embedUrl.contains("dailymotion.com"))) {
                             m_analyzingUrl = embedUrl;
                             startYtDlpProbe(embedUrl);
                             return;
@@ -329,18 +333,19 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
                 }
             }
 
-            // Step 3: Fallback to secure/first-video?titleId={titleId}&season={seasonNum}
-            int fallbackSeason = (seasonNum > 0) ? seasonNum : 1;
-            QString fvUrl = QString("https://animecix.tv/secure/first-video?titleId=%1&season=%2").arg(titleId).arg(fallbackSeason);
+            // Step 3: Fallback to secure/first-video?titleId={titleId}&season={targetSeason} (useful for episode 1 or standalone movies)
+            QString fvUrl = QString("https://animecix.tv/secure/first-video?titleId=%1&season=%2").arg(titleId).arg(targetSeason);
             QNetworkRequest fvReq((QUrl(fvUrl)));
             fvReq.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
             fvReq.setRawHeader("Accept", "application/json, text/plain, */*");
             fvReq.setRawHeader("Referer", url.toString().toUtf8());
+            fvReq.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
             QNetworkReply *fvReply = m_netManager.get(fvReq);
+            fvReply->ignoreSslErrors();
             m_currentReply = fvReply;
 
-            connect(fvReply, &QNetworkReply::finished, this, [this, fvReply, animeTitle, seasonNum, episodeNum, episodeName, poster, url]() {
+            connect(fvReply, &QNetworkReply::finished, this, [this, fvReply, animeTitle, targetSeason, targetEp, isEpisodeSpecific, episodeName, poster, url]() {
                 if (m_currentReply == fvReply) {
                     m_currentReply = nullptr;
                 }
@@ -372,10 +377,12 @@ void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
                     }
                 }
 
-                if (!fvTauId.isEmpty()) {
-                    startTauVideoResolve(fvTauId, animeTitle, seasonNum, episodeNum, fvEpName, fvPoster);
+                if (!fvTauId.isEmpty() && (targetEp == 1 || !isEpisodeSpecific)) {
+                    startTauVideoResolve(fvTauId, animeTitle, targetSeason, targetEp, fvEpName, fvPoster);
                 } else {
-                    startWebPageScrape(url);
+                    m_isAnalyzing = false;
+                    emit analyzingChanged();
+                    emit analysisError(QString("Animecix: Sezon %1 Bölüm %2 için video akışı bulunamadı.").arg(targetSeason).arg(targetEp));
                 }
             });
         });
@@ -388,8 +395,10 @@ void UrlAnalyzer::startTauVideoResolve(const QString &tauId, const QString &anim
     request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
     request.setRawHeader("Referer", "https://tau-video.xyz/");
     request.setRawHeader("Accept", "application/json, text/plain, */*");
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
     QNetworkReply *reply = m_netManager.get(request);
+    reply->ignoreSslErrors();
     m_currentReply = reply;
 
     connect(reply, &QNetworkReply::finished, this, [this, reply, tauId, animeTitle, season, episode, epName, poster]() {
@@ -465,8 +474,9 @@ void UrlAnalyzer::startTauVideoResolve(const QString &tauId, const QString &anim
             }
         }
 
-        // Fallback to yt-dlp probe if Tau direct fails
-        startYtDlpProbe(m_analyzingUrl);
+        m_isAnalyzing = false;
+        emit analyzingChanged();
+        emit analysisError("Animecix (Tau Video): Video akış adresine ulaşılamadı veya sunucu yanıt vermedi.");
     });
 }
 
