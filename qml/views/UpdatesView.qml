@@ -259,19 +259,20 @@ Item {
                 }
             }
 
-            // Architecture & Integrity Information Card
+            // Update Logs & Changelog Card
             Rectangle {
                 width: parent.width
-                implicitHeight: 120
+                implicitHeight: changelogCol.implicitHeight + 40
                 radius: Theme.radiusLg
                 color: Theme.bgCard
                 border.color: Theme.borderDim
                 border.width: 1
 
                 Column {
+                    id: changelogCol
                     anchors.fill: parent
                     anchors.margins: 20
-                    spacing: 10
+                    spacing: 14
 
                     Row {
                         spacing: 8
@@ -281,21 +282,306 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         Text {
-                            text: "Update Architecture & Security"
+                            text: I18n.t("updateLogTitle")
                             color: Theme.textPrimary
-                            font.pixelSize: 13
+                            font.pixelSize: 14
                             font.family: Theme.fontFamily
                             font.weight: Font.DemiBold
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: "• " + I18n.t("updateLogSubtitle")
+                            color: Theme.textMuted
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            anchors.verticalCenter: parent.verticalCenter
                         }
                     }
 
-                    Text {
+                    // GitHub Release Notes (if body is supplied by release author)
+                    Rectangle {
                         width: parent.width
-                        text: "YuYuInstaller connects securely to official GitHub Releases via HTTPS. Updates are verified, unpacked in the background, and seamlessly applied without interrupting your active configuration."
-                        color: Theme.textSecondary
-                        font.pixelSize: 12
-                        font.family: Theme.fontFamily
-                        wrapMode: Text.WordWrap
+                        implicitHeight: remoteNotesCol.implicitHeight + 20
+                        radius: Theme.radiusMd
+                        color: Theme.bgInput
+                        border.color: Theme.accent
+                        border.width: 1
+                        visible: (typeof updateManager !== "undefined" && updateManager.releaseNotes.length > 0)
+
+                        Column {
+                            id: remoteNotesCol
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 6
+
+                            Row {
+                                spacing: 6
+                                Rectangle {
+                                    width: 46; height: 18; radius: 4
+                                    color: Theme.accent
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: (typeof updateManager !== "undefined" && updateManager.latestVersion.length > 0) ? updateManager.latestVersion : "LATEST"
+                                        color: "#07090e"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Bold
+                                    }
+                                }
+                                Text {
+                                    text: "GitHub Notes"
+                                    color: Theme.textPrimary
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+
+                            Text {
+                                width: parent.width
+                                text: (typeof updateManager !== "undefined") ? updateManager.releaseNotes : ""
+                                color: Theme.textSecondary
+                                font.pixelSize: 11
+                                font.family: Theme.fontFamily
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+
+                    // Version Timeline / Logs
+                    Column {
+                        width: parent.width
+                        spacing: 10
+
+                        // v1.0.4 Pro
+                        Rectangle {
+                            width: parent.width
+                            implicitHeight: log104Col.implicitHeight + 20
+                            radius: Theme.radiusMd
+                            color: Theme.bgInput
+                            border.color: Theme.borderDim
+                            border.width: 1
+
+                            Column {
+                                id: log104Col
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 8
+
+                                Row {
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 58; height: 20; radius: 4
+                                        color: Theme.accent
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "v1.0.4"
+                                            color: "#07090e"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                    Rectangle {
+                                        width: 54; height: 18; radius: 9
+                                        color: "#162338"
+                                        border.color: Theme.accent
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "CURRENT"
+                                            color: Theme.accent
+                                            font.pixelSize: 9
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: "• " + I18n.t("log104_1") + "\n• " + I18n.t("log104_2") + "\n• " + I18n.t("log104_3")
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    lineHeight: 1.45
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
+                        // v1.0.3 Pro
+                        Rectangle {
+                            width: parent.width
+                            implicitHeight: log103Col.implicitHeight + 20
+                            radius: Theme.radiusMd
+                            color: Theme.bgInput
+                            border.color: Theme.borderDim
+                            border.width: 1
+
+                            Column {
+                                id: log103Col
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 8
+
+                                Row {
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 58; height: 20; radius: 4
+                                        color: Theme.bgElevated
+                                        border.color: Theme.borderDim
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "v1.0.3"
+                                            color: Theme.textPrimary
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: "• " + I18n.t("log103_1")
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    lineHeight: 1.45
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
+                        // v1.0.2 Pro
+                        Rectangle {
+                            width: parent.width
+                            implicitHeight: log102Col.implicitHeight + 20
+                            radius: Theme.radiusMd
+                            color: Theme.bgInput
+                            border.color: Theme.borderDim
+                            border.width: 1
+
+                            Column {
+                                id: log102Col
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 8
+
+                                Row {
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 58; height: 20; radius: 4
+                                        color: Theme.bgElevated
+                                        border.color: Theme.borderDim
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "v1.0.2"
+                                            color: Theme.textPrimary
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: "• " + I18n.t("log102_1") + "\n• " + I18n.t("log102_2")
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    lineHeight: 1.45
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
+                        // v1.0.1 Pro
+                        Rectangle {
+                            width: parent.width
+                            implicitHeight: log101Col.implicitHeight + 20
+                            radius: Theme.radiusMd
+                            color: Theme.bgInput
+                            border.color: Theme.borderDim
+                            border.width: 1
+
+                            Column {
+                                id: log101Col
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 8
+
+                                Row {
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 58; height: 20; radius: 4
+                                        color: Theme.bgElevated
+                                        border.color: Theme.borderDim
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "v1.0.1"
+                                            color: Theme.textPrimary
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: "• " + I18n.t("log101_1") + "\n• " + I18n.t("log101_2")
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    lineHeight: 1.45
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
+                        // v1.0.0 Pro
+                        Rectangle {
+                            width: parent.width
+                            implicitHeight: log100Col.implicitHeight + 20
+                            radius: Theme.radiusMd
+                            color: Theme.bgInput
+                            border.color: Theme.borderDim
+                            border.width: 1
+
+                            Column {
+                                id: log100Col
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 8
+
+                                Row {
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 58; height: 20; radius: 4
+                                        color: Theme.bgElevated
+                                        border.color: Theme.borderDim
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "v1.0.0"
+                                            color: Theme.textPrimary
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: "• " + I18n.t("log100_1")
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    lineHeight: 1.45
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
                     }
                 }
             }

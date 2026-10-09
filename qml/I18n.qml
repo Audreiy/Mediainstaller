@@ -111,7 +111,18 @@ QtObject {
             "downloadingUpdate": "Downloading update package...",
             "cancelUpdate": "Cancel",
             "updateBannerTitle": "YuYuInstaller %1 is available!",
-            "updateBannerAction": "Update Now"
+            "updateBannerAction": "Update Now",
+            "updateLogTitle": "Release Notes & Changelog",
+            "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log104_1": "Added dedicated Updates navigation tab in sidebar above Settings",
+            "log104_2": "Completely silent background auto-updater with automatic app restart",
+            "log104_3": "Guaranteed permanent desktop shortcut preservation across updates",
+            "log103_1": "Added breathing neon pulse indicator for available updates",
+            "log102_1": "Cleaned up sidebar footer and optimized UI layout",
+            "log102_2": "C++20 Turbo Stream Engine direct-to-disk streaming optimizations",
+            "log101_1": "Added full Ukrainian (UA) and Turkish language localizations",
+            "log101_2": "Enabled AVX2 hardware acceleration & UPX binary compression",
+            "log100_1": "Initial Pro release: hardware video background & 4K media engine"
         },
         "tr": {
             // General
@@ -216,7 +227,18 @@ QtObject {
             "downloadingUpdate": "Güncelleme paketi indiriliyor...",
             "cancelUpdate": "İptal",
             "updateBannerTitle": "YuYuİnstaller %1 sürümü yayınlandı!",
-            "updateBannerAction": "Şimdi Güncelle"
+            "updateBannerAction": "Şimdi Güncelle",
+            "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
+            "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log104_1": "Sol menüde Settings'in hemen üstüne özel Güncellemeler (Updates) sekmesi eklendi",
+            "log104_2": "Sıfır pencere ile tamamen sessiz arka plan güncellemesi ve otomatik yeniden başlatma",
+            "log104_3": "Güncellemelerde masaüstü kısayolunun silinmeden kalıcı olarak korunması sağlandı",
+            "log103_1": "Yeni güncellemeler için nefes alıp veren (pulsing) canlı neon bildirim ışığı eklendi",
+            "log102_1": "Sol menü arayüzü sadeleştirildi ve alt footer temizlendi",
+            "log102_2": "C++20 Turbo Akış Motoru doğrudan diske yazma bellek optimizasyonları yapıldı",
+            "log101_1": "Ukraynaca (UA) ve Türkçe tam yerelleştirme dil paketleri eklendi",
+            "log101_2": "AVX2 donanım hızlandırmalı derleme ve UPX sıkıştırması aktif edildi",
+            "log100_1": "İlk Pro sürüm: Donanım hızlandırmalı video arka planı ve 4K medya indirme motoru"
         },
         "uk": {
             // General
@@ -321,7 +343,18 @@ QtObject {
             "downloadingUpdate": "Завантаження пакета оновлення...",
             "cancelUpdate": "Скасувати",
             "updateBannerTitle": "Доступна нова версія YuYuInstaller %1!",
-            "updateBannerAction": "Оновити зараз"
+            "updateBannerAction": "Оновити зараз",
+            "updateLogTitle": "Журнал оновлень та історія змін",
+            "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log104_1": "Додано окрему вкладку Оновлень у лівій панелі над Налаштуваннями",
+            "log104_2": "Повністю безшумне фонове оновлення без вікон із автоматичним перезапуском",
+            "log104_3": "Гарантоване збереження ярлика на робочому столі після оновлень",
+            "log103_1": "Додано пульсуючий неоновий індикатор сповіщень про наявні оновлення",
+            "log102_1": "Очищено нижній колонтитул бічної панелі та оптимізовано інтерфейс",
+            "log102_2": "Оптимізація пам'яті C++20 Turbo Stream Engine для прямого запису на диск",
+            "log101_1": "Повна локалізація інтерфейсу українською (UA) та турецькою мовами",
+            "log101_2": "Увімкнено апаратну оптимізацію AVX2 та UPX-стиснення бінарних файлів",
+            "log100_1": "Початковий Pro-реліз: відеофон із апаратним прискоренням та рушій 4K-медіа"
         }
     })
 
