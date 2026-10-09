@@ -96,6 +96,31 @@ target_link_libraries(MediaGrab PRIVATE
     dwmapi
 )
 
+# Performance & Compiler Optimizations (MSVC)
+if(MSVC)
+    add_compile_options(
+        /arch:AVX2
+        /Oi
+        /Ot
+        /GF
+        /Gy
+    )
+    add_link_options(
+        /OPT:REF
+        /OPT:ICF
+    )
+endif()
+
+target_precompile_headers(MediaGrab PRIVATE
+    <QtCore>
+    <QtGui>
+    <QtQuick>
+    <QtNetwork>
+    <QObject>
+    <QString>
+    <QUrl>
+)
+
 # Optional libcurl linking if found
 find_package(CURL QUIET)
 if(CURL_FOUND)
