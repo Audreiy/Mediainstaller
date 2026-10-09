@@ -30,3 +30,7 @@ setup_output/
 *.zip
 *.rar
 
+# Logs & scratch
+*.log
+scratch/
+
