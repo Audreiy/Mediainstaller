@@ -23,7 +23,8 @@ VideoBackgroundItem::VideoBackgroundItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
 {
     setOpaquePainting(true);
-    m_timer.setTimerType(Qt::PreciseTimer);
+    setRenderTarget(QQuickPaintedItem::FramebufferObject);
+    m_timer.setTimerType(Qt::CoarseTimer);
     connect(&m_timer, &QTimer::timeout, this, &VideoBackgroundItem::onTimerTick);
 }
 
@@ -56,13 +57,12 @@ void VideoBackgroundItem::setPlaying(bool play) {
 }
 
 void VideoBackgroundItem::setTargetFps(int fps) {
-    if (m_targetFps == fps) return;
-    m_targetFps = fps;
+    int clamped = qBound(10, fps, 60);
+    if (m_targetFps == clamped) return;
+    m_targetFps = clamped;
     emit targetFpsChanged();
 
-    if (m_targetFps > 0) {
-        m_frameIntervalMs = qMax(1, qRound(1000.0 / m_targetFps));
-    }
+    m_frameIntervalMs = qMax(1, qRound(1000.0 / m_targetFps));
     if (m_playing && m_pReader) {
         m_timer.start(m_frameIntervalMs);
     }
@@ -157,15 +157,18 @@ void VideoBackgroundItem::openMedia() {
             double nativeFps = static_cast<double>(num) / den;
             qDebug() << "[VideoBackgroundItem] Detected stream FPS:" << nativeFps;
             if (m_targetFps <= 0) {
-                m_frameIntervalMs = qMax(1, qRound(1000.0 / nativeFps));
+                m_targetFps = qBound(10, qRound(nativeFps), 60);
+                m_frameIntervalMs = qMax(1, qRound(1000.0 / m_targetFps));
             }
         }
         pCurrentType->Release();
     }
 
-    if (m_targetFps > 0) {
-        m_frameIntervalMs = qMax(1, qRound(1000.0 / m_targetFps));
+    if (m_targetFps <= 0) {
+        m_targetFps = 45;
     }
+    m_targetFps = qBound(10, m_targetFps, 60);
+    m_frameIntervalMs = qMax(1, qRound(1000.0 / m_targetFps));
 
     readNextFrame();
 
@@ -221,8 +224,19 @@ void VideoBackgroundItem::readNextFrame() {
             DWORD maxLength = 0, currentLength = 0;
             if (SUCCEEDED(pBuffer->Lock(&pData, &maxLength, &currentLength))) {
                 if (m_videoWidth > 0 && m_videoHeight > 0) {
-                    QImage frame(pData, m_videoWidth, m_videoHeight, m_videoWidth * 4, QImage::Format_RGB32);
-                    m_currentFrame = frame.copy();
+                    if (m_currentFrame.width() != m_videoWidth || m_currentFrame.height() != m_videoHeight || m_currentFrame.format() != QImage::Format_RGB32) {
+                        m_currentFrame = QImage(m_videoWidth, m_videoHeight, QImage::Format_RGB32);
+                    }
+                    uchar *destBits = m_currentFrame.bits();
+                    qsizetype bytesPerLine = m_currentFrame.bytesPerLine();
+                    int srcStride = m_videoWidth * 4;
+                    if (bytesPerLine == srcStride) {
+                        memcpy(destBits, pData, static_cast<size_t>(m_videoHeight) * srcStride);
+                    } else {
+                        for (int y = 0; y < m_videoHeight; ++y) {
+                            memcpy(destBits + y * bytesPerLine, pData + y * srcStride, srcStride);
+                        }
+                    }
                 }
                 pBuffer->Unlock();
             }
@@ -234,7 +248,7 @@ void VideoBackgroundItem::readNextFrame() {
 }
 
 void VideoBackgroundItem::onTimerTick() {
-    if (m_playing && isVisible()) {
+    if (m_playing && isVisible() && opacity() > 0.01) {
         readNextFrame();
     }
 }
@@ -259,6 +273,5 @@ void VideoBackgroundItem::paint(QPainter *painter) {
     qreal drawX = (itemW - drawW) / 2.0;
     qreal drawY = (itemH - drawH) / 2.0;
 
-    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
     painter->drawImage(QRectF(drawX, drawY, drawW, drawH), m_currentFrame);
 }

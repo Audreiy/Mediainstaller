@@ -222,6 +222,92 @@ Item {
                 }
             }
 
+            // Setting Card: Video Background Toggle
+            Rectangle {
+                width: parent.width
+                implicitHeight: 70
+                radius: Theme.radiusLg
+                color: Theme.bgCard
+                border.color: Theme.borderDim
+                border.width: 1
+
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    spacing: 16
+
+                    Item {
+                        width: parent.width - toggleSwitch.width - 16
+                        height: parent.height
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Row {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 8
+                            Rectangle {
+                                width: 6; height: 6; radius: 3
+                                color: Theme.accent
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            Text {
+                                text: I18n.t("videoBgSection")
+                                color: Theme.textPrimary
+                                font.pixelSize: 14
+                                font.family: Theme.fontFamily
+                                font.weight: Font.DemiBold
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            Text {
+                                text: "• " + (downloadManager.videoBackgroundEnabled ? I18n.t("videoBgEnabled") : I18n.t("videoBgDisabled"))
+                                color: downloadManager.videoBackgroundEnabled ? Theme.accent : Theme.textMuted
+                                font.pixelSize: 11
+                                font.family: Theme.fontFamily
+                                font.weight: Font.Medium
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
+                    }
+
+                    // Sleek Modern Toggle Switch
+                    Rectangle {
+                        id: toggleSwitch
+                        width: 54
+                        height: 30
+                        radius: 15
+                        color: downloadManager.videoBackgroundEnabled ? Theme.accent : Theme.bgElevated
+                        border.color: downloadManager.videoBackgroundEnabled ? Theme.accent : Theme.borderBright
+                        border.width: 1
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Behavior on color { ColorAnimation { duration: 180 } }
+                        Behavior on border.color { ColorAnimation { duration: 180 } }
+
+                        // Toggle Knob
+                        Rectangle {
+                            width: 22
+                            height: 22
+                            radius: 11
+                            color: downloadManager.videoBackgroundEnabled ? "#07090e" : Theme.textSecondary
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: downloadManager.videoBackgroundEnabled ? (parent.width - width - 4) : 4
+
+                            Behavior on x {
+                                NumberAnimation { duration: 180; easing.type: Easing.OutQuad }
+                            }
+                            Behavior on color { ColorAnimation { duration: 180 } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                downloadManager.setVideoBackgroundEnabled(!downloadManager.videoBackgroundEnabled)
+                            }
+                        }
+                    }
+                }
+            }
+
             // Setting Card 1: Default Download Directory
             Rectangle {
                 width: parent.width

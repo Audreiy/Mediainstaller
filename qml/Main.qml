@@ -22,8 +22,8 @@ ApplicationWindow {
         id: bgVideo
         anchors.fill: parent
         source: "assets/bg.mp4"
-        playing: true
-        targetFps: 60
+        playing: window.active && downloadManager.videoBackgroundEnabled
+        targetFps: 45
     }
 
     // Frosted dark overlay for high contrast readability

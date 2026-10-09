@@ -108,6 +108,7 @@ void YtDlpDownloader::start() {
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &YtDlpDownloader::onProcessFinished);
     connect(m_process, &QProcess::errorOccurred, this, &YtDlpDownloader::onProcessError);
 
+    m_progressTimer.start();
     m_process->start(ytDlpExe, args);
 }
 
@@ -208,9 +209,12 @@ void YtDlpDownloader::parseOutputLine(const QString &line) {
                 m_etaString = eta;
             }
 
-            emit progressUpdated(m_progress, m_speedString, m_etaString,
-                                 downOk ? down : -1,
-                                 totOk ? tot : -1);
+            if (m_progressTimer.hasExpired(250) || m_progress >= 99.0) {
+                m_progressTimer.restart();
+                emit progressUpdated(m_progress, m_speedString, m_etaString,
+                                     downOk ? down : -1,
+                                     totOk ? tot : -1);
+            }
             return;
         }
     }
@@ -224,7 +228,10 @@ void YtDlpDownloader::parseOutputLine(const QString &line) {
         if (pctOk) m_progress = pct;
         m_speedString = dlMatch.captured(3);
         m_etaString = dlMatch.captured(4);
-        emit progressUpdated(m_progress, m_speedString, m_etaString, -1, -1);
+        if (m_progressTimer.hasExpired(250) || m_progress >= 99.0) {
+            m_progressTimer.restart();
+            emit progressUpdated(m_progress, m_speedString, m_etaString, -1, -1);
+        }
     }
 }
 

@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <QProcess>
+#include <QElapsedTimer>
 
 class YtDlpDownloader : public QObject {
     Q_OBJECT
@@ -59,6 +60,7 @@ private:
     double m_progress = 0.0;
     QString m_speedString;
     QString m_etaString;
+    QElapsedTimer m_progressTimer;
 
     QProcess *m_process = nullptr;
 };

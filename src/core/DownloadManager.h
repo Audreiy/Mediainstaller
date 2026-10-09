@@ -28,6 +28,8 @@ class DownloadManager : public QObject {
     Q_PROPERTY(FFmpegProcessor* ffmpegProcessor READ ffmpegProcessor CONSTANT)
     Q_PROPERTY(QString defaultDownloadPath READ defaultDownloadPath NOTIFY defaultDownloadPathChanged)
     Q_PROPERTY(bool sequentialMode READ sequentialMode WRITE setSequentialMode NOTIFY sequentialModeChanged)
+    Q_PROPERTY(bool videoBackgroundEnabled READ videoBackgroundEnabled WRITE setVideoBackgroundEnabled NOTIFY videoBackgroundEnabledChanged)
+    Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
 
 public:
     explicit DownloadManager(QObject *parent = nullptr);
@@ -38,15 +40,21 @@ public:
     FFmpegProcessor* ffmpegProcessor() { return &m_ffmpegProcessor; }
     QString defaultDownloadPath() const { return m_defaultDownloadPath; }
     bool sequentialMode() const { return m_sequentialMode; }
+    bool videoBackgroundEnabled() const { return m_videoBackgroundEnabled; }
+    QString language() const { return m_language; }
 
     Q_INVOKABLE void addDownload(const QString &url, const QString &title, const QString &formatId, const QString &customFolder = QString());
     Q_INVOKABLE QString getDefaultDownloadDirectory() const;
     Q_INVOKABLE void setDefaultDownloadPath(const QString &path);
     Q_INVOKABLE void setSequentialMode(bool seq);
+    Q_INVOKABLE void setVideoBackgroundEnabled(bool enabled);
+    Q_INVOKABLE void setLanguage(const QString &lang);
 
 signals:
     void defaultDownloadPathChanged();
     void sequentialModeChanged();
+    void videoBackgroundEnabledChanged();
+    void languageChanged();
     void downloadStarted(const QString &id, const QString &title);
     void downloadFinished(const QString &id, const QString &title);
 
@@ -76,6 +84,8 @@ private:
     FFmpegProcessor m_ffmpegProcessor;
     QString m_defaultDownloadPath;
     bool m_sequentialMode = false;
+    bool m_videoBackgroundEnabled = true;
+    QString m_language = "en";
 
     QMap<QString, QueuedTask> m_queuedTasks;
     QMap<QString, QPointer<Downloader>> m_activeHttpDownloads;

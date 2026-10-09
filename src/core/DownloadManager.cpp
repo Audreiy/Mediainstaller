@@ -22,6 +22,8 @@ DownloadManager::DownloadManager(QObject *parent)
     }
 
     m_sequentialMode = settings.value("sequentialMode", false).toBool();
+    m_videoBackgroundEnabled = settings.value("videoBackgroundEnabled", true).toBool();
+    m_language = settings.value("appLanguage", "en").toString();
 
     connect(&m_queueModel, &DownloadQueueModel::requestPause, this, &DownloadManager::onQueuePause);
     connect(&m_queueModel, &DownloadQueueModel::requestResume, this, &DownloadManager::onQueueResume);
@@ -63,6 +65,24 @@ void DownloadManager::setSequentialMode(bool seq) {
         } else {
             checkNextQueueItem();
         }
+    }
+}
+
+void DownloadManager::setVideoBackgroundEnabled(bool enabled) {
+    if (m_videoBackgroundEnabled != enabled) {
+        m_videoBackgroundEnabled = enabled;
+        QSettings settings("YuYuDev", "YuYuInstaller");
+        settings.setValue("videoBackgroundEnabled", m_videoBackgroundEnabled);
+        emit videoBackgroundEnabledChanged();
+    }
+}
+
+void DownloadManager::setLanguage(const QString &lang) {
+    if (m_language != lang && (lang == "en" || lang == "tr" || lang == "ru")) {
+        m_language = lang;
+        QSettings settings("YuYuDev", "YuYuInstaller");
+        settings.setValue("appLanguage", m_language);
+        emit languageChanged();
     }
 }
 
@@ -334,7 +354,7 @@ void DownloadManager::handleDownloadCompleted(const QString &id, const QString &
                 m_activeYtDlpDownloads.remove(id);
             }
             QMetaObject::invokeMethod(this, &DownloadManager::checkNextQueueItem, Qt::QueuedConnection);
-        });
+        }, Qt::SingleShotConnection);
 
         m_ffmpegProcessor.extractAudio(filePath, finalMp3Path, "mp3", 320);
         return;

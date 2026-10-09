@@ -44,8 +44,8 @@ private:
 
     QString m_source;
     bool m_playing = true;
-    int m_targetFps = 60;
-    int m_frameIntervalMs = 16;
+    int m_targetFps = 45;
+    int m_frameIntervalMs = 22;
     QTimer m_timer;
     QImage m_currentFrame;
     int m_videoWidth = 0;

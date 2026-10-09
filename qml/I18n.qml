@@ -4,8 +4,8 @@ import QtQuick
 QtObject {
     id: root
 
-    // Supported: "en", "tr", "ru"
-    property string language: "tr"
+    // Supported: "en", "tr", "ru" - Default: English ("en")
+    property string language: (typeof downloadManager !== "undefined" && downloadManager) ? downloadManager.language : "en"
 
     readonly property var translations: ({
         "en": {
@@ -77,6 +77,9 @@ QtObject {
             "langEn": "English",
             "langTr": "Türkçe",
             "langRu": "Русский",
+            "videoBgSection": "Animated Video Background",
+            "videoBgEnabled": "Playing",
+            "videoBgDisabled": "Paused (Frozen Frame)",
             "storageSection": "Default Download Folder",
             "storageSubtitle": "Downloaded files will be automatically saved to this location.",
             "browse": "Browse",
@@ -163,6 +166,9 @@ QtObject {
             "langEn": "English",
             "langTr": "Türkçe",
             "langRu": "Русский",
+            "videoBgSection": "Video Arka Plan",
+            "videoBgEnabled": "Oynatılıyor",
+            "videoBgDisabled": "Duraklatıldı (Sabit Kare)",
             "storageSection": "Varsayılan İndirme Klasörü",
             "storageSubtitle": "İndirilen tüm medyalar doğrudan bu klasöre kaydedilir.",
             "browse": "Gözat",
@@ -249,6 +255,9 @@ QtObject {
             "langEn": "English",
             "langTr": "Türkçe",
             "langRu": "Русский",
+            "videoBgSection": "Анимированный видеофон",
+            "videoBgEnabled": "Воспроизводится",
+            "videoBgDisabled": "Пауза (Застывший кадр)",
             "storageSection": "Папка загрузки по умолчанию",
             "storageSubtitle": "Все скачанные файлы будут автоматически сохраняться сюда.",
             "browse": "Обзор",
@@ -270,7 +279,7 @@ QtObject {
 
     function t(key) {
         var dict = translations[root.language];
-        if (!dict) dict = translations["tr"];
+        if (!dict) dict = translations["en"];
         if (dict && dict[key] !== undefined) {
             return dict[key];
         }
@@ -284,6 +293,9 @@ QtObject {
     function setLanguage(lang) {
         if (lang === "en" || lang === "tr" || lang === "ru") {
             root.language = lang;
+            if (typeof downloadManager !== "undefined" && downloadManager) {
+                downloadManager.setLanguage(lang);
+            }
         }
     }
 }
