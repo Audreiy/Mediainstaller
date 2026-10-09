@@ -45,6 +45,8 @@ private slots:
 
 private:
     void startYouTubeOembedProbe(const QUrl &url);
+    void startAnimecixResolve(const QUrl &url);
+    void startTauVideoResolve(const QString &tauId, const QString &animeTitle, int season, int episode, const QString &epName, const QString &poster);
     void startWebPageScrape(const QUrl &url);
     void parseHtmlForMedia(const QString &html, const QUrl &baseUrl);
     void startYtDlpProbe(const QString &rawUrl);

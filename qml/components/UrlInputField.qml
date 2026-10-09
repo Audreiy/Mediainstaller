@@ -56,10 +56,11 @@ Item {
                 Text {
                     anchors.fill: parent
                     verticalAlignment: Text.AlignVCenter
-                    text: "Paste URL from YouTube, Animecix, Vidmoly, Sibnet, or any media link..."
+                    text: I18n.t("urlPlaceholder")
                     color: Theme.textMuted
-                    font.pixelSize: 14
+                    font.pixelSize: 13
                     font.family: Theme.fontFamily
+                    elide: Text.ElideRight
                     visible: !textInput.text && !textInput.activeFocus
                 }
 
@@ -85,7 +86,7 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "Paste"
+                    text: I18n.t("pasteBtn")
                     color: pasteHover.hovered ? Theme.textPrimary : Theme.textSecondary
                     font.pixelSize: 12
                     font.family: Theme.fontFamily
@@ -140,7 +141,7 @@ Item {
                     }
 
                     Text {
-                        text: urlAnalyzer.isAnalyzing ? "Analyzing..." : "Analyze"
+                        text: urlAnalyzer.isAnalyzing ? "..." : I18n.t("analyzeBtn")
                         color: "#FFFFFF"
                         font.pixelSize: 13
                         font.family: Theme.fontFamily

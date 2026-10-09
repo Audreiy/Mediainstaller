@@ -22,7 +22,7 @@ void consoleHandler(QtMsgType type, const QMessageLogContext &context, const QSt
 
 int main(int argc, char *argv[]) {
     qInstallMessageHandler(consoleHandler);
-    std::cout << ">>> [DEBUG] MediaGrabApp process started! <<<" << std::endl;
+    std::cout << ">>> [DEBUG] YuYuInstaller process started! <<<" << std::endl;
     std::cout.flush();
 
     // Enable High DPI scaling
@@ -31,8 +31,8 @@ int main(int argc, char *argv[]) {
     );
 
     QGuiApplication app(argc, argv);
-    app.setApplicationName("MediaGrab");
-    app.setOrganizationName("MediaGrabDev");
+    app.setApplicationName(QString::fromUtf8("YuYuİnstaller"));
+    app.setOrganizationName("YuYuDev");
     app.setApplicationVersion("1.0.0");
 
     QIcon appIcon(":/qt/qml/MediaGrab/assets/logo.png");

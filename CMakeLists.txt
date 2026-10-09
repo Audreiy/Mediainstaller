@@ -44,7 +44,7 @@ target_include_directories(MediaGrab PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/media
 )
 
-set_source_files_properties(qml/Theme.qml PROPERTIES
+set_source_files_properties(qml/Theme.qml qml/I18n.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
 )
 
@@ -56,6 +56,7 @@ qt_add_qml_module(MediaGrab
     QML_FILES
         qml/Main.qml
         qml/Theme.qml
+        qml/I18n.qml
         qml/components/Sidebar.qml
         qml/components/UrlInputField.qml
         qml/components/QualitySelector.qml
@@ -67,7 +68,7 @@ qt_add_qml_module(MediaGrab
 )
 
 set_target_properties(MediaGrab PROPERTIES
-    OUTPUT_NAME "MediaGrabApp"
+    OUTPUT_NAME "YuYuInstaller"
     WIN32_EXECUTABLE TRUE
 )
 

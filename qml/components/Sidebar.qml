@@ -40,14 +40,14 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 2
                 Text {
-                    text: "MediaGrab"
+                    text: I18n.t("appName")
                     color: Theme.textPrimary
-                    font.pixelSize: 17
+                    font.pixelSize: 16
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
-                    text: "v1.0 Pro"
+                    text: I18n.t("appVersion")
                     color: Theme.accentHover
                     font.pixelSize: 10
                     font.family: Theme.fontFamily
@@ -72,12 +72,17 @@ Rectangle {
                 width: parent.width
                 height: 44
                 radius: Theme.radiusMd
-                color: (root.activeTab === 0) ? (Theme.accent + "22") : (tab0Hover.hovered ? Theme.bgCardHover : "transparent")
+                color: (root.activeTab === 0) ? (Theme.accent + "22") : (tab0Mouse.containsMouse ? Theme.bgCardHover : "transparent")
                 border.color: (root.activeTab === 0) ? (Theme.accent + "55") : "transparent"
                 border.width: 1
 
-                HoverHandler { id: tab0Hover }
-                TapHandler { onTapped: root.activeTab = 0 }
+                MouseArea {
+                    id: tab0Mouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.activeTab = 0
+                }
 
                 Row {
                     anchors.fill: parent
@@ -91,7 +96,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "Downloader"
+                        text: I18n.t("navDownloader")
                         color: (root.activeTab === 0) ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
@@ -106,12 +111,17 @@ Rectangle {
                 width: parent.width
                 height: 44
                 radius: Theme.radiusMd
-                color: (root.activeTab === 1) ? (Theme.accent + "22") : (tab1Hover.hovered ? Theme.bgCardHover : "transparent")
+                color: (root.activeTab === 1) ? (Theme.accent + "22") : (tab1Mouse.containsMouse ? Theme.bgCardHover : "transparent")
                 border.color: (root.activeTab === 1) ? (Theme.accent + "55") : "transparent"
                 border.width: 1
 
-                HoverHandler { id: tab1Hover }
-                TapHandler { onTapped: root.activeTab = 1 }
+                MouseArea {
+                    id: tab1Mouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.activeTab = 1
+                }
 
                 Row {
                     anchors.fill: parent
@@ -125,7 +135,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "Queue"
+                        text: I18n.t("navQueue")
                         color: (root.activeTab === 1) ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
@@ -160,12 +170,17 @@ Rectangle {
                 width: parent.width
                 height: 44
                 radius: Theme.radiusMd
-                color: (root.activeTab === 2) ? (Theme.accent + "22") : (tab2Hover.hovered ? Theme.bgCardHover : "transparent")
+                color: (root.activeTab === 2) ? (Theme.accent + "22") : (tab2Mouse.containsMouse ? Theme.bgCardHover : "transparent")
                 border.color: (root.activeTab === 2) ? (Theme.accent + "55") : "transparent"
                 border.width: 1
 
-                HoverHandler { id: tab2Hover }
-                TapHandler { onTapped: root.activeTab = 2 }
+                MouseArea {
+                    id: tab2Mouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.activeTab = 2
+                }
 
                 Row {
                     anchors.fill: parent
@@ -179,7 +194,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "Settings"
+                        text: I18n.t("navSettings")
                         color: (root.activeTab === 2) ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
@@ -214,7 +229,7 @@ Rectangle {
                 }
 
                 Text {
-                    text: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? "Core Engine Ready" : (ffmpegProcessor.isFFmpegAvailable ? "FFmpeg Ready" : "Engine Missing")
+                    text: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? (I18n.t("ready") + ": Core Engine") : "Engine Warning"
                     color: Theme.textSecondary
                     font.pixelSize: 11
                     font.family: Theme.fontFamily

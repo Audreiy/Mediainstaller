@@ -10,7 +10,7 @@ ApplicationWindow {
     minimumWidth: 840
     minimumHeight: 560
     visible: true
-    title: "MediaGrab - Media Downloader & Converter"
+    title: I18n.t("appName") + " - " + I18n.t("appSubtitle")
     color: Theme.bgApp
 
     // Subtle ambient gradient background glow

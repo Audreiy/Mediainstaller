@@ -84,7 +84,7 @@ Rectangle {
                         Text {
                             id: badgeText
                             anchors.centerIn: parent
-                            text: (root.mediaInfo && root.mediaInfo.isDirectFile) ? "Direct Media" : "Online Stream"
+                            text: (root.mediaInfo && root.mediaInfo.isDirectFile) ? I18n.t("directFileBadge") : "Online Stream"
                             color: Theme.accentHover
                             font.pixelSize: 10
                             font.family: Theme.fontFamily
@@ -121,7 +121,7 @@ Rectangle {
 
         // Section: Format / Quality Options
         Text {
-            text: "Format & Quality Selection"
+            text: I18n.t("chooseQuality")
             color: Theme.textSecondary
             font.pixelSize: 12
             font.family: Theme.fontFamily
@@ -161,7 +161,7 @@ Rectangle {
                         spacing: 2
 
                         Text {
-                            text: "Video (MP4 / Best Quality)"
+                            text: I18n.t("videoAudio")
                             color: Theme.textPrimary
                             font.pixelSize: 13
                             font.family: Theme.fontFamily
@@ -169,7 +169,7 @@ Rectangle {
                         }
 
                         Text {
-                            text: "Highest resolution video + merged audio"
+                            text: I18n.t("videoAudioDesc")
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -207,7 +207,7 @@ Rectangle {
                         spacing: 2
 
                         Text {
-                            text: "Audio Only (MP3)"
+                            text: I18n.t("audioMp3")
                             color: Theme.textPrimary
                             font.pixelSize: 13
                             font.family: Theme.fontFamily
@@ -215,7 +215,7 @@ Rectangle {
                         }
 
                         Text {
-                            text: "Converted to 320 kbps HQ MP3"
+                            text: I18n.t("audioMp3Desc")
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -288,7 +288,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: "Start Download"
+                        text: I18n.t("startDownload")
                         color: "#FFFFFF"
                         font.pixelSize: 13
                         font.family: Theme.fontFamily

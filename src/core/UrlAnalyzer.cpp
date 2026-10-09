@@ -6,6 +6,7 @@
 #include <QUrlQuery>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QDateTime>
 #include <QDebug>
 
@@ -83,6 +84,22 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
 
     QString lower = trimmed.toLower();
 
+    // 0. Animecix automated URL resolver
+    if (lower.contains("animecix.tv") || lower.contains("animecix.com") || lower.contains("animecix.net")) {
+        startAnimecixResolve(url);
+        return;
+    }
+
+    // 0.1 Tau Video direct embed link
+    if (lower.contains("tau-video.xyz/embed/")) {
+        QRegularExpression tauRe(R"(tau-video\.xyz/embed/([a-f0-9]{24}))", QRegularExpression::CaseInsensitiveOption);
+        auto m = tauRe.match(trimmed);
+        if (m.hasMatch()) {
+            startTauVideoResolve(m.captured(1), "Tau Video", 0, 0, "", "");
+            return;
+        }
+    }
+
     // 1. YouTube specific fast oEmbed
     if (lower.contains("youtube.com") || lower.contains("youtu.be")) {
         startYouTubeOembedProbe(url);
@@ -108,6 +125,227 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
     // 4. Any Web Page (Animecix, Vidmoly, Sibnet, streaming platforms, etc.)
     // First, scrape the webpage HTML with intelligent video sniffer
     startWebPageScrape(url);
+}
+
+void UrlAnalyzer::startAnimecixResolve(const QUrl &url) {
+    QString urlStr = url.toString();
+    QRegularExpression re(R"(animecix\.(?:tv|com|net)/titles/(\d+)(?:/([^/]+))?(?:/season/(\d+))?(?:/episode/(\d+))?)", QRegularExpression::CaseInsensitiveOption);
+    auto match = re.match(urlStr);
+
+    int titleId = 0;
+    int seasonNum = 1;
+    int episodeNum = 1;
+
+    if (match.hasMatch()) {
+        titleId = match.captured(1).toInt();
+        if (!match.captured(3).isEmpty()) {
+            seasonNum = match.captured(3).toInt();
+        }
+        if (!match.captured(4).isEmpty()) {
+            episodeNum = match.captured(4).toInt();
+        }
+    }
+
+    if (titleId <= 0) {
+        startWebPageScrape(url);
+        return;
+    }
+
+    // Step 1: Query batch-download/{titleId}/episodes
+    QString episodesApiUrl = QString("https://animecix.tv/secure/batch-download/%1/episodes").arg(titleId);
+    QNetworkRequest request((QUrl(episodesApiUrl)));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    request.setRawHeader("Accept", "application/json, text/plain, */*");
+    request.setRawHeader("Referer", url.toString().toUtf8());
+
+    QNetworkReply *reply = m_netManager.get(request);
+    m_currentReply = reply;
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, titleId, seasonNum, episodeNum, url]() {
+        if (m_currentReply == reply) {
+            m_currentReply = nullptr;
+        }
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        QByteArray data = reply->readAll();
+        reply->deleteLater();
+
+        QString animeTitle = "Anime";
+        QString episodeName;
+        QString poster;
+        QString tauId;
+
+        if (statusCode == 200 && !data.isEmpty()) {
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            if (doc.isObject()) {
+                QJsonObject rootObj = doc.object();
+                QJsonObject titleObj = rootObj.value("title").toObject();
+                if (!titleObj.value("name").toString().trimmed().isEmpty()) {
+                    animeTitle = titleObj.value("name").toString().trimmed();
+                }
+
+                QJsonArray seasons = rootObj.value("seasons").toArray();
+                for (const QJsonValue &sVal : seasons) {
+                    QJsonObject sObj = sVal.toObject();
+                    if (sObj.value("number").toInt() == seasonNum) {
+                        QJsonArray episodes = sObj.value("episodes").toArray();
+                        for (const QJsonValue &epVal : episodes) {
+                            QJsonObject epObj = epVal.toObject();
+                            if (epObj.value("episode").toInt() == episodeNum) {
+                                episodeName = epObj.value("name").toString().trimmed();
+                                poster = epObj.value("poster").toString().trimmed();
+
+                                QRegularExpression tauPosterRe(R"(tau-video/(?:poster|thb)/([a-f0-9]{24}))", QRegularExpression::CaseInsensitiveOption);
+                                auto m = tauPosterRe.match(poster);
+                                if (m.hasMatch()) {
+                                    tauId = m.captured(1);
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!tauId.isEmpty()) {
+            startTauVideoResolve(tauId, animeTitle, seasonNum, episodeNum, episodeName, poster);
+            return;
+        }
+
+        // Step 2: Fallback to secure/first-video?titleId={titleId}&season={seasonNum}
+        QString fvUrl = QString("https://animecix.tv/secure/first-video?titleId=%1&season=%2").arg(titleId).arg(seasonNum);
+        QNetworkRequest fvReq((QUrl(fvUrl)));
+        fvReq.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+        fvReq.setRawHeader("Accept", "application/json, text/plain, */*");
+        fvReq.setRawHeader("Referer", url.toString().toUtf8());
+
+        QNetworkReply *fvReply = m_netManager.get(fvReq);
+        m_currentReply = fvReply;
+
+        connect(fvReply, &QNetworkReply::finished, this, [this, fvReply, animeTitle, seasonNum, episodeNum, episodeName, poster, url]() {
+            if (m_currentReply == fvReply) {
+                m_currentReply = nullptr;
+            }
+            int fvStatus = fvReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            QByteArray fvData = fvReply->readAll();
+            fvReply->deleteLater();
+
+            QString fvTauId;
+            QString fvEpName = episodeName;
+            QString fvPoster = poster;
+
+            if (fvStatus == 200 && !fvData.isEmpty()) {
+                QJsonDocument fvDoc = QJsonDocument::fromJson(fvData);
+                if (fvDoc.isObject()) {
+                    QJsonObject fvObj = fvDoc.object();
+                    QString embedUrl = fvObj.value("url").toString();
+                    QRegularExpression tauEmbedRe(R"(tau-video\.xyz/embed/([a-f0-9]{24}))", QRegularExpression::CaseInsensitiveOption);
+                    auto m = tauEmbedRe.match(embedUrl);
+                    if (m.hasMatch()) {
+                        fvTauId = m.captured(1);
+                    }
+                    QJsonObject epObj = fvObj.value("episode").toObject();
+                    if (fvEpName.isEmpty() && !epObj.value("name").toString().isEmpty()) {
+                        fvEpName = epObj.value("name").toString();
+                    }
+                    if (fvPoster.isEmpty() && !epObj.value("poster").toString().isEmpty()) {
+                        fvPoster = epObj.value("poster").toString();
+                    }
+                }
+            }
+
+            if (!fvTauId.isEmpty()) {
+                startTauVideoResolve(fvTauId, animeTitle, seasonNum, episodeNum, fvEpName, fvPoster);
+            } else {
+                startWebPageScrape(url);
+            }
+        });
+    });
+}
+
+void UrlAnalyzer::startTauVideoResolve(const QString &tauId, const QString &animeTitle, int season, int episode, const QString &epName, const QString &poster) {
+    QString tauApiUrl = QString("https://tau-video.xyz/api/video/%1").arg(tauId);
+    QNetworkRequest request((QUrl(tauApiUrl)));
+    request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    request.setRawHeader("Referer", "https://tau-video.xyz/");
+    request.setRawHeader("Accept", "application/json, text/plain, */*");
+
+    QNetworkReply *reply = m_netManager.get(request);
+    m_currentReply = reply;
+
+    connect(reply, &QNetworkReply::finished, this, [this, reply, tauId, animeTitle, season, episode, epName, poster]() {
+        if (m_currentReply == reply) {
+            m_currentReply = nullptr;
+        }
+        int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        QByteArray data = reply->readAll();
+        reply->deleteLater();
+
+        if (statusCode == 200 && !data.isEmpty()) {
+            QJsonDocument doc = QJsonDocument::fromJson(data);
+            if (doc.isObject()) {
+                QJsonObject obj = doc.object();
+                QJsonArray urls = obj.value("urls").toArray();
+
+                QString bestUrl;
+                QString bestLabel;
+                qint64 bestSize = 0;
+
+                for (const QJsonValue &uVal : urls) {
+                    QJsonObject uObj = uVal.toObject();
+                    QString uStr = uObj.value("url").toString();
+                    if (!uStr.isEmpty()) {
+                        bestUrl = uStr;
+                        bestLabel = uObj.value("label").toString();
+                        bestSize = uObj.value("size").toInteger();
+                    }
+                }
+
+                if (!bestUrl.isEmpty()) {
+                    m_isAnalyzing = false;
+                    emit analyzingChanged();
+
+                    if (m_currentInfo) {
+                        m_currentInfo->deleteLater();
+                    }
+                    m_currentInfo = new MediaInfo(this);
+                    m_currentInfo->setUrl(bestUrl);
+
+                    QString formattedTitle = animeTitle;
+                    if (season > 0 && episode > 0) {
+                        formattedTitle += QString(" - S%1E%2")
+                            .arg(season, 2, 10, QChar('0'))
+                            .arg(episode, 2, 10, QChar('0'));
+                    }
+                    if (!epName.isEmpty()) {
+                        formattedTitle += " - " + epName;
+                    }
+
+                    m_currentInfo->setTitle(formattedTitle);
+                    m_currentInfo->setAuthor("Animecix (Tau Video)");
+                    m_currentInfo->setThumbnailUrl(poster);
+                    m_currentInfo->setIsDirectFile(true);
+
+                    double durSec = obj.value("duration").toDouble();
+                    if (durSec > 0) {
+                        int m = static_cast<int>(durSec) / 60;
+                        int s = static_cast<int>(durSec) % 60;
+                        m_currentInfo->setDuration(QString("%1:%2").arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+                    }
+
+                    populateDirectFileOptions(m_currentInfo, bestSize, "video/mp4", formattedTitle + ".mp4");
+
+                    emit mediaInfoChanged();
+                    emit analysisSuccess(m_currentInfo);
+                    return;
+                }
+            }
+        }
+
+        // Fallback to yt-dlp probe if Tau direct fails
+        startYtDlpProbe(m_analyzingUrl);
+    });
 }
 
 void UrlAnalyzer::startYouTubeOembedProbe(const QUrl &url) {

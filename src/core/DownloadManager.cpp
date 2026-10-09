@@ -91,9 +91,10 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
                          lowerUrl.contains("vimeo.com") || lowerUrl.contains("reddit.com") ||
                          lowerUrl.contains("soundcloud.com") || lowerUrl.contains("twitch.tv") ||
                          lowerUrl.contains("facebook.com");
-    bool isDirectFile = lowerUrl.endsWith(".mp4") || lowerUrl.endsWith(".mp3") ||
-                        lowerUrl.endsWith(".m4a") || lowerUrl.endsWith(".wav") ||
-                        lowerUrl.endsWith(".webm") || lowerUrl.endsWith(".mkv");
+    bool isDirectFile = lowerUrl.contains(".mp4") || lowerUrl.contains(".mp3") ||
+                        lowerUrl.contains(".m4a") || lowerUrl.contains(".wav") ||
+                        lowerUrl.contains(".webm") || lowerUrl.contains(".mkv") ||
+                        lowerUrl.contains("tau-video");
 
     bool useYtDlp = isWebPlatform || (!isDirectFile && !FFmpegProcessor::findYtDlpExecutable().isEmpty());
 

@@ -74,12 +74,12 @@ Rectangle {
                         id: statusText
                         anchors.centerIn: parent
                         text: {
-                            if (model.status === "Completed") return "Completed"
-                            if (model.status === "Downloading") return "Downloading"
-                            if (model.status === "Converting") return "Converting (MP3)"
-                            if (model.status === "Paused") return "Paused"
-                            if (model.status === "Failed") return "Failed"
-                            if (model.status === "Cancelled") return "Cancelled"
+                            if (model.status === "Completed") return I18n.t("statusCompleted")
+                            if (model.status === "Downloading") return I18n.t("statusDownloading")
+                            if (model.status === "Converting") return I18n.t("statusConverting")
+                            if (model.status === "Paused") return I18n.t("statusPaused")
+                            if (model.status === "Failed") return I18n.t("statusFailed")
+                            if (model.status === "Cancelled") return I18n.t("statusCancelled")
                             return model.status
                         }
                         color: {

@@ -20,14 +20,14 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 4
                 Text {
-                    text: "Download Queue"
+                    text: I18n.t("queueTitle")
                     color: Theme.textPrimary
                     font.pixelSize: 22
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
-                    text: queueModel.activeDownloadCount + " active • Total " + queueModel.totalDownloadCount + " items"
+                    text: I18n.t("queueSubtitle").arg(queueModel.activeDownloadCount).arg(queueModel.totalDownloadCount)
                     color: Theme.textSecondary
                     font.pixelSize: 12
                     font.family: Theme.fontFamily
@@ -61,7 +61,7 @@ Item {
                     spacing: 6
                     Text { text: "🧹"; font.pixelSize: 13 }
                     Text {
-                        text: "Clear Finished"
+                        text: I18n.t("clearFinished")
                         color: clearMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
                         font.pixelSize: 12
                         font.family: Theme.fontFamily
@@ -101,7 +101,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "No Downloads in Queue"
+                    text: I18n.t("noDownloads")
                     color: Theme.textPrimary
                     font.pixelSize: 15
                     font.family: Theme.fontFamily
@@ -110,7 +110,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "Paste a media link in the Downloader tab to begin."
+                    text: I18n.t("noDownloadsHint")
                     color: Theme.textMuted
                     font.pixelSize: 12
                     font.family: Theme.fontFamily
@@ -118,17 +118,17 @@ Item {
             }
         }
 
-        // Active List
+        // Download List
         ListView {
             visible: queueModel.totalDownloadCount > 0
             width: parent.width
-            height: parent.height - 80
-            model: queueModel
-            spacing: 10
+            height: parent.height - 70
             clip: true
+            spacing: 12
+            model: queueModel
 
             delegate: DownloadCard {
-                width: parent.width
+                width: ListView.view.width
             }
         }
     }

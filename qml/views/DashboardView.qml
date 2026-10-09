@@ -35,14 +35,14 @@ Item {
             Column {
                 spacing: 6
                 Text {
-                    text: "Media Downloader & Converter"
+                    text: I18n.t("dashTitle")
                     color: Theme.textPrimary
                     font.pixelSize: 24
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
-                    text: "Paste any video or audio URL, select your desired quality, and download at maximum speed."
+                    text: I18n.t("dashSubtitle")
                     color: Theme.textSecondary
                     font.pixelSize: 13
                     font.family: Theme.fontFamily
@@ -117,7 +117,7 @@ Item {
                             spacing: 8
                             Text { text: "⚡"; font.pixelSize: 16 }
                             Text {
-                                text: "High-Speed Stream Engine"
+                                text: I18n.t("feature1Title")
                                 color: Theme.textPrimary
                                 font.pixelSize: 13
                                 font.family: Theme.fontFamily
@@ -125,7 +125,7 @@ Item {
                             }
                         }
                         Text {
-                            text: "Direct-to-disk streaming architecture ensures blazing fast speeds with zero memory overhead."
+                            text: I18n.t("feature1Desc")
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -152,7 +152,7 @@ Item {
                             spacing: 8
                             Text { text: "🎧"; font.pixelSize: 16 }
                             Text {
-                                text: "320 kbps MP3 Converter"
+                                text: I18n.t("feature2Title")
                                 color: Theme.textPrimary
                                 font.pixelSize: 13
                                 font.family: Theme.fontFamily
@@ -160,7 +160,7 @@ Item {
                             }
                         }
                         Text {
-                            text: "Integrated FFmpeg processor seamlessly extracts studio-quality MP3 and AAC audio directly from videos."
+                            text: I18n.t("feature2Desc")
                             color: Theme.textMuted
                             font.pixelSize: 11
                             font.family: Theme.fontFamily

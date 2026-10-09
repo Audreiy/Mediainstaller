@@ -6,11 +6,12 @@ echo === Configuring CMake ===
 cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="C:/Qt/6.8.2/msvc2022_64"
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-echo === Building MediaGrab ===
+echo === Building YuYuInstaller ===
 cmake --build build --config Release
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-copy /Y build\MediaGrabApp.exe build\MediaGrab.exe >nul 2>&1
+copy /Y build\YuYuInstaller.exe build\MediaGrabApp.exe >nul 2>&1
+copy /Y build\YuYuInstaller.exe build\MediaGrab.exe >nul 2>&1
 if not exist build\assets mkdir build\assets >nul 2>&1
 copy /Y assets\* build\assets\ >nul 2>&1
 

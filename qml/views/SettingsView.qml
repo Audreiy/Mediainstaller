@@ -8,7 +8,7 @@ Item {
 
     FolderDialog {
         id: folderDialog
-        title: "Select Download Folder"
+        title: I18n.t("storageSection")
         currentFolder: "file:///" + downloadManager.defaultDownloadPath
         onAccepted: {
             var path = selectedFolder.toString().replace("file:///", "")
@@ -31,17 +31,155 @@ Item {
             Column {
                 spacing: 4
                 Text {
-                    text: "Settings & Preferences"
+                    text: I18n.t("settingsTitle")
                     color: Theme.textPrimary
                     font.pixelSize: 22
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
-                    text: "Configure download directory, media processing engine, and system tools."
+                    text: I18n.t("settingsSubtitle")
                     color: Theme.textSecondary
                     font.pixelSize: 12
                     font.family: Theme.fontFamily
+                }
+            }
+
+            // Setting Card 0: Language Selection (English / Turkish / Russian)
+            Rectangle {
+                width: parent.width
+                implicitHeight: 120
+                radius: Theme.radiusLg
+                color: Theme.bgCard
+                border.color: Theme.borderDim
+                border.width: 1
+
+                Column {
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    spacing: 12
+
+                    Row {
+                        spacing: 8
+                        Text {
+                            text: "🌐"
+                            font.pixelSize: 15
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: I18n.t("langSection")
+                            color: Theme.textPrimary
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: "• " + I18n.t("langSubtitle")
+                            color: Theme.textMuted
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+
+                    Row {
+                        width: parent.width
+                        spacing: 12
+
+                        // Option 1: English
+                        Rectangle {
+                            width: (parent.width - 24) / 3
+                            height: 42
+                            radius: Theme.radiusMd
+                            color: (I18n.language === "en") ? (Theme.accent + "22") : (enMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
+                            border.color: (I18n.language === "en") ? Theme.accent : Theme.borderDim
+                            border.width: (I18n.language === "en") ? 2 : 1
+
+                            MouseArea {
+                                id: enMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: I18n.setLanguage("en")
+                            }
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 8
+                                Text { text: "🇬🇧"; font.pixelSize: 16 }
+                                Text {
+                                    text: I18n.t("langEn")
+                                    color: (I18n.language === "en") ? Theme.accentHover : Theme.textPrimary
+                                    font.pixelSize: 12
+                                    font.family: Theme.fontFamily
+                                    font.weight: (I18n.language === "en") ? Font.Bold : Font.Medium
+                                }
+                            }
+                        }
+
+                        // Option 2: Türkçe
+                        Rectangle {
+                            width: (parent.width - 24) / 3
+                            height: 42
+                            radius: Theme.radiusMd
+                            color: (I18n.language === "tr") ? (Theme.accent + "22") : (trMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
+                            border.color: (I18n.language === "tr") ? Theme.accent : Theme.borderDim
+                            border.width: (I18n.language === "tr") ? 2 : 1
+
+                            MouseArea {
+                                id: trMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: I18n.setLanguage("tr")
+                            }
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 8
+                                Text { text: "🇹🇷"; font.pixelSize: 16 }
+                                Text {
+                                    text: I18n.t("langTr")
+                                    color: (I18n.language === "tr") ? Theme.accentHover : Theme.textPrimary
+                                    font.pixelSize: 12
+                                    font.family: Theme.fontFamily
+                                    font.weight: (I18n.language === "tr") ? Font.Bold : Font.Medium
+                                }
+                            }
+                        }
+
+                        // Option 3: Русский
+                        Rectangle {
+                            width: (parent.width - 24) / 3
+                            height: 42
+                            radius: Theme.radiusMd
+                            color: (I18n.language === "ru") ? (Theme.accent + "22") : (ruMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
+                            border.color: (I18n.language === "ru") ? Theme.accent : Theme.borderDim
+                            border.width: (I18n.language === "ru") ? 2 : 1
+
+                            MouseArea {
+                                id: ruMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: I18n.setLanguage("ru")
+                            }
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 8
+                                Text { text: "🇷🇺"; font.pixelSize: 16 }
+                                Text {
+                                    text: I18n.t("langRu")
+                                    color: (I18n.language === "ru") ? Theme.accentHover : Theme.textPrimary
+                                    font.pixelSize: 12
+                                    font.family: Theme.fontFamily
+                                    font.weight: (I18n.language === "ru") ? Font.Bold : Font.Medium
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -60,7 +198,7 @@ Item {
                     spacing: 12
 
                     Text {
-                        text: "📁 Default Download Folder"
+                        text: "📁 " + I18n.t("storageSection")
                         color: Theme.textPrimary
                         font.pixelSize: 14
                         font.family: Theme.fontFamily
@@ -95,16 +233,21 @@ Item {
                             width: 108
                             height: 40
                             radius: Theme.radiusMd
-                            color: dirHover.hovered ? Theme.bgCardHover : Theme.bgElevated
-                            border.color: Theme.borderDim
+                            color: dirMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
+                            border.color: dirMouse.containsMouse ? Theme.accent : Theme.borderDim
                             border.width: 1
 
-                            HoverHandler { id: dirHover }
-                            TapHandler { onTapped: folderDialog.open() }
+                            MouseArea {
+                                id: dirMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: folderDialog.open()
+                            }
 
                             Text {
                                 anchors.centerIn: parent
-                                text: "Browse"
+                                text: I18n.t("browse")
                                 color: Theme.textPrimary
                                 font.pixelSize: 12
                                 font.family: Theme.fontFamily
@@ -144,14 +287,14 @@ Item {
                         width: parent.width - 170
 
                         Text {
-                            text: "FFmpeg Media Processor"
+                            text: I18n.t("ffmpegTitle")
                             color: Theme.textPrimary
                             font.pixelSize: 14
                             font.family: Theme.fontFamily
                             font.weight: Font.DemiBold
                         }
                         Text {
-                            text: ffmpegProcessor.isFFmpegAvailable ? "FFmpeg is installed and ready for media merging & audio conversion." : "FFmpeg was not detected on this system."
+                            text: ffmpegProcessor.isFFmpegAvailable ? I18n.t("ffmpegAvailable") : I18n.t("ffmpegNotFound")
                             color: Theme.textMuted
                             font.pixelSize: 12
                             font.family: Theme.fontFamily
@@ -172,7 +315,7 @@ Item {
                         Text {
                             id: ffmpegBadgeText
                             anchors.centerIn: parent
-                            text: ffmpegProcessor.isFFmpegAvailable ? "Ready" : "Missing"
+                            text: ffmpegProcessor.isFFmpegAvailable ? I18n.t("readyStatus") : I18n.t("missingStatus")
                             color: ffmpegProcessor.isFFmpegAvailable ? Theme.success : Theme.warning
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -211,14 +354,14 @@ Item {
                         width: parent.width - 170
 
                         Text {
-                            text: "yt-dlp Video Engine"
+                            text: I18n.t("ytdlpTitle")
                             color: Theme.textPrimary
                             font.pixelSize: 14
                             font.family: Theme.fontFamily
                             font.weight: Font.DemiBold
                         }
                         Text {
-                            text: ffmpegProcessor.isYtDlpAvailable ? "yt-dlp is installed and ready for YouTube & online video downloads." : "yt-dlp was not detected on this system."
+                            text: ffmpegProcessor.isYtDlpAvailable ? I18n.t("ytdlpAvailable") : I18n.t("ytdlpNotFound")
                             color: Theme.textMuted
                             font.pixelSize: 12
                             font.family: Theme.fontFamily
@@ -239,7 +382,7 @@ Item {
                         Text {
                             id: ytdlpBadgeText
                             anchors.centerIn: parent
-                            text: ffmpegProcessor.isYtDlpAvailable ? "Ready" : "Missing"
+                            text: ffmpegProcessor.isYtDlpAvailable ? I18n.t("readyStatus") : I18n.t("missingStatus")
                             color: ffmpegProcessor.isYtDlpAvailable ? Theme.success : Theme.warning
                             font.pixelSize: 11
                             font.family: Theme.fontFamily
@@ -249,7 +392,7 @@ Item {
                 }
             }
 
-            // Setting Card 4: About MediaGrab Architecture
+            // Setting Card 4: About YuYuİnstaller Architecture
             Rectangle {
                 width: parent.width
                 implicitHeight: 130
@@ -264,7 +407,7 @@ Item {
                     spacing: 8
 
                     Text {
-                        text: "ℹ️ About MediaGrab"
+                        text: "ℹ️ " + I18n.t("aboutTitle")
                         color: Theme.textPrimary
                         font.pixelSize: 14
                         font.family: Theme.fontFamily
@@ -272,7 +415,7 @@ Item {
                     }
 
                     Text {
-                        text: "MediaGrab is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction."
+                        text: I18n.t("aboutDesc")
                         color: Theme.textSecondary
                         font.pixelSize: 12
                         font.family: Theme.fontFamily
@@ -281,7 +424,7 @@ Item {
                     }
 
                     Text {
-                        text: "Version 1.0.0 Pro • Hardware-Accelerated QML Interface"
+                        text: I18n.t("aboutVersion")
                         color: Theme.accentHover
                         font.pixelSize: 11
                         font.family: Theme.fontFamily
