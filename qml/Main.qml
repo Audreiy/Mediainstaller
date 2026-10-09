@@ -11,28 +11,47 @@ ApplicationWindow {
     minimumHeight: 560
     visible: true
     title: I18n.t("appName") + " - " + I18n.t("appSubtitle")
-    color: Theme.bgApp
+    // Base dark fallback
+    Rectangle {
+        anchors.fill: parent
+        color: "#0a0d13"
+    }
+
+    // Looping Video Background Layer (Direct Hardware Accelerated)
+    VideoBackground {
+        id: bgVideo
+        anchors.fill: parent
+        source: "assets/bg.mp4"
+        playing: true
+    }
+
+    // Frosted dark overlay for high contrast readability
+    Rectangle {
+        anchors.fill: parent
+        color: "#070a12"
+        opacity: 0.50
+    }
 
     // Subtle ambient gradient background glow
     Rectangle {
-        width: 400
-        height: 400
-        radius: 200
+        width: 420
+        height: 420
+        radius: 210
         anchors.top: parent.top
         anchors.right: parent.right
-        anchors.margins: -100
-        opacity: 0.10
-        color: Theme.accentPurple
+        anchors.margins: -120
+        opacity: 0.08
+        color: Theme.accentBlue
     }
 
     Rectangle {
-        width: 450
-        height: 450
-        radius: 225
+        width: 380
+        height: 380
+        radius: 190
         anchors.bottom: parent.bottom
         anchors.left: parent.left
-        anchors.margins: -120
-        opacity: 0.08
+        anchors.margins: -100
+        opacity: 0.06
         color: Theme.accent
     }
 

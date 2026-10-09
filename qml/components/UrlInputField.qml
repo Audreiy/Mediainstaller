@@ -32,12 +32,36 @@ Item {
             anchors.bottomMargin: 8
             spacing: 12
 
-            // Link Icon
-            Text {
-                text: "🔗"
-                font.pixelSize: 20
+            // Link Vector Icon
+            Item {
+                width: 20; height: 20
                 anchors.verticalCenter: parent.verticalCenter
-                opacity: 0.7
+                Canvas {
+                    anchors.fill: parent
+                    onPaint: {
+                        var ctx = getContext("2d");
+                        ctx.reset();
+                        ctx.strokeStyle = Theme.accent;
+                        ctx.lineWidth = 1.8;
+                        ctx.lineCap = "round";
+
+                        // Left link loop
+                        ctx.beginPath();
+                        ctx.arc(7.5, 10, 3.8, Math.PI * 0.5, Math.PI * 1.5);
+                        ctx.stroke();
+
+                        // Right link loop
+                        ctx.beginPath();
+                        ctx.arc(12.5, 10, 3.8, -Math.PI * 0.5, Math.PI * 0.5);
+                        ctx.stroke();
+
+                        // Center connecting bar
+                        ctx.beginPath();
+                        ctx.moveTo(7, 10);
+                        ctx.lineTo(13, 10);
+                        ctx.stroke();
+                    }
+                }
             }
 
             // Input Field
@@ -116,7 +140,7 @@ Item {
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
                     GradientStop { position: 0.0; color: analyzeHover.hovered ? Theme.accentHover : Theme.accent }
-                    GradientStop { position: 1.0; color: analyzeHover.hovered ? Theme.accentPurple : Theme.accentSecondary }
+                    GradientStop { position: 1.0; color: analyzeHover.hovered ? Theme.accentBlueHover : Theme.accentBlue }
                 }
 
                 HoverHandler { id: analyzeHover }

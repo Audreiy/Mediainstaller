@@ -12,6 +12,7 @@
 #include "UrlAnalyzer.h"
 #include "FFmpegProcessor.h"
 #include "MediaInfo.h"
+#include "VideoBackgroundItem.h"
 
 void consoleHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(type);
@@ -51,6 +52,7 @@ int main(int argc, char *argv[]) {
 
     // Register custom types for QML
     qmlRegisterUncreatableType<MediaInfo>("MediaGrab", 1, 0, "MediaInfo", "MediaInfo is created by UrlAnalyzer");
+    qmlRegisterType<VideoBackgroundItem>("MediaGrab", 1, 0, "VideoBackground");
     qRegisterMetaType<MediaStreamOption>("MediaStreamOption");
 
     DownloadManager downloadManager;

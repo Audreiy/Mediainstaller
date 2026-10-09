@@ -34,6 +34,8 @@ qt_add_executable(MediaGrab
     src/core/DownloadManager.cpp
     src/media/FFmpegProcessor.h
     src/media/FFmpegProcessor.cpp
+    src/media/VideoBackgroundItem.h
+    src/media/VideoBackgroundItem.cpp
     app.rc
 )
 
@@ -78,6 +80,10 @@ target_link_libraries(MediaGrab PRIVATE
     Qt6::Quick
     Qt6::Qml
     Qt6::QuickControls2
+    mfplat
+    mfreadwrite
+    mfuuid
+    propsys
 )
 
 # Optional libcurl linking if found

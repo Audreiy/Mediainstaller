@@ -5,8 +5,8 @@ Item {
     id: root
     property real value: 0 // 0 to 100
     property color barColor: Theme.accent
-    property color barColorEnd: Theme.accentPurple
-    property color bgColor: Theme.bgElevated
+    property color barColorEnd: Theme.accentBlue
+    property color bgColor: Theme.bgInput
     property int barHeight: 8
     property bool showText: false
 

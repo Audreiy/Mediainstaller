@@ -2,35 +2,42 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    // Backgrounds
-    readonly property color bgApp: "#090D16"
-    readonly property color bgSidebar: "#0D1322"
-    readonly property color bgCard: "#131C2E"
-    readonly property color bgCardHover: "#18243B"
-    readonly property color bgInput: "#0F172A"
-    readonly property color bgElevated: "#1E293B"
+    // Backgrounds - Translucent frosted obsidian glass HUD (Saydam cam estetiği)
+    readonly property color bgApp: "transparent"
+    readonly property color bgSidebar: "#d6080b12"      // 84% opacity deep glass
+    readonly property color bgCard: "#bf0f1420"         // 75% opacity translucent card
+    readonly property color bgCardHover: "#d9161f2e"    // 85% opacity hover
+    readonly property color bgInput: "#aa0c1018"        // 67% opacity input
+    readonly property color bgElevated: "#cc131826"     // 80% opacity elevated
 
-    // Accents & Gradients
-    readonly property color accent: "#3B82F6"
-    readonly property color accentHover: "#60A5FA"
-    readonly property color accentPurple: "#8B5CF6"
-    readonly property color accentSecondary: "#8B5CF6"
-    readonly property color accentPink: "#EC4899"
-    readonly property color accentCyan: "#06B6D4"
+    // Signature Accents & Gradients (Mint/Teal to Electric Blue)
+    readonly property color accent: "#00d29d"          // Neon Mint/Teal
+    readonly property color accentHover: "#10e8b1"     // Lighter vibrant teal
+    readonly property color accentBlue: "#2563eb"      // Electric Blue
+    readonly property color accentBlueHover: "#3b82f6" // Brighter Blue
+    readonly property color accentPurple: "#8b5cf6"
+    readonly property color accentSecondary: "#2563eb"
+    readonly property color accentCyan: "#06b6d4"
 
-    readonly property color success: "#10B981"
-    readonly property color warning: "#F59E0B"
-    readonly property color error: "#EF4444"
+    // Active Sidebar Tab styling
+    readonly property color activeTabBg: "#e60a2822"
+    readonly property color activeTabBorder: "#00d29d"
+    readonly property color activeTabIndicator: "#00d29d"
+    readonly property color activeTabText: "#00d29d"
 
-    // Text
-    readonly property color textPrimary: "#F8FAFC"
-    readonly property color textSecondary: "#94A3B8"
-    readonly property color textMuted: "#64748B"
+    readonly property color success: "#00d29d"
+    readonly property color warning: "#f59e0b"
+    readonly property color error: "#ef4444"
+
+    // Text hierarchy
+    readonly property color textPrimary: "#f3f4f6"
+    readonly property color textSecondary: "#94a3b8"
+    readonly property color textMuted: "#5e6a7c"
 
     // Borders
-    readonly property color borderDim: "#1E293B"
-    readonly property color borderBright: "#334155"
-    readonly property color borderHighlight: "#3B82F6"
+    readonly property color borderDim: "#1a1f2b"
+    readonly property color borderBright: "#272f40"
+    readonly property color borderHighlight: "#00d29d"
 
     // Radii
     readonly property int radiusSm: 6
@@ -39,5 +46,5 @@ QtObject {
     readonly property int radiusXl: 20
 
     // Font Family
-    readonly property string fontFamily: "Segoe UI, Inter, sans-serif"
+    readonly property string fontFamily: "Segoe UI, Inter, -apple-system, sans-serif"
 }

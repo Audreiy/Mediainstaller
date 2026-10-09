@@ -58,8 +58,27 @@ Item {
 
                 Row {
                     anchors.centerIn: parent
-                    spacing: 6
-                    Text { text: "🧹"; font.pixelSize: 13 }
+                    spacing: 8
+                    Canvas {
+                        id: clearCanvas
+                        width: 12; height: 12
+                        anchors.verticalCenter: parent.verticalCenter
+                        onPaint: {
+                            var ctx = getContext("2d");
+                            ctx.reset();
+                            ctx.strokeStyle = clearMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary;
+                            ctx.lineWidth = 1.5;
+                            ctx.lineCap = "round";
+                            ctx.beginPath();
+                            ctx.moveTo(2, 2); ctx.lineTo(10, 10);
+                            ctx.moveTo(10, 2); ctx.lineTo(2, 10);
+                            ctx.stroke();
+                        }
+                        Connections {
+                            target: clearMouse
+                            function onContainsMouseChanged() { clearCanvas.requestPaint(); }
+                        }
+                    }
                     Text {
                         text: I18n.t("clearFinished")
                         color: clearMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
@@ -90,12 +109,31 @@ Item {
                     height: 56
                     radius: 28
                     color: Theme.bgElevated
+                    border.color: Theme.borderDim
+                    border.width: 1
                     anchors.horizontalCenter: parent.horizontalCenter
 
-                    Text {
+                    Canvas {
                         anchors.centerIn: parent
-                        text: "📥"
-                        font.pixelSize: 26
+                        width: 24; height: 24
+                        onPaint: {
+                            var ctx = getContext("2d");
+                            ctx.reset();
+                            ctx.strokeStyle = Theme.accent;
+                            ctx.fillStyle = Theme.accent;
+                            ctx.lineWidth = 2;
+                            ctx.lineCap = "round";
+                            ctx.lineJoin = "round";
+
+                            ctx.beginPath();
+                            ctx.moveTo(12, 3); ctx.lineTo(12, 15);
+                            ctx.moveTo(7, 10); ctx.lineTo(12, 15); ctx.lineTo(17, 10);
+                            ctx.stroke();
+
+                            ctx.beginPath();
+                            ctx.moveTo(4, 15); ctx.lineTo(4, 20); ctx.lineTo(20, 20); ctx.lineTo(20, 15);
+                            ctx.stroke();
+                        }
                     }
                 }
 

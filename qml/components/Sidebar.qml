@@ -12,19 +12,19 @@ Rectangle {
 
     Column {
         anchors.fill: parent
-        anchors.margins: 18
+        anchors.margins: 16
         spacing: 24
 
         // Logo & Branding
         Row {
             spacing: 12
             Rectangle {
-                width: 42
-                height: 42
+                width: 40
+                height: 40
                 radius: 12
                 color: Theme.bgElevated
-                border.color: Theme.accent
-                border.width: 1.5
+                border.color: Theme.borderBright
+                border.width: 1
                 clip: true
 
                 Image {
@@ -42,13 +42,13 @@ Rectangle {
                 Text {
                     text: I18n.t("appName")
                     color: Theme.textPrimary
-                    font.pixelSize: 16
+                    font.pixelSize: 15
                     font.family: Theme.fontFamily
                     font.weight: Font.Bold
                 }
                 Text {
                     text: I18n.t("appVersion")
-                    color: Theme.accentHover
+                    color: Theme.accent
                     font.pixelSize: 10
                     font.family: Theme.fontFamily
                     font.weight: Font.DemiBold
@@ -65,16 +65,28 @@ Rectangle {
         // Navigation Menu
         Column {
             width: parent.width
-            spacing: 8
+            spacing: 6
 
-            // Tab 0: Dashboard (İndirici)
+            // Tab 0: Dashboard (Downloader)
             Rectangle {
                 width: parent.width
-                height: 44
+                height: 42
                 radius: Theme.radiusMd
-                color: (root.activeTab === 0) ? (Theme.accent + "22") : (tab0Mouse.containsMouse ? Theme.bgCardHover : "transparent")
-                border.color: (root.activeTab === 0) ? (Theme.accent + "55") : "transparent"
+                color: (root.activeTab === 0) ? Theme.activeTabBg : (tab0Mouse.containsMouse ? Theme.bgCardHover : "transparent")
+                border.color: (root.activeTab === 0) ? Theme.activeTabBorder : "transparent"
                 border.width: 1
+
+                // Left vertical neon indicator line (like the screenshot)
+                Rectangle {
+                    width: 3
+                    height: 18
+                    radius: 2
+                    color: Theme.activeTabIndicator
+                    anchors.left: parent.left
+                    anchors.leftMargin: 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.activeTab === 0
+                }
 
                 MouseArea {
                     id: tab0Mouse
@@ -86,18 +98,54 @@ Rectangle {
 
                 Row {
                     anchors.fill: parent
-                    anchors.margins: 12
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 12
                     spacing: 12
 
-                    Text {
-                        text: "📥"
-                        font.pixelSize: 16
+                    Item {
+                        width: 18; height: 18
                         anchors.verticalCenter: parent.verticalCenter
+                        Canvas {
+                            id: tab0Canvas
+                            anchors.fill: parent
+                            onPaint: {
+                                var ctx = getContext("2d");
+                                ctx.reset();
+                                ctx.strokeStyle = (root.activeTab === 0) ? Theme.accent : (tab0Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary);
+                                ctx.fillStyle = ctx.strokeStyle;
+                                ctx.lineWidth = 1.75;
+                                ctx.lineCap = "round";
+                                ctx.lineJoin = "round";
+
+                                ctx.beginPath();
+                                ctx.moveTo(9, 2);
+                                ctx.lineTo(9, 11);
+                                ctx.moveTo(5.5, 7.5);
+                                ctx.lineTo(9, 11);
+                                ctx.lineTo(12.5, 7.5);
+                                ctx.stroke();
+
+                                ctx.beginPath();
+                                ctx.moveTo(3, 11);
+                                ctx.lineTo(3, 15);
+                                ctx.lineTo(15, 15);
+                                ctx.lineTo(15, 11);
+                                ctx.stroke();
+                            }
+                            Connections {
+                                target: root
+                                function onActiveTabChanged() { tab0Canvas.requestPaint(); }
+                            }
+                            Connections {
+                                target: tab0Mouse
+                                function onContainsMouseChanged() { tab0Canvas.requestPaint(); }
+                            }
+                        }
                     }
 
                     Text {
                         text: I18n.t("navDownloader")
-                        color: (root.activeTab === 0) ? Theme.textPrimary : Theme.textSecondary
+                        color: (root.activeTab === 0) ? Theme.activeTabText : (tab0Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
                         font.weight: (root.activeTab === 0) ? Font.DemiBold : Font.Normal
@@ -109,11 +157,23 @@ Rectangle {
             // Tab 1: Queue
             Rectangle {
                 width: parent.width
-                height: 44
+                height: 42
                 radius: Theme.radiusMd
-                color: (root.activeTab === 1) ? (Theme.accent + "22") : (tab1Mouse.containsMouse ? Theme.bgCardHover : "transparent")
-                border.color: (root.activeTab === 1) ? (Theme.accent + "55") : "transparent"
+                color: (root.activeTab === 1) ? Theme.activeTabBg : (tab1Mouse.containsMouse ? Theme.bgCardHover : "transparent")
+                border.color: (root.activeTab === 1) ? Theme.activeTabBorder : "transparent"
                 border.width: 1
+
+                // Left vertical neon indicator line
+                Rectangle {
+                    width: 3
+                    height: 18
+                    radius: 2
+                    color: Theme.activeTabIndicator
+                    anchors.left: parent.left
+                    anchors.leftMargin: 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.activeTab === 1
+                }
 
                 MouseArea {
                     id: tab1Mouse
@@ -125,18 +185,62 @@ Rectangle {
 
                 Row {
                     anchors.fill: parent
-                    anchors.margins: 12
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 12
                     spacing: 12
 
-                    Text {
-                        text: "📋"
-                        font.pixelSize: 16
+                    Item {
+                        width: 18; height: 18
                         anchors.verticalCenter: parent.verticalCenter
+                        Canvas {
+                            id: tab1Canvas
+                            anchors.fill: parent
+                            onPaint: {
+                                var ctx = getContext("2d");
+                                ctx.reset();
+                                ctx.strokeStyle = (root.activeTab === 1) ? Theme.accent : (tab1Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary);
+                                ctx.fillStyle = ctx.strokeStyle;
+                                ctx.lineWidth = 1.75;
+                                ctx.lineCap = "round";
+
+                                ctx.beginPath();
+                                ctx.moveTo(7, 4);
+                                ctx.lineTo(15, 4);
+                                ctx.stroke();
+                                ctx.beginPath();
+                                ctx.arc(3.5, 4, 1.2, 0, Math.PI * 2);
+                                ctx.fill();
+
+                                ctx.beginPath();
+                                ctx.moveTo(7, 9);
+                                ctx.lineTo(15, 9);
+                                ctx.stroke();
+                                ctx.beginPath();
+                                ctx.arc(3.5, 9, 1.2, 0, Math.PI * 2);
+                                ctx.fill();
+
+                                ctx.beginPath();
+                                ctx.moveTo(7, 14);
+                                ctx.lineTo(15, 14);
+                                ctx.stroke();
+                                ctx.beginPath();
+                                ctx.arc(3.5, 14, 1.2, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                            Connections {
+                                target: root
+                                function onActiveTabChanged() { tab1Canvas.requestPaint(); }
+                            }
+                            Connections {
+                                target: tab1Mouse
+                                function onContainsMouseChanged() { tab1Canvas.requestPaint(); }
+                            }
+                        }
                     }
 
                     Text {
                         text: I18n.t("navQueue")
-                        color: (root.activeTab === 1) ? Theme.textPrimary : Theme.textSecondary
+                        color: (root.activeTab === 1) ? Theme.activeTabText : (tab1Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
                         font.weight: (root.activeTab === 1) ? Font.DemiBold : Font.Normal
@@ -157,7 +261,7 @@ Rectangle {
                         Text {
                             anchors.centerIn: parent
                             text: queueModel.activeDownloadCount
-                            color: "#FFFFFF"
+                            color: "#07090e"
                             font.pixelSize: 10
                             font.weight: Font.Bold
                         }
@@ -168,11 +272,23 @@ Rectangle {
             // Tab 2: Settings
             Rectangle {
                 width: parent.width
-                height: 44
+                height: 42
                 radius: Theme.radiusMd
-                color: (root.activeTab === 2) ? (Theme.accent + "22") : (tab2Mouse.containsMouse ? Theme.bgCardHover : "transparent")
-                border.color: (root.activeTab === 2) ? (Theme.accent + "55") : "transparent"
+                color: (root.activeTab === 2) ? Theme.activeTabBg : (tab2Mouse.containsMouse ? Theme.bgCardHover : "transparent")
+                border.color: (root.activeTab === 2) ? Theme.activeTabBorder : "transparent"
                 border.width: 1
+
+                // Left vertical neon indicator line
+                Rectangle {
+                    width: 3
+                    height: 18
+                    radius: 2
+                    color: Theme.activeTabIndicator
+                    anchors.left: parent.left
+                    anchors.leftMargin: 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.activeTab === 2
+                }
 
                 MouseArea {
                     id: tab2Mouse
@@ -184,18 +300,53 @@ Rectangle {
 
                 Row {
                     anchors.fill: parent
-                    anchors.margins: 12
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 12
                     spacing: 12
 
-                    Text {
-                        text: "⚙"
-                        font.pixelSize: 16
+                    Item {
+                        width: 18; height: 18
                         anchors.verticalCenter: parent.verticalCenter
+                        Canvas {
+                            id: tab2Canvas
+                            anchors.fill: parent
+                            onPaint: {
+                                var ctx = getContext("2d");
+                                ctx.reset();
+                                ctx.strokeStyle = (root.activeTab === 2) ? Theme.accent : (tab2Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary);
+                                ctx.lineWidth = 1.75;
+                                ctx.lineCap = "round";
+
+                                ctx.beginPath();
+                                ctx.arc(9, 9, 3.2, 0, Math.PI * 2);
+                                ctx.stroke();
+
+                                for (var i = 0; i < 6; i++) {
+                                    var angle = i * Math.PI / 3;
+                                    var x1 = 9 + Math.cos(angle) * 4.5;
+                                    var y1 = 9 + Math.sin(angle) * 4.5;
+                                    var x2 = 9 + Math.cos(angle) * 7.5;
+                                    var y2 = 9 + Math.sin(angle) * 7.5;
+                                    ctx.beginPath();
+                                    ctx.moveTo(x1, y1);
+                                    ctx.lineTo(x2, y2);
+                                    ctx.stroke();
+                                }
+                            }
+                            Connections {
+                                target: root
+                                function onActiveTabChanged() { tab2Canvas.requestPaint(); }
+                            }
+                            Connections {
+                                target: tab2Mouse
+                                function onContainsMouseChanged() { tab2Canvas.requestPaint(); }
+                            }
+                        }
                     }
 
                     Text {
                         text: I18n.t("navSettings")
-                        color: (root.activeTab === 2) ? Theme.textPrimary : Theme.textSecondary
+                        color: (root.activeTab === 2) ? Theme.activeTabText : (tab2Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
                         font.weight: (root.activeTab === 2) ? Font.DemiBold : Font.Normal
@@ -205,12 +356,12 @@ Rectangle {
             }
         }
 
-        Item { height: parent.height - 320; width: 1 }
+        Item { height: parent.height - 310; width: 1 }
 
         // Bottom status badge: FFmpeg & C++ Core
         Rectangle {
             width: parent.width
-            height: 52
+            height: 44
             radius: Theme.radiusMd
             color: Theme.bgElevated
             border.color: Theme.borderDim
@@ -221,10 +372,10 @@ Rectangle {
                 spacing: 8
 
                 Rectangle {
-                    width: 8
-                    height: 8
-                    radius: 4
-                    color: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? Theme.success : (ffmpegProcessor.isFFmpegAvailable ? Theme.accentHover : Theme.warning)
+                    width: 7
+                    height: 7
+                    radius: 3.5
+                    color: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? Theme.accent : (ffmpegProcessor.isFFmpegAvailable ? Theme.accentHover : Theme.warning)
                     anchors.verticalCenter: parent.verticalCenter
                 }
 

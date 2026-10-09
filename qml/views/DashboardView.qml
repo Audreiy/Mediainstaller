@@ -71,7 +71,18 @@ Item {
                 Row {
                     anchors.centerIn: parent
                     spacing: 10
-                    Text { text: "⚠️"; font.pixelSize: 14 }
+                    Rectangle {
+                        width: 16; height: 16; radius: 8
+                        color: Theme.error
+                        anchors.verticalCenter: parent.verticalCenter
+                        Text {
+                            anchors.centerIn: parent
+                            text: "!"
+                            color: "#ffffff"
+                            font.pixelSize: 11
+                            font.weight: Font.Bold
+                        }
+                    }
                     Text {
                         text: root.currentErrorMessage
                         color: Theme.error
@@ -115,7 +126,11 @@ Item {
 
                         Row {
                             spacing: 8
-                            Text { text: "⚡"; font.pixelSize: 16 }
+                            Rectangle {
+                                width: 6; height: 6; radius: 3
+                                color: Theme.accent
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
                             Text {
                                 text: I18n.t("feature1Title")
                                 color: Theme.textPrimary
@@ -150,7 +165,11 @@ Item {
 
                         Row {
                             spacing: 8
-                            Text { text: "🎧"; font.pixelSize: 16 }
+                            Rectangle {
+                                width: 6; height: 6; radius: 3
+                                color: Theme.accentBlue
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
                             Text {
                                 text: I18n.t("feature2Title")
                                 color: Theme.textPrimary

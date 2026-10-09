@@ -49,11 +49,21 @@ Rectangle {
                     visible: status === Image.Ready
                 }
 
-                Text {
+                Rectangle {
                     anchors.centerIn: parent
                     visible: !thumbImg.visible
-                    text: (root.selectedOptionId === "audio_mp3") ? "🎵" : "🎬"
-                    font.pixelSize: 22
+                    width: 36; height: 24; radius: 4
+                    color: Theme.bgElevated
+                    border.color: Theme.borderBright
+                    border.width: 1
+                    Text {
+                        anchors.centerIn: parent
+                        text: (root.selectedOptionId === "audio_mp3") ? "MP3" : "MP4"
+                        color: Theme.accent
+                        font.pixelSize: 11
+                        font.family: Theme.fontFamily
+                        font.weight: Font.Bold
+                    }
                 }
             }
 
@@ -138,7 +148,7 @@ Rectangle {
                 width: (parent.width - 12) / 2
                 height: 70
                 radius: Theme.radiusMd
-                color: (root.selectedOptionId !== "audio_mp3") ? (Theme.accent + "18") : (videoHover.hovered ? Theme.bgCardHover : Theme.bgInput)
+                color: (root.selectedOptionId !== "audio_mp3") ? Theme.activeTabBg : (videoHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
                 border.color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.borderDim
                 border.width: (root.selectedOptionId !== "audio_mp3") ? 2 : 1
 
@@ -150,10 +160,19 @@ Rectangle {
                     anchors.margins: 12
                     spacing: 12
 
-                    Text {
-                        text: "📹"
-                        font.pixelSize: 22
+                    Rectangle {
+                        width: 38; height: 26; radius: 6
+                        color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.bgElevated
+                        border.color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.borderDim
                         anchors.verticalCenter: parent.verticalCenter
+                        Text {
+                            anchors.centerIn: parent
+                            text: "MP4"
+                            color: (root.selectedOptionId !== "audio_mp3") ? "#07090e" : Theme.textPrimary
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            font.weight: Font.Bold
+                        }
                     }
 
                     Column {
@@ -162,7 +181,7 @@ Rectangle {
 
                         Text {
                             text: I18n.t("videoAudio")
-                            color: Theme.textPrimary
+                            color: (root.selectedOptionId !== "audio_mp3") ? Theme.accent : Theme.textPrimary
                             font.pixelSize: 13
                             font.family: Theme.fontFamily
                             font.weight: Font.DemiBold
@@ -184,8 +203,8 @@ Rectangle {
                 width: (parent.width - 12) / 2
                 height: 70
                 radius: Theme.radiusMd
-                color: (root.selectedOptionId === "audio_mp3") ? (Theme.accentPurple + "18") : (audioHover.hovered ? Theme.bgCardHover : Theme.bgInput)
-                border.color: (root.selectedOptionId === "audio_mp3") ? Theme.accentPurple : Theme.borderDim
+                color: (root.selectedOptionId === "audio_mp3") ? Theme.activeTabBg : (audioHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
+                border.color: (root.selectedOptionId === "audio_mp3") ? Theme.accent : Theme.borderDim
                 border.width: (root.selectedOptionId === "audio_mp3") ? 2 : 1
 
                 HoverHandler { id: audioHover }
@@ -196,10 +215,19 @@ Rectangle {
                     anchors.margins: 12
                     spacing: 12
 
-                    Text {
-                        text: "🎧"
-                        font.pixelSize: 22
+                    Rectangle {
+                        width: 38; height: 26; radius: 6
+                        color: (root.selectedOptionId === "audio_mp3") ? Theme.accent : Theme.bgElevated
+                        border.color: (root.selectedOptionId === "audio_mp3") ? Theme.accent : Theme.borderDim
                         anchors.verticalCenter: parent.verticalCenter
+                        Text {
+                            anchors.centerIn: parent
+                            text: "MP3"
+                            color: (root.selectedOptionId === "audio_mp3") ? "#07090e" : Theme.textPrimary
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            font.weight: Font.Bold
+                        }
                     }
 
                     Column {
@@ -244,9 +272,9 @@ Rectangle {
                     anchors.margins: 12
                     spacing: 8
 
-                    Text {
-                        text: "📁"
-                        font.pixelSize: 14
+                    Rectangle {
+                        width: 6; height: 6; radius: 3
+                        color: Theme.accent
                         anchors.verticalCenter: parent.verticalCenter
                     }
 
@@ -271,8 +299,8 @@ Rectangle {
 
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: dlHover.hovered ? Theme.success : "#059669" }
-                    GradientStop { position: 1.0; color: dlHover.hovered ? "#34D399" : Theme.success }
+                    GradientStop { position: 0.0; color: dlHover.hovered ? Theme.accentHover : Theme.accent }
+                    GradientStop { position: 1.0; color: dlHover.hovered ? Theme.accentBlueHover : Theme.accentBlue }
                 }
 
                 HoverHandler { id: dlHover }
@@ -282,9 +310,10 @@ Rectangle {
                     spacing: 8
 
                     Text {
-                        text: "⬇"
+                        text: "▷"
                         color: "#FFFFFF"
-                        font.pixelSize: 15
+                        font.pixelSize: 14
+                        font.bold: true
                     }
 
                     Text {

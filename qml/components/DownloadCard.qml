@@ -29,8 +29,11 @@ Rectangle {
 
             Text {
                 anchors.centerIn: parent
-                text: model.isAudioOnly ? "🎵" : "🎬"
-                font.pixelSize: 20
+                text: model.isAudioOnly ? "MP3" : "MP4"
+                color: Theme.accent
+                font.pixelSize: 11
+                font.family: Theme.fontFamily
+                font.weight: Font.Bold
             }
         }
 
@@ -171,10 +174,32 @@ Rectangle {
                     onClicked: queueModel.openFileFolder(model.id)
                 }
 
-                Text {
+                Canvas {
+                    id: folderCanvas
                     anchors.centerIn: parent
-                    text: "📂"
-                    font.pixelSize: 14
+                    width: 14; height: 14
+                    onPaint: {
+                        var ctx = getContext("2d");
+                        ctx.reset();
+                        ctx.strokeStyle = folderMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary;
+                        ctx.lineWidth = 1.4;
+                        ctx.lineCap = "round";
+                        ctx.lineJoin = "round";
+                        ctx.beginPath();
+                        ctx.moveTo(1, 4);
+                        ctx.lineTo(1, 12);
+                        ctx.lineTo(13, 12);
+                        ctx.lineTo(13, 4);
+                        ctx.lineTo(7, 4);
+                        ctx.lineTo(5, 2);
+                        ctx.lineTo(1, 2);
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                    Connections {
+                        target: folderMouse
+                        function onContainsMouseChanged() { folderCanvas.requestPaint(); }
+                    }
                 }
             }
 

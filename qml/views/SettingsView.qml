@@ -61,9 +61,9 @@ Item {
 
                     Row {
                         spacing: 8
-                        Text {
-                            text: "🌐"
-                            font.pixelSize: 15
+                        Rectangle {
+                            width: 6; height: 6; radius: 3
+                            color: Theme.accent
                             anchors.verticalCenter: parent.verticalCenter
                         }
                         Text {
@@ -92,7 +92,7 @@ Item {
                             width: (parent.width - 24) / 3
                             height: 42
                             radius: Theme.radiusMd
-                            color: (I18n.language === "en") ? (Theme.accent + "22") : (enMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
+                            color: (I18n.language === "en") ? Theme.activeTabBg : (enMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
                             border.color: (I18n.language === "en") ? Theme.accent : Theme.borderDim
                             border.width: (I18n.language === "en") ? 2 : 1
 
@@ -106,14 +106,27 @@ Item {
 
                             Row {
                                 anchors.centerIn: parent
-                                spacing: 8
-                                Text { text: "🇬🇧"; font.pixelSize: 16 }
+                                spacing: 10
+                                Rectangle {
+                                    width: 28; height: 20; radius: 4
+                                    color: (I18n.language === "en") ? Theme.accent : Theme.borderBright
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "EN"
+                                        color: (I18n.language === "en") ? "#07090e" : Theme.textPrimary
+                                        font.pixelSize: 11
+                                        font.family: Theme.fontFamily
+                                        font.weight: Font.Bold
+                                    }
+                                }
                                 Text {
                                     text: I18n.t("langEn")
-                                    color: (I18n.language === "en") ? Theme.accentHover : Theme.textPrimary
+                                    color: (I18n.language === "en") ? Theme.activeTabText : Theme.textPrimary
                                     font.pixelSize: 12
                                     font.family: Theme.fontFamily
                                     font.weight: (I18n.language === "en") ? Font.Bold : Font.Medium
+                                    anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
                         }
@@ -123,7 +136,7 @@ Item {
                             width: (parent.width - 24) / 3
                             height: 42
                             radius: Theme.radiusMd
-                            color: (I18n.language === "tr") ? (Theme.accent + "22") : (trMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
+                            color: (I18n.language === "tr") ? Theme.activeTabBg : (trMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
                             border.color: (I18n.language === "tr") ? Theme.accent : Theme.borderDim
                             border.width: (I18n.language === "tr") ? 2 : 1
 
@@ -137,14 +150,27 @@ Item {
 
                             Row {
                                 anchors.centerIn: parent
-                                spacing: 8
-                                Text { text: "🇹🇷"; font.pixelSize: 16 }
+                                spacing: 10
+                                Rectangle {
+                                    width: 28; height: 20; radius: 4
+                                    color: (I18n.language === "tr") ? Theme.accent : Theme.borderBright
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "TR"
+                                        color: (I18n.language === "tr") ? "#07090e" : Theme.textPrimary
+                                        font.pixelSize: 11
+                                        font.family: Theme.fontFamily
+                                        font.weight: Font.Bold
+                                    }
+                                }
                                 Text {
                                     text: I18n.t("langTr")
-                                    color: (I18n.language === "tr") ? Theme.accentHover : Theme.textPrimary
+                                    color: (I18n.language === "tr") ? Theme.activeTabText : Theme.textPrimary
                                     font.pixelSize: 12
                                     font.family: Theme.fontFamily
                                     font.weight: (I18n.language === "tr") ? Font.Bold : Font.Medium
+                                    anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
                         }
@@ -154,7 +180,7 @@ Item {
                             width: (parent.width - 24) / 3
                             height: 42
                             radius: Theme.radiusMd
-                            color: (I18n.language === "ru") ? (Theme.accent + "22") : (ruMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
+                            color: (I18n.language === "ru") ? Theme.activeTabBg : (ruMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated)
                             border.color: (I18n.language === "ru") ? Theme.accent : Theme.borderDim
                             border.width: (I18n.language === "ru") ? 2 : 1
 
@@ -168,14 +194,27 @@ Item {
 
                             Row {
                                 anchors.centerIn: parent
-                                spacing: 8
-                                Text { text: "🇷🇺"; font.pixelSize: 16 }
+                                spacing: 10
+                                Rectangle {
+                                    width: 28; height: 20; radius: 4
+                                    color: (I18n.language === "ru") ? Theme.accent : Theme.borderBright
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "RU"
+                                        color: (I18n.language === "ru") ? "#07090e" : Theme.textPrimary
+                                        font.pixelSize: 11
+                                        font.family: Theme.fontFamily
+                                        font.weight: Font.Bold
+                                    }
+                                }
                                 Text {
                                     text: I18n.t("langRu")
-                                    color: (I18n.language === "ru") ? Theme.accentHover : Theme.textPrimary
+                                    color: (I18n.language === "ru") ? Theme.activeTabText : Theme.textPrimary
                                     font.pixelSize: 12
                                     font.family: Theme.fontFamily
                                     font.weight: (I18n.language === "ru") ? Font.Bold : Font.Medium
+                                    anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
                         }
@@ -197,12 +236,21 @@ Item {
                     anchors.margins: 20
                     spacing: 12
 
-                    Text {
-                        text: "📁 " + I18n.t("storageSection")
-                        color: Theme.textPrimary
-                        font.pixelSize: 14
-                        font.family: Theme.fontFamily
-                        font.weight: Font.DemiBold
+                    Row {
+                        spacing: 8
+                        Rectangle {
+                            width: 6; height: 6; radius: 3
+                            color: Theme.accent
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: I18n.t("storageSection")
+                            color: Theme.textPrimary
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
                     }
 
                     Row {
@@ -277,8 +325,17 @@ Item {
                         height: 44
                         radius: Theme.radiusMd
                         color: Theme.bgElevated
+                        border.color: Theme.borderDim
+                        border.width: 1
                         anchors.verticalCenter: parent.verticalCenter
-                        Text { anchors.centerIn: parent; text: "🎬"; font.pixelSize: 22 }
+                        Text {
+                            anchors.centerIn: parent
+                            text: "FF"
+                            color: Theme.accentCyan
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.Bold
+                        }
                     }
 
                     Column {
@@ -344,8 +401,17 @@ Item {
                         height: 44
                         radius: Theme.radiusMd
                         color: Theme.bgElevated
+                        border.color: Theme.borderDim
+                        border.width: 1
                         anchors.verticalCenter: parent.verticalCenter
-                        Text { anchors.centerIn: parent; text: "⚡"; font.pixelSize: 22 }
+                        Text {
+                            anchors.centerIn: parent
+                            text: "DL"
+                            color: Theme.accent
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.Bold
+                        }
                     }
 
                     Column {
@@ -406,12 +472,21 @@ Item {
                     anchors.margins: 20
                     spacing: 8
 
-                    Text {
-                        text: "ℹ️ " + I18n.t("aboutTitle")
-                        color: Theme.textPrimary
-                        font.pixelSize: 14
-                        font.family: Theme.fontFamily
-                        font.weight: Font.DemiBold
+                    Row {
+                        spacing: 8
+                        Rectangle {
+                            width: 6; height: 6; radius: 3
+                            color: Theme.accent
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: I18n.t("aboutTitle")
+                            color: Theme.textPrimary
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
                     }
 
                     Text {
