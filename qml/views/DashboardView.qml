@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import MediaGrab
 
 Item {
@@ -61,35 +62,49 @@ Item {
 
             // Error banner (if any)
             Rectangle {
+                id: errorBanner
                 visible: root.currentErrorMessage.length > 0
                 width: parent.width
-                height: 44
+                implicitHeight: visible ? (errorRow.implicitHeight + 28) : 0
+                height: implicitHeight
                 radius: Theme.radiusMd
                 color: Theme.error + "18"
                 border.color: Theme.error + "55"
                 border.width: 1
 
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 10
+                RowLayout {
+                    id: errorRow
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 14
+                    spacing: 12
+
                     Rectangle {
-                        width: 16; height: 16; radius: 8
+                        width: 22
+                        height: 22
+                        radius: 11
                         color: Theme.error
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.alignment: Qt.AlignTop
+
                         Text {
                             anchors.centerIn: parent
                             text: "!"
                             color: "#ffffff"
-                            font.pixelSize: 11
+                            font.pixelSize: 12
                             font.weight: Font.Bold
                         }
                     }
+
                     Text {
+                        Layout.fillWidth: true
                         text: root.currentErrorMessage
                         color: Theme.error
                         font.pixelSize: 12
                         font.family: Theme.fontFamily
                         font.weight: Font.Medium
+                        wrapMode: Text.WordWrap
+                        lineHeight: 1.25
                     }
                 }
             }

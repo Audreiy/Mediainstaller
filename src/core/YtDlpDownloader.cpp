@@ -50,6 +50,7 @@ void YtDlpDownloader::start() {
     args << "--no-playlist";
     args << "--no-check-certificates";
     args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+    args << "--extractor-args" << "generic:impersonate";
 
     if (!m_referer.isEmpty()) {
         args << "--referer" << m_referer;

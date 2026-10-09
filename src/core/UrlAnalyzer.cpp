@@ -80,13 +80,13 @@ void UrlAnalyzer::clear() {
 void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
     QString trimmed = rawUrl.trimmed();
     if (trimmed.isEmpty()) {
-        emit analysisError("Please enter a valid URL.");
+        emit analysisError(QString::fromUtf8("Lütfen geçerli bir bağlantı adresi girin."));
         return;
     }
 
     QUrl url(trimmed);
     if (!url.isValid() || (url.scheme() != "http" && url.scheme() != "https")) {
-        emit analysisError("Invalid URL format. URL must start with 'http://' or 'https://'.");
+        emit analysisError(QString::fromUtf8("Geçersiz bağlantı formatı. Bağlantı 'http://' veya 'https://' ile başlamalıdır."));
         return;
     }
 
@@ -578,6 +578,8 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
     args << "--no-warnings";
     args << "--no-playlist";
     args << "--no-check-certificates";
+    args << "--extractor-args" << "generic:impersonate";
+    args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
     args << "--referer" << rawUrl;
     args << rawUrl;
 
@@ -624,7 +626,7 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
     }
 
     // Informative guidance error if extraction failed
-    emit analysisError("Could not auto-detect video stream on this page. Tip: If using an anime/movie site (like Animecix), right-click the video player, copy the player/embed URL (Vidmoly, Sibnet, or .m3u8), and paste it directly!");
+    emit analysisError(QString::fromUtf8("Bu sayfadaki video akışı doğrudan algılanamadı.\n💡 İpucu: Film veya dizi sitelerinde (FullHDFilmizlesene, Animecix vb.) doğrudan video oynatıcısının üzerine sağ tıklayıp oynatıcı linkini (Vidmoly, Sibnet, Rapid veya .m3u8) kopyalayarak buraya yapıştırabilirsiniz."));
 }
 
 void UrlAnalyzer::startDirectProbe(const QUrl &url) {
@@ -664,7 +666,7 @@ void UrlAnalyzer::onHeadFinished() {
         QString errStr = m_currentReply->errorString();
         m_currentReply->deleteLater();
         m_currentReply = nullptr;
-        emit analysisError("URL analysis failed: " + errStr);
+        emit analysisError(QString::fromUtf8("Bağlantı analizi başarısız oldu: ") + errStr);
         return;
     }
 
