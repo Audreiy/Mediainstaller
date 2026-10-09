@@ -544,6 +544,80 @@ Item {
                 }
             }
 
+            // Setting Card 4: C++20 Core Engine Status
+            Rectangle {
+                width: parent.width
+                implicitHeight: 100
+                radius: Theme.radiusLg
+                color: Theme.bgCard
+                border.color: Theme.borderDim
+                border.width: 1
+
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    spacing: 16
+
+                    Rectangle {
+                        width: 44
+                        height: 44
+                        radius: Theme.radiusMd
+                        color: Theme.bgElevated
+                        border.color: Theme.borderDim
+                        border.width: 1
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "⚡"
+                            font.pixelSize: 22
+                        }
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        width: parent.width - 170
+
+                        Text {
+                            text: I18n.t("coreEngineTitle")
+                            color: Theme.textPrimary
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                        }
+                        Text {
+                            text: I18n.t("coreEngineDesc")
+                            color: Theme.textMuted
+                            font.pixelSize: 12
+                            font.family: Theme.fontFamily
+                            wrapMode: Text.WordWrap
+                            width: parent.width
+                        }
+                    }
+
+                    Rectangle {
+                        height: 28
+                        width: coreEngineBadgeText.width + 18
+                        radius: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: Theme.success + "22"
+                        border.color: Theme.success
+                        border.width: 1
+
+                        Text {
+                            id: coreEngineBadgeText
+                            anchors.centerIn: parent
+                            text: I18n.t("readyStatus")
+                            color: Theme.success
+                            font.pixelSize: 11
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                        }
+                    }
+                }
+            }
+
             // Setting Card: Application Updates (GitHub Releases)
             Rectangle {
                 width: parent.width

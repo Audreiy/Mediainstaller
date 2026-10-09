@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0 Pro",
+            "appVersion": "v1.0.1 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -91,6 +91,8 @@ QtObject {
             "ytdlpTitle": "yt-dlp Video Engine",
             "ytdlpAvailable": "yt-dlp is installed and ready for YouTube & online video downloads.",
             "ytdlpNotFound": "yt-dlp was not detected on this system.",
+            "coreEngineTitle": "C++20 Turbo Stream Engine",
+            "coreEngineDesc": "Native asynchronous direct-to-disk streaming & memory optimization engine.",
             "readyStatus": "Ready",
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
@@ -113,7 +115,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuİnstaller",
-            "appVersion": "v1.0 Pro",
+            "appVersion": "v1.0.1 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -193,6 +195,8 @@ QtObject {
             "ytdlpTitle": "yt-dlp Video Motoru",
             "ytdlpAvailable": "yt-dlp kurulu ve YouTube / web indirmeleri için hazır.",
             "ytdlpNotFound": "yt-dlp bu sistemde bulunamadı.",
+            "coreEngineTitle": "C++20 Turbo Akış Motoru",
+            "coreEngineDesc": "Doğrudan diske yazan yüksek performanslı asenkron ağ ve bellek yönetim motoru.",
             "readyStatus": "Hazır",
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
@@ -215,7 +219,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0 Pro",
+            "appVersion": "v1.0.1 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -295,6 +299,8 @@ QtObject {
             "ytdlpTitle": "Відеорушій yt-dlp",
             "ytdlpAvailable": "yt-dlp встановлено і готовий до завантаження з YouTube та веб-сайтів.",
             "ytdlpNotFound": "yt-dlp не виявлено в системі.",
+            "coreEngineTitle": "C++20 Турбо-рушій потоку",
+            "coreEngineDesc": "Високопродуктивний асинхронний рушій прямого запису на диск та оптимізації пам'яті.",
             "readyStatus": "Готово",
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",

@@ -364,37 +364,26 @@ Rectangle {
             }
         }
 
-        Item { height: parent.height - 310; width: 1 }
+        Item { height: Math.max(parent.height - 290, 20); width: 1 }
 
-        // Bottom status badge: FFmpeg & C++ Core
-        Rectangle {
-            width: parent.width
-            height: 44
-            radius: Theme.radiusMd
-            color: Theme.bgElevated
-            border.color: Theme.borderDim
-            border.width: 1
+        // Clean minimal footer
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 6
+            opacity: 0.65
 
-            Row {
-                anchors.centerIn: parent
-                spacing: 8
+            Rectangle {
+                width: 6; height: 6; radius: 3
+                color: Theme.accent
+                anchors.verticalCenter: parent.verticalCenter
+            }
 
-                Rectangle {
-                    width: 7
-                    height: 7
-                    radius: 3.5
-                    color: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? Theme.accent : (ffmpegProcessor.isFFmpegAvailable ? Theme.accentHover : Theme.warning)
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                Text {
-                    text: (ffmpegProcessor.isFFmpegAvailable && ffmpegProcessor.isYtDlpAvailable) ? (I18n.t("ready") + ": Core Engine") : "Engine Warning"
-                    color: Theme.textSecondary
-                    font.pixelSize: 11
-                    font.family: Theme.fontFamily
-                    font.weight: Font.Medium
-                    anchors.verticalCenter: parent.verticalCenter
-                }
+            Text {
+                text: "YuYuInstaller " + I18n.t("appVersion")
+                color: Theme.textMuted
+                font.pixelSize: 10
+                font.family: Theme.fontFamily
+                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }
