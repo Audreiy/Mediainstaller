@@ -17,6 +17,7 @@ QtObject {
             // Sidebar
             "navDownloader": "Downloader",
             "navQueue": "Download Queue",
+            "navUpdates": "Updates",
             "navSettings": "Settings",
             "activeDownloads": "Active",
             "ready": "Ready",
@@ -121,6 +122,7 @@ QtObject {
             // Sidebar
             "navDownloader": "İndirici",
             "navQueue": "İndirme Kuyruğu",
+            "navUpdates": "Güncellemeler",
             "navSettings": "Ayarlar",
             "activeDownloads": "Aktif",
             "ready": "Hazır",
@@ -225,6 +227,7 @@ QtObject {
             // Sidebar
             "navDownloader": "Завантажувач",
             "navQueue": "Черга завантажень",
+            "navUpdates": "Оновлення",
             "navSettings": "Налаштування",
             "activeDownloads": "Активні",
             "ready": "Готово",

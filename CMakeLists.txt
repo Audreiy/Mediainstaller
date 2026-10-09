@@ -74,6 +74,7 @@ qt_add_qml_module(MediaGrab
         qml/components/ProgressBarCustom.qml
         qml/views/DashboardView.qml
         qml/views/QueueView.qml
+        qml/views/UpdatesView.qml
         qml/views/SettingsView.qml
 )
 

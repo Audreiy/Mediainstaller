@@ -84,6 +84,10 @@ ApplicationWindow {
                     id: queueView
                 }
 
+                UpdatesView {
+                    id: updatesView
+                }
+
                 SettingsView {
                     id: settingsView
                 }

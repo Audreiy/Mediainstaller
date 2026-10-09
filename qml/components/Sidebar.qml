@@ -270,7 +270,7 @@ Rectangle {
                 }
             }
 
-            // Tab 2: Settings
+            // Tab 2: Updates
             Rectangle {
                 width: parent.width
                 height: 42
@@ -315,24 +315,26 @@ Rectangle {
                                 var ctx = getContext("2d");
                                 ctx.reset();
                                 ctx.strokeStyle = (root.activeTab === 2) ? Theme.accent : (tab2Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary);
+                                ctx.fillStyle = ctx.strokeStyle;
                                 ctx.lineWidth = 1.75;
                                 ctx.lineCap = "round";
 
+                                // Arc reload / loop
                                 ctx.beginPath();
-                                ctx.arc(9, 9, 3.2, 0, Math.PI * 2);
+                                ctx.arc(9, 9, 5.5, -Math.PI * 0.35, Math.PI * 1.15);
                                 ctx.stroke();
 
-                                for (var i = 0; i < 6; i++) {
-                                    var angle = i * Math.PI / 3;
-                                    var x1 = 9 + Math.cos(angle) * 4.5;
-                                    var y1 = 9 + Math.sin(angle) * 4.5;
-                                    var x2 = 9 + Math.cos(angle) * 7.5;
-                                    var y2 = 9 + Math.sin(angle) * 7.5;
-                                    ctx.beginPath();
-                                    ctx.moveTo(x1, y1);
-                                    ctx.lineTo(x2, y2);
-                                    ctx.stroke();
-                                }
+                                // Arrow tip
+                                ctx.beginPath();
+                                ctx.moveTo(13.5, 4);
+                                ctx.lineTo(15.5, 4);
+                                ctx.lineTo(15.5, 6.5);
+                                ctx.stroke();
+
+                                // Center sparkle
+                                ctx.beginPath();
+                                ctx.arc(9, 9, 1.2, 0, Math.PI * 2);
+                                ctx.fill();
                             }
                             Connections {
                                 target: root
@@ -346,7 +348,7 @@ Rectangle {
                     }
 
                     Text {
-                        text: I18n.t("navSettings")
+                        text: I18n.t("navUpdates")
                         color: (root.activeTab === 2) ? Theme.activeTabText : (tab2Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
                         font.pixelSize: 13
                         font.family: Theme.fontFamily
@@ -379,6 +381,92 @@ Rectangle {
                             width: 7; height: 7; radius: 3.5
                             color: Theme.accent
                         }
+                    }
+                }
+            }
+
+            // Tab 3: Settings
+            Rectangle {
+                width: parent.width
+                height: 42
+                radius: Theme.radiusMd
+                color: (root.activeTab === 3) ? Theme.activeTabBg : (tab3Mouse.containsMouse ? Theme.bgCardHover : "transparent")
+                border.color: (root.activeTab === 3) ? Theme.activeTabBorder : "transparent"
+                border.width: 1
+
+                // Left vertical neon indicator line
+                Rectangle {
+                    width: 3
+                    height: 18
+                    radius: 2
+                    color: Theme.activeTabIndicator
+                    anchors.left: parent.left
+                    anchors.leftMargin: 2
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.activeTab === 3
+                }
+
+                MouseArea {
+                    id: tab3Mouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.activeTab = 3
+                }
+
+                Row {
+                    anchors.fill: parent
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 12
+                    spacing: 12
+
+                    Item {
+                        width: 18; height: 18
+                        anchors.verticalCenter: parent.verticalCenter
+                        Canvas {
+                            id: tab3Canvas
+                            anchors.fill: parent
+                            onPaint: {
+                                var ctx = getContext("2d");
+                                ctx.reset();
+                                ctx.strokeStyle = (root.activeTab === 3) ? Theme.accent : (tab3Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary);
+                                ctx.lineWidth = 1.75;
+                                ctx.lineCap = "round";
+
+                                ctx.beginPath();
+                                ctx.arc(9, 9, 3.2, 0, Math.PI * 2);
+                                ctx.stroke();
+
+                                for (var i = 0; i < 6; i++) {
+                                    var angle = i * Math.PI / 3;
+                                    var x1 = 9 + Math.cos(angle) * 4.5;
+                                    var y1 = 9 + Math.sin(angle) * 4.5;
+                                    var x2 = 9 + Math.cos(angle) * 7.5;
+                                    var y2 = 9 + Math.sin(angle) * 7.5;
+                                    ctx.beginPath();
+                                    ctx.moveTo(x1, y1);
+                                    ctx.lineTo(x2, y2);
+                                    ctx.stroke();
+                                }
+                            }
+                            Connections {
+                                target: root
+                                function onActiveTabChanged() { tab3Canvas.requestPaint(); }
+                            }
+                            Connections {
+                                target: tab3Mouse
+                                function onContainsMouseChanged() { tab3Canvas.requestPaint(); }
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: I18n.t("navSettings")
+                        color: (root.activeTab === 3) ? Theme.activeTabText : (tab3Mouse.containsMouse ? Theme.textPrimary : Theme.textSecondary)
+                        font.pixelSize: 13
+                        font.family: Theme.fontFamily
+                        font.weight: (root.activeTab === 3) ? Font.DemiBold : Font.Normal
+                        anchors.verticalCenter: parent.verticalCenter
                     }
                 }
             }
