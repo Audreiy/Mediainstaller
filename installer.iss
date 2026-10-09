@@ -15,7 +15,8 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog commandline
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
@@ -71,7 +72,7 @@ Source: "build\qml\*"; DestDir: "{app}\qml"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\assets\app.ico"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\assets\app.ico"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\assets\app.ico"; Check: ShouldCreateDesktopIcon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
@@ -81,6 +82,21 @@ Filename: "{app}\{#MyAppExeName}"; Flags: nowait; Check: WizardSilent
 Type: filesandordirs; Name: "{app}"
 
 [Code]
+// If a desktop shortcut already exists, DO NOT recreate it so Windows preserves its exact screen location!
+function ShouldCreateDesktopIcon(): Boolean;
+begin
+  if FileExists(ExpandConstant('{autodesktop}\{#MyAppName}.lnk')) or
+     FileExists(ExpandConstant('{userdesktop}\{#MyAppName}.lnk')) or
+     FileExists(ExpandConstant('{commondesktop}\{#MyAppName}.lnk')) then
+  begin
+    Result := False;
+  end
+  else
+  begin
+    Result := True;
+  end;
+end;
+
 // Automatically terminate running app before uninstall so Windows file-locks are released
 function InitializeUninstall(): Boolean;
 var
