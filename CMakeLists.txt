@@ -39,6 +39,10 @@ qt_add_executable(MediaGrab
     app.rc
 )
 
+set_source_files_properties(app.rc PROPERTIES
+    OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/app.ico"
+)
+
 target_include_directories(MediaGrab PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core
