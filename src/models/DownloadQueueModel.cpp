@@ -86,13 +86,21 @@ void DownloadQueueModel::updateProgress(const QString &id, double progress, cons
     if (idx < 0) return;
 
     auto &it = m_items[idx];
-    it.progress = progress;
-    it.speed = speed;
-    it.eta = eta;
-    it.bytesDownloaded = downloaded;
-    it.totalBytes = total;
+    if (progress >= 0.0) {
+        it.progress = progress;
+    }
+    if (!speed.isEmpty()) {
+        it.speed = speed;
+    }
+    if (!eta.isEmpty()) {
+        it.eta = eta;
+    }
+    if (downloaded >= 0) {
+        it.bytesDownloaded = downloaded;
+    }
     if (total > 0) {
-        it.downloadedFormatted = QString::asprintf("%.1f MB", downloaded / (1024.0 * 1024.0));
+        it.totalBytes = total;
+        it.downloadedFormatted = QString::asprintf("%.1f MB", it.bytesDownloaded / (1024.0 * 1024.0));
         it.totalFormatted = QString::asprintf("%.1f MB", total / (1024.0 * 1024.0));
     }
 

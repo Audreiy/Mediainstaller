@@ -235,19 +235,23 @@ void DownloadManager::onQueuePause(const QString &id) {
     if (m_activeHttpDownloads.contains(id) && m_activeHttpDownloads[id]) {
         m_activeHttpDownloads[id]->pause();
         m_queueModel.updateStatus(id, "Paused");
+        m_queueModel.updateProgress(id, -1, "0 KB/s", "--:--", -1, -1);
     } else if (m_activeYtDlpDownloads.contains(id) && m_activeYtDlpDownloads[id]) {
         m_activeYtDlpDownloads[id]->pause();
         m_queueModel.updateStatus(id, "Paused");
+        m_queueModel.updateProgress(id, -1, "0 KB/s", "--:--", -1, -1);
     }
 }
 
 void DownloadManager::onQueueResume(const QString &id) {
     if (m_activeHttpDownloads.contains(id) && m_activeHttpDownloads[id]) {
+        m_queueModel.updateStatus(id, "Downloading");
+        m_queueModel.updateProgress(id, -1, "Bağlanıyor...", "--:--", -1, -1);
         m_activeHttpDownloads[id]->resume();
-        m_queueModel.updateStatus(id, "Downloading");
     } else if (m_activeYtDlpDownloads.contains(id) && m_activeYtDlpDownloads[id]) {
-        m_activeYtDlpDownloads[id]->resume();
         m_queueModel.updateStatus(id, "Downloading");
+        m_queueModel.updateProgress(id, -1, "Sürdürülüyor...", "--:--", -1, -1);
+        m_activeYtDlpDownloads[id]->resume();
     }
 }
 

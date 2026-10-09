@@ -23,15 +23,40 @@ void Downloader::start() {
     QFileInfo fi(m_targetPath);
     QDir().mkpath(fi.absolutePath());
 
-    if (!m_outputFile.open(QIODevice::WriteOnly)) {
-        emit downloadFailed(m_id, QString::fromUtf8("Dosya oluşturulamadı: ") + m_outputFile.errorString());
-        return;
+    qint64 existingBytes = 0;
+    if (QFile::exists(m_targetPath)) {
+        existingBytes = QFileInfo(m_targetPath).size();
+    }
+
+    if (existingBytes > 0 && m_isPaused) {
+        if (!m_outputFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
+            emit downloadFailed(m_id, QString::fromUtf8("Dosya açılamadı: ") + m_outputFile.errorString());
+            return;
+        }
+        m_downloadedBytes = existingBytes;
+    } else {
+        if (!m_outputFile.open(QIODevice::WriteOnly)) {
+            emit downloadFailed(m_id, QString::fromUtf8("Dosya oluşturulamadı: ") + m_outputFile.errorString());
+            return;
+        }
+        m_downloadedBytes = 0;
     }
 
     QNetworkRequest request;
     request.setUrl(QUrl(m_url));
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) MediaGrab/1.0");
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+
+    if (m_downloadedBytes > 0) {
+        request.setRawHeader("Range", QString("bytes=%1-").arg(m_downloadedBytes).toUtf8());
+    }
+
+    m_isPaused = false;
+    m_isRunning = true;
+    m_speedTimer.start();
+    m_totalTimer.start();
+    m_lastSampleBytes = m_downloadedBytes;
+    emit runningChanged();
 
     m_reply = m_netManager.get(request);
 
@@ -39,88 +64,118 @@ void Downloader::start() {
     connect(m_reply, &QNetworkReply::downloadProgress, this, &Downloader::onDownloadProgress);
     connect(m_reply, &QNetworkReply::finished, this, &Downloader::onFinished);
     connect(m_reply, &QNetworkReply::errorOccurred, this, &Downloader::onErrorOccurred);
-
-    m_isRunning = true;
-    m_speedTimer.start();
-    m_totalTimer.start();
-    m_lastSampleBytes = 0;
-    emit runningChanged();
+    connect(m_reply, &QNetworkReply::metaDataChanged, this, [this]() {
+        if (!m_reply) return;
+        int statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (m_downloadedBytes > 0 && statusCode == 200) {
+            if (m_outputFile.isOpen()) {
+                m_outputFile.seek(0);
+                m_outputFile.resize(0);
+            }
+            m_downloadedBytes = 0;
+            m_lastSampleBytes = 0;
+        }
+    });
 }
 
 void Downloader::pause() {
-    // For basic pause, abort the reply, remember offset
+    if (!m_isRunning) return;
     m_isPaused = true;
+    m_isRunning = false;
+    emit runningChanged();
+
     if (m_reply) {
         m_reply->abort();
+    }
+    if (m_outputFile.isOpen()) {
+        m_outputFile.flush();
+        m_outputFile.close();
     }
 }
 
 void Downloader::resume() {
-    m_isPaused = false;
-    // Future range resume support
+    if (m_isRunning) return;
     start();
 }
 
 void Downloader::cancel() {
-    if (!m_isRunning) return;
+    m_isPaused = false;
     m_isRunning = false;
+    emit runningChanged();
+
     if (m_reply) {
         m_reply->abort();
     }
     cleanup();
+
     // Remove partially downloaded file
     m_outputFile.remove();
     emit downloadCancelled(m_id);
-    emit runningChanged();
 }
 
 void Downloader::onReadyRead() {
     if (!m_reply || !m_outputFile.isOpen()) return;
 
-    // Stream chunk directly to disk - memory efficient
     QByteArray chunk = m_reply->readAll();
     m_outputFile.write(chunk);
-    m_downloadedBytes += chunk.size();
 }
 
 void Downloader::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
-    m_totalBytes = bytesTotal;
+    if (m_isPaused) return;
+
+    qint64 currentDownloaded = m_downloadedBytes + bytesReceived;
+    qint64 actualTotal = (bytesTotal > 0) ? (bytesTotal + m_downloadedBytes) : m_totalBytes;
+    if (actualTotal > 0) {
+        m_totalBytes = actualTotal;
+    }
 
     double percent = 0.0;
-    if (bytesTotal > 0) {
-        percent = (double(bytesReceived) / double(bytesTotal)) * 100.0;
+    if (actualTotal > 0) {
+        percent = (double(currentDownloaded) / double(actualTotal)) * 100.0;
+        if (percent > 100.0) percent = 100.0;
     }
     m_progress = percent;
 
     qint64 elapsedMs = m_speedTimer.elapsed();
-    if (elapsedMs >= 500) { // Update speed twice per second
-        qint64 deltaBytes = bytesReceived - m_lastSampleBytes;
+    if (elapsedMs >= 500) {
+        qint64 deltaBytes = currentDownloaded - m_lastSampleBytes;
         double speedBps = (double(deltaBytes) / double(elapsedMs)) * 1000.0;
         m_speedString = formatSpeed(speedBps);
 
         QString etaStr = "--:--";
-        if (speedBps > 1024 && bytesTotal > bytesReceived) {
-            double remainingSec = double(bytesTotal - bytesReceived) / speedBps;
+        if (speedBps > 1024 && actualTotal > currentDownloaded) {
+            double remainingSec = double(actualTotal - currentDownloaded) / speedBps;
             etaStr = formatEta(remainingSec);
         }
 
-        m_lastSampleBytes = bytesReceived;
+        m_lastSampleBytes = currentDownloaded;
         m_speedTimer.restart();
 
-        emit progressUpdated(percent, m_speedString, etaStr, bytesReceived, bytesTotal);
+        emit progressUpdated(percent, m_speedString, etaStr, currentDownloaded, actualTotal);
     }
 }
 
 void Downloader::onFinished() {
     if (!m_reply) return;
 
-    if (m_reply->error() == QNetworkReply::NoError) {
+    if (m_isPaused) {
+        cleanup();
+        return;
+    }
+
+    int statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    bool isOk = (m_reply->error() == QNetworkReply::NoError) || (statusCode == 200 || statusCode == 206);
+
+    if (isOk) {
         m_outputFile.flush();
         m_outputFile.close();
         m_isRunning = false;
         emit runningChanged();
-        emit progressUpdated(100.0, "0 KB/s", "00:00", m_totalBytes, m_totalBytes);
+        emit progressUpdated(100.0, "Done", "00:00", m_totalBytes, m_totalBytes);
         emit downloadCompleted(m_id, m_targetPath);
+    } else {
+        m_isRunning = false;
+        emit runningChanged();
     }
     cleanup();
 }
@@ -129,17 +184,20 @@ void Downloader::onErrorOccurred(QNetworkReply::NetworkError code) {
     Q_UNUSED(code);
     if (!m_reply) return;
 
-    if (m_reply->error() != QNetworkReply::OperationCanceledError) {
-        QString err = m_reply->errorString();
-        m_isRunning = false;
-        cleanup();
-        emit runningChanged();
-        emit downloadFailed(m_id, err);
+    if (m_isPaused || m_reply->error() == QNetworkReply::OperationCanceledError) {
+        return;
     }
+
+    QString err = m_reply->errorString();
+    m_isRunning = false;
+    cleanup();
+    emit runningChanged();
+    emit downloadFailed(m_id, err);
 }
 
 void Downloader::cleanup() {
     if (m_outputFile.isOpen()) {
+        m_outputFile.flush();
         m_outputFile.close();
     }
     if (m_reply) {

@@ -49,6 +49,7 @@ void YtDlpDownloader::start() {
     args << "--no-warnings";
     args << "--no-playlist";
     args << "--no-check-certificates";
+    args << "--continue";
     args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
     args << "--extractor-args" << "generic:impersonate";
 
@@ -91,6 +92,16 @@ void YtDlpDownloader::start() {
 
     args << m_url;
 
+    if (m_process) {
+        disconnect(m_process, nullptr, this, nullptr);
+        if (m_process->state() != QProcess::NotRunning) {
+            m_process->kill();
+            m_process->waitForFinished(300);
+        }
+        delete m_process;
+        m_process = nullptr;
+    }
+
     m_process = new QProcess(this);
     connect(m_process, &QProcess::readyReadStandardOutput, this, &YtDlpDownloader::onReadyReadStandardOutput);
     connect(m_process, &QProcess::readyReadStandardError, this, &YtDlpDownloader::onReadyReadStandardError);
@@ -105,26 +116,32 @@ void YtDlpDownloader::pause() {
     m_isPaused = true;
     m_isRunning = false;
     emit runningChanged();
+
+    disconnect(m_process, nullptr, this, nullptr);
     m_process->kill();
     m_process->waitForFinished(500);
+    delete m_process;
+    m_process = nullptr;
 }
 
 void YtDlpDownloader::resume() {
     if (m_isRunning) return;
+    m_isPaused = false;
     start();
 }
 
 void YtDlpDownloader::cancel() {
-    if (!m_isRunning) return;
+    m_isPaused = false;
     m_isRunning = false;
     emit runningChanged();
 
     if (m_process) {
+        disconnect(m_process, nullptr, this, nullptr);
         if (m_process->state() != QProcess::NotRunning) {
             m_process->kill();
             m_process->waitForFinished(500);
         }
-        m_process->deleteLater();
+        delete m_process;
         m_process = nullptr;
     }
 
@@ -172,19 +189,29 @@ void YtDlpDownloader::parseOutputLine(const QString &line) {
         QStringList parts = data.split('|');
         if (parts.size() >= 5) {
             QString pctStr = parts[0].trimmed().remove('%').trimmed();
-            double pct = pctStr.toDouble();
+            bool pctOk = false;
+            double pct = pctStr.toDouble(&pctOk);
             QString speed = parts[1].trimmed();
             QString eta = parts[2].trimmed();
-            qint64 down = parts[3].trimmed().toLongLong();
-            qint64 tot = parts[4].trimmed().toLongLong();
+            bool downOk = false;
+            qint64 down = parts[3].trimmed().toLongLong(&downOk);
+            bool totOk = false;
+            qint64 tot = parts[4].trimmed().toLongLong(&totOk);
 
-            if (pct >= 0.0) {
+            if (pctOk && pct >= 0.0) {
                 m_progress = pct;
-                m_speedString = speed;
-                m_etaString = eta;
-                emit progressUpdated(m_progress, m_speedString, m_etaString, down, tot);
-                return;
             }
+            if (!speed.isEmpty() && speed != "NA" && speed != "Unknown B/s") {
+                m_speedString = speed;
+            }
+            if (!eta.isEmpty() && eta != "NA") {
+                m_etaString = eta;
+            }
+
+            emit progressUpdated(m_progress, m_speedString, m_etaString,
+                                 downOk ? down : -1,
+                                 totOk ? tot : -1);
+            return;
         }
     }
 
@@ -192,13 +219,12 @@ void YtDlpDownloader::parseOutputLine(const QString &line) {
     static const QRegularExpression dlRegex(R"(\[download\]\s+([\d\.]+)%\s+of\s+~?\s*([^\s]+)\s+at\s+([^\s]+)\s+ETA\s+([^\s]+))");
     auto dlMatch = dlRegex.match(line);
     if (dlMatch.hasMatch()) {
-        double pct = dlMatch.captured(1).toDouble();
-        QString speed = dlMatch.captured(3);
-        QString eta = dlMatch.captured(4);
-        m_progress = pct;
-        m_speedString = speed;
-        m_etaString = eta;
-        emit progressUpdated(m_progress, m_speedString, m_etaString, 0, 0);
+        bool pctOk = false;
+        double pct = dlMatch.captured(1).toDouble(&pctOk);
+        if (pctOk) m_progress = pct;
+        m_speedString = dlMatch.captured(3);
+        m_etaString = dlMatch.captured(4);
+        emit progressUpdated(m_progress, m_speedString, m_etaString, -1, -1);
     }
 }
 
