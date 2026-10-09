@@ -3,9 +3,12 @@ echo ==============================================
 echo   YuYuInstaller - Installer Packaging Script
 echo ==============================================
 
-set "ISCC=C:\Users\serbu\AppData\Local\Programs\Inno Setup 6\ISCC.exe"
+set "ISCC=%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe"
 if not exist "%ISCC%" (
     set "ISCC=C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+)
+if not exist "%ISCC%" (
+    set "ISCC=C:\Program Files\Inno Setup 6\ISCC.exe"
 )
 
 if not exist "%ISCC%" (
