@@ -308,6 +308,50 @@ Item {
                         }
                     }
                 }
+
+                // Error Diagnostics Log Button
+                Rectangle {
+                    width: 110
+                    height: 38
+                    radius: Theme.radiusMd
+                    color: logHeaderMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
+                    border.color: logHeaderMouse.containsMouse ? Theme.accentCyan : Theme.borderDim
+                    border.width: 1
+
+                    MouseArea {
+                        id: logHeaderMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (typeof downloadManager !== "undefined" && downloadManager) {
+                                downloadManager.openLogFile();
+                            }
+                        }
+                    }
+
+                    ToolTip.visible: logHeaderMouse.containsMouse
+                    ToolTip.text: I18n.t("viewLogHint")
+                    ToolTip.delay: 300
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        Text {
+                            text: "📄"
+                            font.pixelSize: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: I18n.t("openLogFile")
+                            color: logHeaderMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
+                            font.pixelSize: 12
+                            font.family: Theme.fontFamily
+                            font.weight: Font.Medium
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+                }
             }
         }
 

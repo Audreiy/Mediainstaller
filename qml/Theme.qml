@@ -45,6 +45,6 @@ QtObject {
     readonly property int radiusLg: 14
     readonly property int radiusXl: 20
 
-    // Font Family
-    readonly property string fontFamily: "Segoe UI, Inter, -apple-system, sans-serif"
+    // Font Family (Universal multi-script typography covering Latin, Cyrillic, Japanese, Korean, Chinese, Arabic)
+    readonly property string fontFamily: "'Segoe UI Variable', 'Segoe UI', Inter, 'Noto Sans', 'Arial Unicode MS', 'Yu Gothic UI', 'Meiryo', 'Microsoft YaHei', sans-serif"
 }

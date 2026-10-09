@@ -619,7 +619,128 @@ Item {
             }
 
 
-            // Setting Card 4: About YuYuİnstaller Architecture
+            // Setting Card 4: Diagnostics & Error Log
+            Rectangle {
+                width: parent.width
+                implicitHeight: 88
+                radius: Theme.radiusLg
+                color: Theme.bgCard
+                border.color: Theme.borderDim
+                border.width: 1
+
+                Row {
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    spacing: 16
+
+                    Rectangle {
+                        width: 44
+                        height: 44
+                        radius: Theme.radiusMd
+                        color: Theme.bgElevated
+                        border.color: Theme.borderDim
+                        border.width: 1
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "📄"
+                            font.pixelSize: 20
+                        }
+                    }
+
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 4
+                        width: parent.width - 44 - 16 - 220
+
+                        Text {
+                            text: I18n.t("diagnosticsSection")
+                            color: Theme.textPrimary
+                            font.pixelSize: 14
+                            font.family: Theme.fontFamily
+                            font.weight: Font.DemiBold
+                        }
+                        Text {
+                            text: I18n.t("diagnosticsSubtitle")
+                            color: Theme.textMuted
+                            font.pixelSize: 12
+                            font.family: Theme.fontFamily
+                            wrapMode: Text.WordWrap
+                            width: parent.width
+                        }
+                    }
+
+                    Row {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 8
+
+                        // Open Log File Button
+                        Rectangle {
+                            width: 110
+                            height: 36
+                            radius: Theme.radiusMd
+                            color: openLogBtnMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
+                            border.color: openLogBtnMouse.containsMouse ? Theme.accentCyan : Theme.borderDim
+                            border.width: 1
+
+                            MouseArea {
+                                id: openLogBtnMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (typeof downloadManager !== "undefined" && downloadManager) {
+                                        downloadManager.openLogFile()
+                                    }
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: I18n.t("openLogBtn")
+                                color: openLogBtnMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
+                                font.pixelSize: 11
+                                font.family: Theme.fontFamily
+                                font.weight: Font.Medium
+                            }
+                        }
+
+                        // Clear Log Button
+                        Rectangle {
+                            width: 90
+                            height: 36
+                            radius: Theme.radiusMd
+                            color: clearLogBtnMouse.containsMouse ? Theme.error + "22" : Theme.bgElevated
+                            border.color: clearLogBtnMouse.containsMouse ? Theme.error + "66" : Theme.borderDim
+                            border.width: 1
+
+                            MouseArea {
+                                id: clearLogBtnMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    if (typeof downloadManager !== "undefined" && downloadManager) {
+                                        downloadManager.clearLogFile()
+                                    }
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: I18n.t("clearLogBtn")
+                                color: clearLogBtnMouse.containsMouse ? Theme.error : Theme.textSecondary
+                                font.pixelSize: 11
+                                font.family: Theme.fontFamily
+                                font.weight: Font.Medium
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Setting Card 5: About YuYuİnstaller Architecture
             Rectangle {
                 width: parent.width
                 implicitHeight: 130

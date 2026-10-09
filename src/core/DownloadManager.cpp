@@ -6,6 +6,10 @@
 #include <QDateTime>
 #include <QRegularExpression>
 #include <QSettings>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QFile>
+#include <QTextStream>
 
 DownloadManager::DownloadManager(QObject *parent)
     : QObject(parent)
@@ -40,6 +44,72 @@ DownloadManager::DownloadManager(QObject *parent)
     connect(&m_queueModel, &DownloadQueueModel::requestResume, this, &DownloadManager::onQueueResume);
     connect(&m_queueModel, &DownloadQueueModel::requestCancel, this, &DownloadManager::onQueueCancel);
     connect(&m_queueModel, &DownloadQueueModel::queueOrderChanged, this, &DownloadManager::checkNextQueueItem);
+    connect(&m_urlAnalyzer, &UrlAnalyzer::analysisError, this, [this](const QString &msg) {
+        logDownloadFailure("URL Analysis Error", "", msg);
+    });
+}
+
+QString DownloadManager::logFilePath() {
+    QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/logs";
+    QDir().mkpath(logDir);
+    return logDir + "/downloads.log";
+}
+
+void DownloadManager::logDownloadFailure(const QString &title, const QString &url, const QString &errorMessage, const QString &details) {
+    QString path = logFilePath();
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&file);
+        out << "================================================================================\n";
+        out << QString("[%1] DOWNLOAD FAILURE\n").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"));
+        out << "File:    " << title << "\n";
+        if (!url.isEmpty()) {
+            out << "URL:     " << url << "\n";
+        }
+        out << "Reason:  " << errorMessage << "\n";
+        if (!details.trimmed().isEmpty()) {
+            out << "Details / Logs:\n" << details.trimmed() << "\n";
+        }
+        out << "================================================================================\n\n";
+        file.close();
+    }
+}
+
+void DownloadManager::openLogFile() {
+    QString path = logFilePath();
+    QFileInfo fi(path);
+    if (!fi.exists()) {
+        QDir().mkpath(fi.dir().absolutePath());
+        QFile file(path);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+            out << "YuYuInstaller Download & Diagnostics Log\n";
+            out << "Created: " << QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss") << "\n";
+            out << "No errors recorded yet.\n\n";
+            file.close();
+        }
+    }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+}
+
+QString DownloadManager::getLogFilePath() const {
+    return logFilePath();
+}
+
+void DownloadManager::clearLogFile() {
+    QString path = logFilePath();
+    QFile file(path);
+    if (file.exists()) {
+        file.remove();
+    }
+}
+
+void DownloadManager::retryDownload(const QString &id) {
+    if (!m_taskRegistry.contains(id)) return;
+    QueuedTask task = m_taskRegistry.value(id);
+    m_queueModel.updateStatus(id, "Downloading");
+    m_queueModel.updateProgress(id, 0.0, "Retrying...", "--:--", -1, -1);
+    startTask(task);
 }
 
 DownloadManager::~DownloadManager() {
@@ -354,6 +424,8 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
     item.isAudioOnly = isAudioOnly;
     item.createdTime = QDateTime::currentDateTime();
 
+    m_taskRegistry[id] = task;
+
     int activeCount = countActiveDownloads();
     if (m_downloadLimitEnabled && m_maxConcurrentDownloads > 0 && activeCount >= m_maxConcurrentDownloads) {
         item.status = "Queued";
@@ -423,8 +495,21 @@ void DownloadManager::handleDownloadCompleted(const QString &id, const QString &
     QMetaObject::invokeMethod(this, &DownloadManager::checkNextQueueItem, Qt::QueuedConnection);
 }
 
-void DownloadManager::handleDownloadFailed(const QString &id, const QString &errorMsg) {
+void DownloadManager::handleDownloadFailed(const QString &id, const QString &errorMsg, const QString &details) {
     m_queueModel.updateStatus(id, "Failed", errorMsg);
+
+    QString title = id;
+    QString url = "";
+    if (m_taskRegistry.contains(id)) {
+        title = m_taskRegistry[id].title;
+        url = m_taskRegistry[id].url;
+    } else {
+        DownloadItem item = m_queueModel.getItem(id);
+        title = item.title;
+        url = item.url;
+    }
+    logDownloadFailure(title, url, errorMsg, details);
+
     if (m_activeHttpDownloads.contains(id)) {
         if (m_activeHttpDownloads[id]) m_activeHttpDownloads[id]->deleteLater();
         m_activeHttpDownloads.remove(id);
@@ -465,6 +550,12 @@ void DownloadManager::onQueuePause(const QString &id) {
 }
 
 void DownloadManager::onQueueResume(const QString &id) {
+    DownloadItem item = m_queueModel.getItem(id);
+    if (item.status == "Failed") {
+        retryDownload(id);
+        return;
+    }
+
     if (m_downloadLimitEnabled && countActiveDownloads() >= m_maxConcurrentDownloads) {
         for (int i = m_queueModel.rowCount() - 1; i >= 0; --i) {
             DownloadItem it = m_queueModel.getItemAt(i);
@@ -490,6 +581,7 @@ void DownloadManager::onQueueResume(const QString &id) {
 }
 
 void DownloadManager::onQueueCancel(const QString &id) {
+    m_taskRegistry.remove(id);
     if (m_queuedTasks.contains(id)) {
         m_queuedTasks.remove(id);
         m_queueModel.removeItem(id);

@@ -35,7 +35,7 @@ signals:
     void runningChanged();
     void progressUpdated(double percent, const QString &speedStr, const QString &etaStr, qint64 downloaded, qint64 total);
     void downloadCompleted(const QString &id, const QString &filePath);
-    void downloadFailed(const QString &id, const QString &errorMessage);
+    void downloadFailed(const QString &id, const QString &errorMessage, const QString &details = QString());
     void downloadCancelled(const QString &id);
 
 private slots:

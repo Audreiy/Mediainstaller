@@ -32,9 +32,12 @@ YtDlpDownloader::~YtDlpDownloader() {
 void YtDlpDownloader::start() {
     if (m_isRunning) return;
 
+    m_errorLogs.clear();
+    m_lastErrorMessage.clear();
+
     QString ytDlpExe = FFmpegProcessor::findYtDlpExecutable();
     if (ytDlpExe.isEmpty()) {
-        emit downloadFailed(m_id, "yt-dlp executable not found. Please ensure yt-dlp is installed.");
+        emit downloadFailed(m_id, "yt-dlp executable not found. Please ensure yt-dlp is installed.", "yt-dlp executable could not be found in application directory or system PATH.");
         return;
     }
 
@@ -50,8 +53,17 @@ void YtDlpDownloader::start() {
     args << "--no-playlist";
     args << "--no-check-certificates";
     args << "--continue";
-    args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
-    args << "--extractor-args" << "generic:impersonate";
+
+    QString lowerUrl = m_url.toLower();
+    bool isYouTube = lowerUrl.contains("youtube.com") || lowerUrl.contains("youtu.be");
+
+    if (isYouTube) {
+        // Use android and ios player clients to bypass YouTube SABR bot check and 429 login requirements
+        args << "--extractor-args" << "youtube:player_client=android,ios";
+    } else {
+        args << "--extractor-args" << "generic:impersonate";
+        args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+    }
 
     if (!m_referer.isEmpty()) {
         args << "--referer" << m_referer;
@@ -66,20 +78,22 @@ void YtDlpDownloader::start() {
         if (m_formatId.contains("256")) bitrate = "256k";
         else if (m_formatId.contains("192")) bitrate = "192k";
         else if (m_formatId.contains("128")) bitrate = "128k";
+        args << "-f" << "bestaudio/best";
         args << "-x" << "--audio-format" << "mp3" << "--audio-quality" << bitrate;
     } else if (m_formatId == "audio_m4a") {
+        args << "-f" << "bestaudio/best";
         args << "-x" << "--audio-format" << "m4a";
     } else if (m_formatId == "video_1080p") {
-        args << "-f" << "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/best";
+        args << "-f" << "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/18/best";
     } else if (m_formatId == "video_720p") {
-        args << "-f" << "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/best";
+        args << "-f" << "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/18/best";
     } else if (m_formatId == "video_480p") {
-        args << "-f" << "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/best";
+        args << "-f" << "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/18/best";
     } else if (m_formatId == "video_360p") {
-        args << "-f" << "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]/best";
+        args << "-f" << "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]/18/best";
     } else {
-        // High quality video with merged audio or best direct stream
-        args << "-f" << "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/best";
+        // High quality video with merged audio and robust 18/best fallback
+        args << "-f" << "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/18/best";
     }
 
     // Output template: use %(ext)s so yt-dlp correctly writes the target extension without duplication
@@ -167,12 +181,35 @@ void YtDlpDownloader::onReadyReadStandardError() {
     if (!m_process) return;
     while (m_process->canReadLine()) {
         QString line = QString::fromUtf8(m_process->readLine()).trimmed();
+        if (!line.isEmpty()) {
+            m_errorLogs.append(line);
+            if (m_errorLogs.size() > 60) {
+                m_errorLogs.removeFirst();
+            }
+        }
         parseOutputLine(line);
     }
 }
 
 void YtDlpDownloader::parseOutputLine(const QString &line) {
     if (line.isEmpty()) return;
+
+    // Detect errors from yt-dlp output
+    if (line.contains("ERROR:", Qt::CaseInsensitive)) {
+        int idx = line.indexOf("ERROR:", 0, Qt::CaseInsensitive);
+        if (idx != -1) {
+            QString err = line.mid(idx + 6).trimmed();
+            if (err.startsWith("[")) {
+                int endBracket = err.indexOf("]");
+                if (endBracket != -1) {
+                    err = err.mid(endBracket + 1).trimmed();
+                }
+            }
+            if (!err.isEmpty()) {
+                m_lastErrorMessage = err;
+            }
+        }
+    }
 
     // Check for post-processing conversions: [ExtractAudio] or [Merger]
     if (line.contains("[ExtractAudio]") || line.contains("[Merger]") || line.contains("[Fixup")) {
@@ -270,7 +307,12 @@ void YtDlpDownloader::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
 
         emit downloadCompleted(m_id, finalPath);
     } else {
-        emit downloadFailed(m_id, QString("Download failed (Process exit code: %1)").arg(exitCode));
+        QString errorReason = m_lastErrorMessage;
+        if (errorReason.isEmpty()) {
+            errorReason = QString("Download failed (Process exit code: %1)").arg(exitCode);
+        }
+        QString details = m_errorLogs.join("\n");
+        emit downloadFailed(m_id, errorReason, details);
     }
 
     if (m_process) {
@@ -280,12 +322,26 @@ void YtDlpDownloader::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
 }
 
 void YtDlpDownloader::onProcessError(QProcess::ProcessError error) {
-    Q_UNUSED(error);
     if (m_isPaused) return;
 
     m_isRunning = false;
     emit runningChanged();
-    emit downloadFailed(m_id, "yt-dlp encountered an execution error.");
+
+    QString errorReason = "yt-dlp encountered an execution error.";
+    if (error == QProcess::FailedToStart) {
+        errorReason = "yt-dlp failed to start (file missing or blocked by antivirus).";
+    } else if (error == QProcess::Crashed) {
+        errorReason = "yt-dlp crashed unexpectedly.";
+    } else if (error == QProcess::Timedout) {
+        errorReason = "yt-dlp operation timed out.";
+    }
+
+    if (!m_lastErrorMessage.isEmpty()) {
+        errorReason += " (" + m_lastErrorMessage + ")";
+    }
+
+    QString details = m_errorLogs.join("\n");
+    emit downloadFailed(m_id, errorReason, details);
 
     if (m_process) {
         m_process->deleteLater();

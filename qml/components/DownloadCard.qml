@@ -290,9 +290,43 @@ Rectangle {
                 }
             }
 
-            // Pause / Resume / Start (When downloading, paused, or queued)
+            // View Error Log (When failed)
             Rectangle {
-                visible: model.status === "Downloading" || model.status === "Paused" || model.status === "Queued"
+                visible: model.status === "Failed"
+                width: 34
+                height: 34
+                radius: Theme.radiusSm
+                color: logMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
+                border.color: logMouse.containsMouse ? Theme.accentCyan : Theme.borderDim
+                border.width: 1
+
+                MouseArea {
+                    id: logMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (typeof downloadManager !== "undefined" && downloadManager) {
+                            downloadManager.openLogFile()
+                        }
+                    }
+                }
+
+                ToolTip.visible: logMouse.containsMouse
+                ToolTip.text: I18n.t("viewLogHint")
+                ToolTip.delay: 300
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "📄"
+                    color: logMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
+                    font.pixelSize: 12
+                }
+            }
+
+            // Pause / Resume / Retry (When downloading, paused, queued, or failed)
+            Rectangle {
+                visible: model.status === "Downloading" || model.status === "Paused" || model.status === "Queued" || model.status === "Failed"
                 width: 34
                 height: 34
                 radius: Theme.radiusSm
@@ -313,6 +347,10 @@ Rectangle {
                         }
                     }
                 }
+
+                ToolTip.visible: pauseMouse.containsMouse && model.status === "Failed"
+                ToolTip.text: I18n.t("retryDownload")
+                ToolTip.delay: 300
 
                 Text {
                     anchors.centerIn: parent

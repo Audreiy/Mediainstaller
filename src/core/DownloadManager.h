@@ -55,6 +55,13 @@ public:
     Q_INVOKABLE void setMaxConcurrentDownloads(int limit);
     Q_INVOKABLE void setVideoBackgroundEnabled(bool enabled);
     Q_INVOKABLE void setLanguage(const QString &lang);
+    Q_INVOKABLE void openLogFile();
+    Q_INVOKABLE QString getLogFilePath() const;
+    Q_INVOKABLE void clearLogFile();
+    Q_INVOKABLE void retryDownload(const QString &id);
+
+    static QString logFilePath();
+    static void logDownloadFailure(const QString &title, const QString &url, const QString &errorMessage, const QString &details = QString());
 
 signals:
     void defaultDownloadPathChanged();
@@ -72,7 +79,7 @@ public slots:
 private slots:
     void handleProgressUpdated(double percent, const QString &speedStr, const QString &etaStr, qint64 downloaded, qint64 total);
     void handleDownloadCompleted(const QString &id, const QString &filePath);
-    void handleDownloadFailed(const QString &id, const QString &errorMsg);
+    void handleDownloadFailed(const QString &id, const QString &errorMsg, const QString &details = QString());
     void handleDownloadCancelled(const QString &id);
 
     void onQueuePause(const QString &id);
@@ -98,6 +105,7 @@ private:
     bool m_videoBackgroundEnabled = true;
     QString m_language = "en";
 
+    QMap<QString, QueuedTask> m_taskRegistry;
     QMap<QString, QueuedTask> m_queuedTasks;
     QMap<QString, QPointer<Downloader>> m_activeHttpDownloads;
     QMap<QString, QPointer<YtDlpDownloader>> m_activeYtDlpDownloads;

@@ -176,6 +176,9 @@ void Downloader::onFinished() {
     } else {
         m_isRunning = false;
         emit runningChanged();
+        QString err = QString("HTTP error (Status %1)").arg(statusCode);
+        QString details = QString("HTTP Status: %1\nURL: %2\nOutput File: %3").arg(statusCode).arg(m_url, m_targetPath);
+        emit downloadFailed(m_id, err, details);
     }
     cleanup();
 }
@@ -189,10 +192,12 @@ void Downloader::onErrorOccurred(QNetworkReply::NetworkError code) {
     }
 
     QString err = m_reply->errorString();
+    int httpCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QString details = QString("HTTP Status: %1\nURL: %2\nNetwork Error: %3").arg(httpCode).arg(m_url, err);
     m_isRunning = false;
     cleanup();
     emit runningChanged();
-    emit downloadFailed(m_id, err);
+    emit downloadFailed(m_id, err, details);
 }
 
 void Downloader::cleanup() {

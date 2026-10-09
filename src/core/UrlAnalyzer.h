@@ -42,6 +42,7 @@ private slots:
     void onHeadFinished();
     void onOembedFinished();
     void onWebPageScrapeFinished();
+    void onIframeFetchFinished();
     void onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void onSpotifyOembedFinished();
     void onSpotifySearchFinished(int exitCode, QProcess::ExitStatus exitStatus);
@@ -52,6 +53,7 @@ private:
     void startAnimecixResolve(const QUrl &url);
     void startTauVideoResolve(const QString &tauId, const QString &animeTitle, int season, int episode, const QString &epName, const QString &poster);
     void startWebPageScrape(const QUrl &url);
+    void fetchIframeContent(const QUrl &iframeUrl, const QString &title, const QString &thumb, const QString &providerName);
     void parseHtmlForMedia(const QString &html, const QUrl &baseUrl);
     void startYtDlpProbe(const QString &rawUrl);
     void startDirectProbe(const QUrl &url);
@@ -68,4 +70,8 @@ private:
     QString m_analyzingUrl;
     QString m_spotifyTitle;
     QString m_spotifyThumb;
+    QUrl m_pendingIframeUrl;
+    QString m_pendingTitle;
+    QString m_pendingThumb;
+    QString m_pendingProvider;
 };

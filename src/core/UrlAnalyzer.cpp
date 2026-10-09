@@ -645,7 +645,7 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
     }
 
     if (!foundIframe.isEmpty()) {
-        setupStreamMediaInfo(foundIframe, title, providerName, thumb);
+        fetchIframeContent(QUrl(foundIframe), title, thumb, providerName);
         return;
     }
 
@@ -658,8 +658,68 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         return;
     }
 
-    // 6. If static HTML didn't expose the video stream, run yt-dlp probe with referer
+    // 6. If static HTML didn't expose the video stream, run dynamic yt-dlp probe with referer
     startYtDlpProbe(m_analyzingUrl);
+}
+
+void UrlAnalyzer::fetchIframeContent(const QUrl &iframeUrl, const QString &title, const QString &thumb, const QString &providerName) {
+    m_pendingIframeUrl = iframeUrl;
+    m_pendingTitle = title;
+    m_pendingThumb = thumb;
+    m_pendingProvider = providerName;
+
+    QNetworkRequest request(iframeUrl);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    request.setRawHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+    request.setRawHeader("Referer", m_analyzingUrl.toUtf8());
+
+    m_currentReply = m_netManager.get(request);
+    connect(m_currentReply, &QNetworkReply::finished, this, &UrlAnalyzer::onIframeFetchFinished);
+}
+
+void UrlAnalyzer::onIframeFetchFinished() {
+    if (!m_currentReply) return;
+
+    QUrl finalUrl = m_currentReply->url();
+    int httpCode = m_currentReply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray htmlBytes = m_currentReply->readAll();
+    m_currentReply->deleteLater();
+    m_currentReply = nullptr;
+
+    if (httpCode >= 200 && httpCode < 400 && !htmlBytes.isEmpty()) {
+        QString html = QString::fromUtf8(htmlBytes);
+
+        // 1. Check for .m3u8 stream in iframe HTML
+        QRegularExpression m3u8Re(R"((https?://[^"'\s<>]+\.m3u8[^"'\s<>]*))", QRegularExpression::CaseInsensitiveOption);
+        auto m3u8Match = m3u8Re.match(html);
+        if (m3u8Match.hasMatch()) {
+            setupStreamMediaInfo(m3u8Match.captured(1), m_pendingTitle, m_pendingProvider, m_pendingThumb);
+            return;
+        }
+
+        // 2. Check for .mp4 stream in iframe HTML
+        QRegularExpression mp4Re(R"((https?://[^"'\s<>]+\.mp4[^"'\s<>]*))", QRegularExpression::CaseInsensitiveOption);
+        auto mp4Match = mp4Re.match(html);
+        if (mp4Match.hasMatch()) {
+            setupStreamMediaInfo(mp4Match.captured(1), m_pendingTitle, m_pendingProvider, m_pendingThumb);
+            return;
+        }
+
+        // 3. Check for sources: [{file: "..."}] or player.src(...)
+        QRegularExpression sourcesRe(R"(file\s*:\s*["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+        auto sourcesMatch = sourcesRe.match(html);
+        if (sourcesMatch.hasMatch()) {
+            QString src = sourcesMatch.captured(1).trimmed();
+            if (src.startsWith("//")) src = "https:" + src;
+            else if (src.startsWith("/")) src = finalUrl.resolved(QUrl(src)).toString();
+            setupStreamMediaInfo(src, m_pendingTitle, m_pendingProvider, m_pendingThumb);
+            return;
+        }
+    }
+
+    // Method 2 fallback: dynamic probe via yt-dlp on the iframe URL with referer
+    startYtDlpProbe(m_pendingIframeUrl.toString());
 }
 
 void UrlAnalyzer::setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail) {
@@ -696,8 +756,16 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
     args << "--no-warnings";
     args << "--no-playlist";
     args << "--no-check-certificates";
-    args << "--extractor-args" << "generic:impersonate";
-    args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+
+    QString lower = rawUrl.toLower();
+    bool isYouTube = lower.contains("youtube.com") || lower.contains("youtu.be");
+    if (isYouTube) {
+        args << "--extractor-args" << "youtube:player_client=android,ios";
+    } else {
+        args << "--extractor-args" << "generic:impersonate";
+        args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+    }
+
     args << "--referer" << rawUrl;
     args << rawUrl;
 
@@ -713,6 +781,7 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
     if (!m_ytDlpProcess) return;
 
     QString output = QString::fromUtf8(m_ytDlpProcess->readAllStandardOutput()).trimmed();
+    QString errOutput = QString::fromUtf8(m_ytDlpProcess->readAllStandardError()).trimmed();
     m_ytDlpProcess->deleteLater();
     m_ytDlpProcess = nullptr;
 
@@ -744,7 +813,15 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
     }
 
     // Informative guidance error if extraction failed
-    emit analysisError("Could not detect media stream from this page.");
+    QString cleanErr = "Could not detect media stream from this page.";
+    if (!errOutput.isEmpty()) {
+        QRegularExpression errRe(R"(ERROR:\s*(?:\[[^\]]+\]\s*)?([^\r\n]+))");
+        auto match = errRe.match(errOutput);
+        if (match.hasMatch()) {
+            cleanErr = match.captured(1).trimmed();
+        }
+    }
+    emit analysisError(cleanErr);
 }
 
 void UrlAnalyzer::startDirectProbe(const QUrl &url) {
