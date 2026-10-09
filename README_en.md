@@ -23,6 +23,8 @@ YuYuInstaller is a next-generation Windows media downloader and audio converter 
   - Pause, resume, cancel, clear finished downloads, and direct file reveal in Windows Explorer.
 - **🌍 Multi-Language System (i18n):**
   - Seamless, instant language switching between English (default), Turkish, and Ukrainian from the Settings tab.
+- **🔄 Automatic & Secure Self-Updating:**
+  - SSL/HTTPS-encrypted update checking directly against GitHub Releases. When a new version is released, downloads the setup package and updates seamlessly in silent mode with auto-restart.
 - **📦 Clean Windows Installer:**
   - Packaged with Inno Setup 6 featuring modern aesthetics, automatic process termination on install/update, and complete cleanup on uninstallation.
 

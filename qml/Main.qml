@@ -90,4 +90,75 @@ ApplicationWindow {
             }
         }
     }
+
+    // Floating Update Notification Banner
+    Rectangle {
+        id: updateBanner
+        property bool dismissed: false
+        visible: !dismissed && (typeof updateManager !== "undefined" && updateManager.updateAvailable && sidebarNav.activeTab !== 2)
+        height: 48
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: 20
+        width: bannerRow.implicitWidth + 32
+        radius: 24
+        color: "#141c2b"
+        border.color: Theme.accent
+        border.width: 1
+
+        Row {
+            id: bannerRow
+            anchors.centerIn: parent
+            spacing: 12
+
+            Text {
+                text: "🚀 " + ((typeof updateManager !== "undefined" && updateManager.latestVersion) ? I18n.t("updateBannerTitle").arg(updateManager.latestVersion) : "")
+                color: Theme.textPrimary
+                font.pixelSize: 12
+                font.family: Theme.fontFamily
+                font.weight: Font.DemiBold
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Rectangle {
+                width: 76; height: 28; radius: 14
+                color: updateBtnMouse.containsMouse ? Theme.accentHover : Theme.accent
+                anchors.verticalCenter: parent.verticalCenter
+
+                MouseArea {
+                    id: updateBtnMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: sidebarNav.activeTab = 2
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: I18n.t("updateBannerAction")
+                    color: "#07090e"
+                    font.pixelSize: 11
+                    font.family: Theme.fontFamily
+                    font.weight: Font.Bold
+                }
+            }
+
+            Text {
+                text: "✕"
+                color: closeBannerMouse.containsMouse ? Theme.textPrimary : Theme.textMuted
+                font.pixelSize: 12
+                font.weight: Font.Bold
+                anchors.verticalCenter: parent.verticalCenter
+
+                MouseArea {
+                    id: closeBannerMouse
+                    anchors.fill: parent
+                    anchors.margins: -6
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: updateBanner.dismissed = true
+                }
+            }
+        }
+    }
 }

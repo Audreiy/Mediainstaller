@@ -20,6 +20,7 @@
 #include "FFmpegProcessor.h"
 #include "MediaInfo.h"
 #include "VideoBackgroundItem.h"
+#include "UpdateManager.h"
 
 void consoleHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(type);
@@ -71,6 +72,7 @@ int main(int argc, char *argv[]) {
     qRegisterMetaType<MediaStreamOption>("MediaStreamOption");
 
     DownloadManager downloadManager;
+    UpdateManager updateManager;
 
     QQmlApplicationEngine engine;
 
@@ -88,6 +90,12 @@ int main(int argc, char *argv[]) {
     rootCtx->setContextProperty("queueModel", downloadManager.queueModel());
     rootCtx->setContextProperty("urlAnalyzer", downloadManager.urlAnalyzer());
     rootCtx->setContextProperty("ffmpegProcessor", downloadManager.ffmpegProcessor());
+    rootCtx->setContextProperty("updateManager", &updateManager);
+
+    // Silent update check 3 seconds after application launch
+    QTimer::singleShot(3000, &updateManager, [&updateManager]() {
+        updateManager.checkForUpdates(true);
+    });
 
     // Load Main QML resource path
     const QUrl url(u"qrc:/qt/qml/MediaGrab/qml/Main.qml"_qs);

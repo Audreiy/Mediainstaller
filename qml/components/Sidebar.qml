@@ -353,6 +353,13 @@ Rectangle {
                         font.weight: (root.activeTab === 2) ? Font.DemiBold : Font.Normal
                         anchors.verticalCenter: parent.verticalCenter
                     }
+
+                    Rectangle {
+                        width: 7; height: 7; radius: 3.5
+                        color: Theme.accent
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: (typeof updateManager !== "undefined" && updateManager.updateAvailable)
+                    }
                 }
             }
         }

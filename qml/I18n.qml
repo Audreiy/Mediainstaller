@@ -95,7 +95,20 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.0.0 Pro • Hardware-Accelerated QML Interface"
+            "aboutVersion": "Version 1.0.0 Pro • Hardware-Accelerated QML Interface",
+            "updateSection": "Application Updates",
+            "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
+            "currentVersionLabel": "Installed Version",
+            "latestVersionLabel": "Latest Version",
+            "checkUpdatesBtn": "Check for Updates",
+            "checkingUpdates": "Checking for updates...",
+            "upToDateBadge": "Up to Date",
+            "updateAvailableBadge": "New Version Available!",
+            "downloadAndInstallBtn": "Download & Update Now",
+            "downloadingUpdate": "Downloading update package...",
+            "cancelUpdate": "Cancel",
+            "updateBannerTitle": "YuYuInstaller %1 is available!",
+            "updateBannerAction": "Update Now"
         },
         "tr": {
             // General
@@ -184,7 +197,20 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.0.0 Pro • Donanım Hızlandırmalı QML Arayüzü"
+            "aboutVersion": "Sürüm 1.0.0 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "updateSection": "Uygulama Güncellemeleri",
+            "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
+            "currentVersionLabel": "Yüklü Sürüm",
+            "latestVersionLabel": "Son Sürüm",
+            "checkUpdatesBtn": "Güncellemeleri Denetle",
+            "checkingUpdates": "Güncellemeler denetleniyor...",
+            "upToDateBadge": "Güncel",
+            "updateAvailableBadge": "Yeni Sürüm Mevcut!",
+            "downloadAndInstallBtn": "Şimdi İndir ve Güncelle",
+            "downloadingUpdate": "Güncelleme paketi indiriliyor...",
+            "cancelUpdate": "İptal",
+            "updateBannerTitle": "YuYuİnstaller %1 sürümü yayınlandı!",
+            "updateBannerAction": "Şimdi Güncelle"
         },
         "uk": {
             // General
@@ -273,7 +299,20 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.0.0 Pro • Апаратно-прискорений інтерфейс QML"
+            "aboutVersion": "Версія 1.0.0 Pro • Апаратно-прискорений інтерфейс QML",
+            "updateSection": "Оновлення програми",
+            "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
+            "currentVersionLabel": "Встановлена версія",
+            "latestVersionLabel": "Остання версія",
+            "checkUpdatesBtn": "Перевірити оновлення",
+            "checkingUpdates": "Перевірка оновлень...",
+            "upToDateBadge": "Остання версія",
+            "updateAvailableBadge": "Доступна нова версія!",
+            "downloadAndInstallBtn": "Завантажити та оновити",
+            "downloadingUpdate": "Завантаження пакета оновлення...",
+            "cancelUpdate": "Скасувати",
+            "updateBannerTitle": "Доступна нова версія YuYuInstaller %1!",
+            "updateBannerAction": "Оновити зараз"
         }
     })
 

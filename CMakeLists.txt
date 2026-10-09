@@ -13,7 +13,7 @@ if(NOT Qt6_DIR AND EXISTS "C:/Qt/6.8.2/msvc2022_64/lib/cmake/Qt6")
     list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.8.2/msvc2022_64")
 endif()
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Quick Qml QuickControls2)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Quick Qml QuickControls2 Network)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -32,6 +32,8 @@ qt_add_executable(MediaGrab
     src/core/YtDlpDownloader.cpp
     src/core/DownloadManager.h
     src/core/DownloadManager.cpp
+    src/core/UpdateManager.h
+    src/core/UpdateManager.cpp
     src/media/FFmpegProcessor.h
     src/media/FFmpegProcessor.cpp
     src/media/VideoBackgroundItem.h
@@ -86,6 +88,7 @@ target_link_libraries(MediaGrab PRIVATE
     Qt6::Quick
     Qt6::Qml
     Qt6::QuickControls2
+    Qt6::Network
     mfplat
     mfreadwrite
     mfuuid

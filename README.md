@@ -23,6 +23,8 @@ YuYuInstaller, modern C++20 ve Qt 6 Quick / QML mimarisiyle geliştirilmiş; don
   - Duraklatma, devam ettirme, iptal etme, bitenleri temizleme ve doğrudan Windows Gezgini'nde açma.
 - **🌍 Çok Dilli Altyapı (i18n):**
   - Ayarlar sayfasından anlık olarak İngilizce (varsayılan), Türkçe ve Ukraynaca arasında kesintisiz geçiş.
+- **🔄 Otomatik & Güvenli Güncelleme Motoru:**
+  - GitHub Releases üzerinden SSL/HTTPS korumalı otomatik sürüm denetimi. Yeni sürüm çıktığında tek tıkla arka planda indirip sessizce kendini güncelleme ve yeniden başlatma desteği.
 - **📦 Profesyonel Windows Kurulum Paketi:**
   - Inno Setup 6 ile paketlenmiş, tek tıkla kurulan ve arkasında artık dosya bırakmayan temiz kaldırıcı desteği.
 
