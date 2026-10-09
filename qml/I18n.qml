@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.5 Pro",
+            "appVersion": "v1.0.6 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -98,7 +98,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.0.5 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.0.6 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -114,6 +114,8 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log106_1": "Guaranteed desktop shortcut position preservation during silent updates",
+            "log106_2": "Zero-UAC background updater (non-elevated seamless user installation mode)",
             "log105_1": "Added interactive Update Logs & Changelog panel directly in Updates view",
             "log105_2": "Full multi-language support (EN, TR, UK) for release changelogs",
             "log104_1": "Added dedicated Updates navigation tab in sidebar above Settings",
@@ -129,7 +131,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuİnstaller",
-            "appVersion": "v1.0.5 Pro",
+            "appVersion": "v1.0.6 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -216,7 +218,7 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.0.5 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "aboutVersion": "Sürüm 1.0.6 Pro • Donanım Hızlandırmalı QML Arayüzü",
             "updateSection": "Uygulama Güncellemeleri",
             "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
             "currentVersionLabel": "Yüklü Sürüm",
@@ -232,6 +234,8 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log106_1": "Sessiz güncellemelerde masaüstü kısayolunun yerinin ve konumunun sabit kalması sağlandı",
+            "log106_2": "Yönetici yetkisi (UAC) sormayan %100 sessiz arka plan güncelleme altyapısına geçildi",
             "log105_1": "Güncellemeler sekmesine etkileşimli Güncelleme Notları & Sürüm Logları paneli eklendi",
             "log105_2": "Sürüm logları için tam çoklu dil desteği (EN, TR, UK)",
             "log104_1": "Sol menüde Settings'in hemen üstüne özel Güncellemeler (Updates) sekmesi eklendi",
@@ -247,7 +251,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.5 Pro",
+            "appVersion": "v1.0.6 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -334,7 +338,7 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.0.5 Pro • Апаратно-прискорений інтерфейс QML",
+            "aboutVersion": "Версія 1.0.6 Pro • Апаратно-прискорений інтерфейс QML",
             "updateSection": "Оновлення програми",
             "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
             "currentVersionLabel": "Встановлена версія",
@@ -350,6 +354,8 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log106_1": "Гарантоване збереження позиції ярлика на робочому столі під час оновлення",
+            "log106_2": "Фонове оновлення без запитів UAC (режим безшумного оновлення користувача)",
             "log105_1": "Додано інтерактивну панель журналу оновлень та історії змін у вкладку Оновлень",
             "log105_2": "Повна багатомовна підтримка (EN, TR, UK) для списку змін",
             "log104_1": "Додано окрему вкладку Оновлень у лівій панелі над Налаштуваннями",
