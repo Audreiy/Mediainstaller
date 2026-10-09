@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.8 Pro",
+            "appVersion": "v1.0.7 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -132,13 +132,12 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
-            "log108_1": "YouTube engine upgrade: integrated mobile client bypass to resolve bot verification & HTTP 429 errors",
-            "log108_2": "Automatic HTML & recursive iframe scraper: extracts hidden .m3u8/.mp4 streams from embedded players",
-            "log108_3": "Detailed diagnostics error logging (downloads.log) with 1-click Notepad access & card retry button",
-            "log108_4": "Universal multi-script typography supporting all alphabets (Latin, Cyrillic, Japanese, Chinese, Arabic)",
-            "log107_1": "Added customizable simultaneous download limit control with interactive stepper",
-            "log107_2": "Complete localization audit: fixed language leaks on download cards and system status",
-            "log107_3": "Removed decorative emoji clutter across interface for a cleaner minimalist HUD",
+            "log107_1": "YouTube engine upgrade: integrated mobile client bypass to resolve bot verification & HTTP 429 errors",
+            "log107_2": "Automatic HTML & recursive iframe scraper: extracts hidden .m3u8/.mp4 streams from embedded players",
+            "log107_3": "Detailed diagnostics error logging (downloads.log) with 1-click Notepad access & card retry button",
+            "log107_4": "Universal multi-script typography supporting all alphabets (Latin, Cyrillic, Japanese, Chinese, Arabic)",
+            "log107_5": "Added customizable simultaneous download limit control with interactive stepper",
+            "log107_6": "Complete localization audit and interface emoji cleanup for a minimalist HUD",
             "log106_1": "Guaranteed desktop shortcut position preservation during silent updates",
             "log106_2": "Zero-UAC background updater (non-elevated seamless user installation mode)",
             "log105_1": "Added interactive Update Logs & Changelog panel directly in Updates view",
@@ -156,7 +155,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.8 Pro",
+            "appVersion": "v1.0.7 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -277,13 +276,12 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
-            "log108_1": "YouTube motoru güncellemesi: bot doğrulaması ve HTTP 429 hatalarını aşan mobil istemci bypass'ı entegre edildi",
-            "log108_2": "Otomatik HTML ve özyinelemeli iframe kazıyıcı: gömülü oynatıcılardan gizli .m3u8/.mp4 akışlarını çözer",
-            "log108_3": "Ayrıntılı hata günlüğü (downloads.log), tek tıkla Not Defteri'nde açma ve kartta tekrar dene butonu eklendi",
-            "log108_4": "Tüm alfabeleri (Latin, Kiril, Japonca, Çince, Arapça) eksiksiz destekleyen evrensel font altyapısı",
-            "log107_1": "Etkileşimli sayaçlı özelleştirilebilir eşzamanlı indirme sınırı kontrolü eklendi",
-            "log107_2": "Kapsamlı dil denetimi: indirme kartları ve sistem durumundaki dil kaçakları düzeltildi",
-            "log107_3": "Daha sade ve minimalist arayüz için mod seçici ve başlıklardaki emojiler kaldırıldı",
+            "log107_1": "YouTube motoru güncellemesi: bot doğrulaması ve HTTP 429 hatalarını aşan mobil istemci bypass'ı entegre edildi",
+            "log107_2": "Otomatik HTML ve özyinelemeli iframe kazıyıcı: gömülü oynatıcılardan gizli .m3u8/.mp4 akışlarını çözer",
+            "log107_3": "Ayrıntılı hata günlüğü (downloads.log), tek tıkla Not Defteri'nde açma ve kartta tekrar dene butonu eklendi",
+            "log107_4": "Tüm alfabeleri (Latin, Kiril, Japonca, Çince, Arapça) eksiksiz destekleyen evrensel font altyapısı",
+            "log107_5": "Etkileşimli sayaçlı özelleştirilebilir eşzamanlı indirme sınırı kontrolü eklendi",
+            "log107_6": "Kapsamlı dil denetimi ve daha sade minimalist arayüz için emojiler temizlendi",
             "log106_1": "Sessiz güncellemelerde masaüstü kısayolunun yerinin ve konumunun sabit kalması sağlandı",
             "log106_2": "Yönetici yetkisi (UAC) sormayan %100 sessiz arka plan güncelleme altyapısına geçildi",
             "log105_1": "Güncellemeler sekmesine etkileşimli Güncelleme Notları & Sürüm Logları paneli eklendi",
@@ -301,7 +299,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.8 Pro",
+            "appVersion": "v1.0.7 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -422,13 +420,12 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
-            "log108_1": "Оновлення рушія YouTube: інтегровано обхід мобільного клієнта для усунення перевірок на роботів та помилок HTTP 429",
-            "log108_2": "Автоматичний скрейпер HTML та рекурсивних iframe: видобуває приховані потоки .m3u8/.mp4 із вбудованих плеєрів",
-            "log108_3": "Детальний журнал діагностики помилок (downloads.log) зі швидким відкриттям у Блокноті та кнопкою повтору на картці",
-            "log108_4": "Універсальна багатомовна типографіка з підтримкою всіх алфавітів (латиниця, кирилиця, японська, китайська, арабська)",
-            "log107_1": "Додано налаштовуване керування лімітом одночасних завантажень із лічильником",
-            "log107_2": "Повний аудит локалізації: виправлено відображення мов у картках та статусах",
-            "log107_3": "Видалено декоративні емодзі з інтерфейсу для чистішого мінімалістичного вигляду",
+            "log107_1": "Оновлення рушія YouTube: інтегровано обхід мобільного клієнта для усунення перевірок на роботів та помилок HTTP 429",
+            "log107_2": "Автоматичний скрейпер HTML та рекурсивних iframe: видобуває приховані потоки .m3u8/.mp4 із вбудованих плеєрів",
+            "log107_3": "Детальний журнал діагностики помилок (downloads.log) зі швидким відкриттям у Блокноті та кнопкою повтору на картці",
+            "log107_4": "Універсальна багатомовна типографіка з підтримкою всіх алфавітів (латиниця, кирилиця, японська, китайська, арабська)",
+            "log107_5": "Додано налаштовуване керування лімітом одночасних завантажень із лічильником",
+            "log107_6": "Повний аудит локалізації та видалення емодзі для чистішого мінімалістичного вигляду",
             "log106_1": "Гарантоване збереження позиції ярлика на робочому столі під час оновлення",
             "log106_2": "Фонове оновлення без запитів UAC (режим безшумного оновлення користувача)",
             "log105_1": "Додано інтерактивну панель журналу оновлень та історії змін у вкладку Оновлень",
