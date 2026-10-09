@@ -19,8 +19,8 @@ Rectangle {
         Row {
             spacing: 12
             Rectangle {
-                width: 40
-                height: 40
+                width: 42
+                height: 42
                 radius: 12
                 color: Theme.bgElevated
                 border.color: Theme.borderBright
@@ -29,8 +29,9 @@ Rectangle {
 
                 Image {
                     anchors.fill: parent
+                    anchors.margins: 2
                     source: "qrc:/qt/qml/MediaGrab/assets/logo.png"
-                    fillMode: Image.PreserveAspectCrop
+                    fillMode: Image.PreserveAspectFit
                     smooth: true
                     mipmap: true
                 }

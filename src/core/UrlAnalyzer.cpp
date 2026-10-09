@@ -787,10 +787,10 @@ void UrlAnalyzer::startSpotifyResolve(const QUrl &url) {
     m_spotifyTitle.clear();
     m_spotifyThumb.clear();
 
-    QUrl oembedUrl("https://open.spotify.com/oembed?url=" + QUrl::toPercentEncoding(url.toString()));
-    QNetworkRequest request(oembedUrl);
+    QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0.0.0 Safari/537.36");
+    request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    request.setRawHeader("Accept-Language", "en-US,en;q=0.9");
 
     m_currentReply = m_netManager.get(request);
     connect(m_currentReply, &QNetworkReply::finished, this, &UrlAnalyzer::onSpotifyOembedFinished);
@@ -811,24 +811,47 @@ void UrlAnalyzer::onSpotifyOembedFinished() {
     }
 
     QByteArray data = reply->readAll();
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    if (!doc.isObject()) {
-        emit analysisError("Spotify parça bilgisi alınamadı.");
-        m_isAnalyzing = false;
-        emit analyzingChanged();
-        return;
+    QString html = QString::fromUtf8(data);
+
+    QString artist;
+    QRegularExpression artistRe(R"(name=["']music:musician_description["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+    auto mArtist = artistRe.match(html);
+    if (mArtist.hasMatch()) {
+        artist = mArtist.captured(1).trimmed();
     }
 
-    QJsonObject obj = doc.object();
-    m_spotifyTitle = obj.value("title").toString().trimmed();
-    m_spotifyThumb = obj.value("thumbnail_url").toString().trimmed();
+    QRegularExpression titleRe(R"(property=["']og:title["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+    auto mTitle = titleRe.match(html);
+    if (mTitle.hasMatch()) {
+        m_spotifyTitle = mTitle.captured(1).trimmed();
+    }
+
+    QRegularExpression imgRe(R"(property=["']og:image["']\s+content=["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+    auto mImg = imgRe.match(html);
+    if (mImg.hasMatch()) {
+        m_spotifyThumb = mImg.captured(1).trimmed();
+    }
+
+    // Fallbacks if metadata was formatted differently in HTML
+    if (artist.isEmpty()) {
+        QRegularExpression titleTagRe(R"(<title>([^<]+)\s*-\s*song\s*(?:and\s*lyrics)?\s*by\s*([^<|]+)\s*\|\s*Spotify</title>)", QRegularExpression::CaseInsensitiveOption);
+        auto mTitleTag = titleTagRe.match(html);
+        if (mTitleTag.hasMatch()) {
+            if (m_spotifyTitle.isEmpty()) m_spotifyTitle = mTitleTag.captured(1).trimmed();
+            artist = mTitleTag.captured(2).trimmed();
+        }
+    }
 
     if (m_spotifyTitle.isEmpty()) {
-        emit analysisError("Spotify parça başlığı okunamadı.");
+        emit analysisError("Spotify parça bilgisi okunamadı. Lütfen doğrudan YouTube veya medya bağlantısı girin.");
         m_isAnalyzing = false;
         emit analyzingChanged();
         return;
     }
+
+    QString searchQuery = artist.isEmpty() ? m_spotifyTitle : QString("%1 %2").arg(artist, m_spotifyTitle);
+    QString displayTitle = artist.isEmpty() ? m_spotifyTitle : QString("%1 - %2").arg(artist, m_spotifyTitle);
+    m_spotifyTitle = displayTitle;
 
     QString ytDlpExe = FFmpegProcessor::findYtDlpExecutable();
     if (ytDlpExe.isEmpty()) {
@@ -844,7 +867,7 @@ void UrlAnalyzer::onSpotifyOembedFinished() {
     args << "--no-warnings";
     args << "--no-playlist";
     args << "--no-check-certificates";
-    args << QString("ytsearch1:%1 audio").arg(m_spotifyTitle);
+    args << QString("ytsearch1:%1").arg(searchQuery);
 
     connect(m_ytDlpProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &UrlAnalyzer::onSpotifySearchFinished);
     m_ytDlpProcess->start(ytDlpExe, args);
