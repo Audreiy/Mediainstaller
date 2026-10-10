@@ -129,3 +129,9 @@ YuYuInstaller/
    .\make_setup.bat
    ```
    *Готовий інсталятор буде збережено у папці `setup_output\YuYuInstaller_Setup.exe`.*
+
+---
+
+## Ліцензія
+
+Цей проект ліцензовано за умовами [MIT License](../LICENSE). Докладніше див. у файлі [LICENSE](../LICENSE).

@@ -129,3 +129,9 @@ YuYuInstaller/
    .\make_setup.bat
    ```
    *The compiled installer will be located at `setup_output\YuYuInstaller_Setup.exe`.*
+
+---
+
+## License
+
+This project is licensed under the [MIT License](../LICENSE). See the [LICENSE](../LICENSE) file for more details.

@@ -130,3 +130,9 @@ YuYuInstaller/
    .\make_setup.bat
    ```
    *Çıktı dosyası `setup_output\YuYuInstaller_Setup.exe` konumunda oluşturulacaktır.*
+
+---
+
+## Lisans
+
+Bu proje [MIT Lisansı](../LICENSE) ile lisanslanmıştır. Detaylı bilgi için [LICENSE](../LICENSE) dosyasına göz atabilirsiniz.

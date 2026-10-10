@@ -48,8 +48,9 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-; Main Executable
+; Main Executable & License
 Source: "build\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 ; Tools (ffmpeg & yt-dlp)
 Source: "build\ffmpeg.exe"; DestDir: "{app}"; Flags: ignoreversion
