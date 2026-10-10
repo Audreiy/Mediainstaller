@@ -77,14 +77,6 @@ Item {
                             Row {
                                 id: concurrentContent
                                 anchors.centerIn: parent
-                                spacing: 5
-
-                                Text {
-                                    text: "⚡"
-                                    color: !downloadManager.sequentialMode ? Theme.accent : Theme.textMuted
-                                    font.pixelSize: 10
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
 
                                 Text {
                                     text: I18n.t("downloadModeConcurrent")
@@ -120,15 +112,6 @@ Item {
                             Row {
                                 id: seqContent
                                 anchors.centerIn: parent
-                                spacing: 5
-
-                                Text {
-                                    text: "⇣"
-                                    color: downloadManager.sequentialMode ? Theme.accent : Theme.textMuted
-                                    font.pixelSize: 11
-                                    font.bold: true
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
 
                                 Text {
                                     text: I18n.t("downloadModeSequential")
@@ -143,10 +126,10 @@ Item {
                     }
                 }
 
-                // 2. Dedicated Limit Controller (HUD Glow Card with Toggle & Stepper)
+                // 2. Dedicated Speed Limit Controller (HUD Glow Card with Toggle & Stepper)
                 Rectangle {
                     id: limitCard
-                    property bool isActive: downloadManager.downloadLimitEnabled
+                    property bool isActive: downloadManager.speedLimitEnabled
                     height: 36
                     width: limitMainRow.width + 16
                     radius: Theme.radiusMd
@@ -162,7 +145,7 @@ Item {
                         anchors.centerIn: parent
                         spacing: 8
 
-                        // Clickable Toggle Section: [Pulse Dot] Limit [ON/OFF]
+                        // Clickable Toggle Section: [Pulse Dot] Speed Limit [ON/OFF]
                         Item {
                             id: toggleAreaItem
                             width: toggleContentRow.width
@@ -174,7 +157,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: downloadManager.setDownloadLimitEnabled(!downloadManager.downloadLimitEnabled)
+                                onClicked: downloadManager.setSpeedLimitEnabled(!downloadManager.speedLimitEnabled)
                             }
 
                             Row {
@@ -248,10 +231,27 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
-                        // Stepper Controls [-] [ N ] [+]
+                        // Stepper Controls [-] [ N MB/s ] [+]
                         Row {
+                            id: speedStepperRow
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 4
+
+                            readonly property var speedSteps: [1, 2, 3, 5, 8, 10, 15, 20, 30, 50]
+
+                            function getNextSpeed(cur) {
+                                for (var i = 0; i < speedSteps.length; i++) {
+                                    if (speedSteps[i] > cur) return speedSteps[i];
+                                }
+                                return 50;
+                            }
+
+                            function getPrevSpeed(cur) {
+                                for (var i = speedSteps.length - 1; i >= 0; i--) {
+                                    if (speedSteps[i] < cur) return speedSteps[i];
+                                }
+                                return 1;
+                            }
 
                             // Decrement Button [-]
                             Rectangle {
@@ -269,13 +269,11 @@ Item {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        if (!downloadManager.downloadLimitEnabled) {
-                                            downloadManager.setDownloadLimitEnabled(true)
+                                        if (!downloadManager.speedLimitEnabled) {
+                                            downloadManager.setSpeedLimitEnabled(true)
                                         }
-                                        var cur = downloadManager.maxConcurrentDownloads
-                                        if (cur > 1) {
-                                            downloadManager.setMaxConcurrentDownloads(cur - 1)
-                                        }
+                                        var cur = downloadManager.speedLimitMBps
+                                        downloadManager.setSpeedLimitMBps(speedStepperRow.getPrevSpeed(cur))
                                     }
                                 }
 
@@ -288,9 +286,9 @@ Item {
                                 }
                             }
 
-                            // Stepper Value Display Pill
+                            // Stepper Value Display Pill: e.g. "2 MB/s"
                             Rectangle {
-                                width: 28
+                                width: speedValText.implicitWidth + 14
                                 height: 22
                                 radius: 5
                                 color: limitCard.isActive ? (Theme.accent + "2D") : Theme.bgElevated
@@ -299,10 +297,11 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 Text {
+                                    id: speedValText
                                     anchors.centerIn: parent
-                                    text: downloadManager.maxConcurrentDownloads
+                                    text: downloadManager.speedLimitMBps + " MB/s"
                                     color: limitCard.isActive ? Theme.accent : Theme.textSecondary
-                                    font.pixelSize: 11
+                                    font.pixelSize: 10
                                     font.family: Theme.fontFamily
                                     font.weight: Font.Bold
                                 }
@@ -324,13 +323,11 @@ Item {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        if (!downloadManager.downloadLimitEnabled) {
-                                            downloadManager.setDownloadLimitEnabled(true)
+                                        if (!downloadManager.speedLimitEnabled) {
+                                            downloadManager.setSpeedLimitEnabled(true)
                                         }
-                                        var cur = downloadManager.maxConcurrentDownloads
-                                        if (cur < 10) {
-                                            downloadManager.setMaxConcurrentDownloads(cur + 1)
-                                        }
+                                        var cur = downloadManager.speedLimitMBps
+                                        downloadManager.setSpeedLimitMBps(speedStepperRow.getNextSpeed(cur))
                                     }
                                 }
 
@@ -427,10 +424,23 @@ Item {
                     Row {
                         anchors.centerIn: parent
                         spacing: 6
-                        Text {
-                            text: "📄"
-                            font.pixelSize: 12
+                        Item {
+                            width: 13; height: 13
                             anchors.verticalCenter: parent.verticalCenter
+                            Canvas {
+                                anchors.fill: parent
+                                onPaint: {
+                                    var ctx = getContext("2d");
+                                    ctx.reset();
+                                    ctx.strokeStyle = logHeaderMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary;
+                                    ctx.lineWidth = 1.2;
+                                    ctx.strokeRect(1.5, 1.5, 10, 10);
+                                    ctx.beginPath();
+                                    ctx.moveTo(4, 5); ctx.lineTo(9, 5);
+                                    ctx.moveTo(4, 8); ctx.lineTo(7, 8);
+                                    ctx.stroke();
+                                }
+                            }
                         }
                         Text {
                             text: I18n.t("openLogFile")

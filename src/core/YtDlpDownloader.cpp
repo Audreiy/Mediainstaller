@@ -54,6 +54,10 @@ void YtDlpDownloader::start() {
     args << "--no-check-certificates";
     args << "--continue";
 
+    if (m_speedLimitMBps > 0) {
+        args << "--limit-rate" << QString("%1M").arg(m_speedLimitMBps);
+    }
+
     QString lowerUrl = m_url.toLower();
     bool isYouTube = lowerUrl.contains("youtube.com") || lowerUrl.contains("youtu.be");
 

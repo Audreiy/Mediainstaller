@@ -70,7 +70,7 @@ private:
     int m_downloadProgress = 0;
     bool m_isSilentCheck = false;
 
-    QString m_currentVersion = "1.0.9";
+    QString m_currentVersion = "1.1.0";
     QString m_latestVersion;
     QString m_releaseNotes;
     QString m_downloadUrl;

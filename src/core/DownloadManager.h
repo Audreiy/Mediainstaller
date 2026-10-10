@@ -28,8 +28,10 @@ class DownloadManager : public QObject {
     Q_PROPERTY(FFmpegProcessor* ffmpegProcessor READ ffmpegProcessor CONSTANT)
     Q_PROPERTY(QString defaultDownloadPath READ defaultDownloadPath NOTIFY defaultDownloadPathChanged)
     Q_PROPERTY(bool sequentialMode READ sequentialMode WRITE setSequentialMode NOTIFY sequentialModeChanged)
-    Q_PROPERTY(bool downloadLimitEnabled READ downloadLimitEnabled WRITE setDownloadLimitEnabled NOTIFY downloadLimitEnabledChanged)
-    Q_PROPERTY(int maxConcurrentDownloads READ maxConcurrentDownloads WRITE setMaxConcurrentDownloads NOTIFY maxConcurrentDownloadsChanged)
+    Q_PROPERTY(bool speedLimitEnabled READ speedLimitEnabled WRITE setSpeedLimitEnabled NOTIFY speedLimitEnabledChanged)
+    Q_PROPERTY(int speedLimitMBps READ speedLimitMBps WRITE setSpeedLimitMBps NOTIFY speedLimitMBpsChanged)
+    Q_PROPERTY(bool downloadLimitEnabled READ speedLimitEnabled WRITE setSpeedLimitEnabled NOTIFY speedLimitEnabledChanged)
+    Q_PROPERTY(int maxConcurrentDownloads READ speedLimitMBps WRITE setSpeedLimitMBps NOTIFY speedLimitMBpsChanged)
     Q_PROPERTY(bool videoBackgroundEnabled READ videoBackgroundEnabled WRITE setVideoBackgroundEnabled NOTIFY videoBackgroundEnabledChanged)
     Q_PROPERTY(QString language READ language WRITE setLanguage NOTIFY languageChanged)
 
@@ -42,8 +44,10 @@ public:
     FFmpegProcessor* ffmpegProcessor() { return &m_ffmpegProcessor; }
     QString defaultDownloadPath() const { return m_defaultDownloadPath; }
     bool sequentialMode() const { return m_sequentialMode; }
-    bool downloadLimitEnabled() const { return m_downloadLimitEnabled; }
-    int maxConcurrentDownloads() const { return m_maxConcurrentDownloads; }
+    bool speedLimitEnabled() const { return m_speedLimitEnabled; }
+    int speedLimitMBps() const { return m_speedLimitMBps; }
+    bool downloadLimitEnabled() const { return m_speedLimitEnabled; }
+    int maxConcurrentDownloads() const { return m_speedLimitMBps; }
     bool videoBackgroundEnabled() const { return m_videoBackgroundEnabled; }
     QString language() const { return m_language; }
 
@@ -51,8 +55,10 @@ public:
     Q_INVOKABLE QString getDefaultDownloadDirectory() const;
     Q_INVOKABLE void setDefaultDownloadPath(const QString &path);
     Q_INVOKABLE void setSequentialMode(bool seq);
-    Q_INVOKABLE void setDownloadLimitEnabled(bool enabled);
-    Q_INVOKABLE void setMaxConcurrentDownloads(int limit);
+    Q_INVOKABLE void setSpeedLimitEnabled(bool enabled);
+    Q_INVOKABLE void setSpeedLimitMBps(int limit);
+    Q_INVOKABLE void setDownloadLimitEnabled(bool enabled) { setSpeedLimitEnabled(enabled); }
+    Q_INVOKABLE void setMaxConcurrentDownloads(int limit) { setSpeedLimitMBps(limit); }
     Q_INVOKABLE void setVideoBackgroundEnabled(bool enabled);
     Q_INVOKABLE void setLanguage(const QString &lang);
     Q_INVOKABLE void openLogFile();
@@ -66,6 +72,8 @@ public:
 signals:
     void defaultDownloadPathChanged();
     void sequentialModeChanged();
+    void speedLimitEnabledChanged();
+    void speedLimitMBpsChanged();
     void downloadLimitEnabledChanged();
     void maxConcurrentDownloadsChanged();
     void videoBackgroundEnabledChanged();
@@ -101,8 +109,8 @@ private:
     FFmpegProcessor m_ffmpegProcessor;
     QString m_defaultDownloadPath;
     bool m_sequentialMode = false;
-    bool m_downloadLimitEnabled = false;
-    int m_maxConcurrentDownloads = 2;
+    bool m_speedLimitEnabled = false;
+    int m_speedLimitMBps = 2;
     bool m_videoBackgroundEnabled = true;
     QString m_language = "en";
 

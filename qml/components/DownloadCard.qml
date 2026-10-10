@@ -316,11 +316,23 @@ Rectangle {
                 ToolTip.text: I18n.t("viewLogHint")
                 ToolTip.delay: 300
 
-                Text {
+                Item {
                     anchors.centerIn: parent
-                    text: "📄"
-                    color: logMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary
-                    font.pixelSize: 12
+                    width: 14; height: 14
+                    Canvas {
+                        anchors.fill: parent
+                        onPaint: {
+                            var ctx = getContext("2d");
+                            ctx.reset();
+                            ctx.strokeStyle = logMouse.containsMouse ? Theme.textPrimary : Theme.textSecondary;
+                            ctx.lineWidth = 1.2;
+                            ctx.strokeRect(1.5, 1.5, 11, 11);
+                            ctx.beginPath();
+                            ctx.moveTo(4, 5); ctx.lineTo(10, 5);
+                            ctx.moveTo(4, 8); ctx.lineTo(8, 8);
+                            ctx.stroke();
+                        }
+                    }
                 }
             }
 

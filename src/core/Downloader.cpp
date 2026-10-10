@@ -10,10 +10,39 @@ Downloader::Downloader(const QString &id, const QString &url, const QString &tar
     , m_targetPath(targetPath)
     , m_outputFile(targetPath)
 {
+    m_throttleTimer = new QTimer(this);
+    m_throttleTimer->setInterval(50);
+    connect(m_throttleTimer, &QTimer::timeout, this, &Downloader::onThrottleTimeout);
 }
 
 Downloader::~Downloader() {
     cleanup();
+}
+
+void Downloader::setSpeedLimitMBps(int mbps) {
+    m_speedLimitMBps = mbps;
+    if (m_speedLimitMBps > 0 && m_isRunning) {
+        if (m_reply) {
+            m_reply->setReadBufferSize(128 * 1024);
+        }
+        m_rateTimer.restart();
+        if (!m_throttleTimer->isActive()) {
+            m_throttleTimer->start();
+        }
+    } else {
+        if (m_reply) {
+            m_reply->setReadBufferSize(0);
+        }
+        if (m_throttleTimer) {
+            m_throttleTimer->stop();
+        }
+        if (m_reply && m_outputFile.isOpen()) {
+            QByteArray chunk = m_reply->readAll();
+            if (!chunk.isEmpty()) {
+                m_outputFile.write(chunk);
+            }
+        }
+    }
 }
 
 void Downloader::start() {
@@ -60,6 +89,15 @@ void Downloader::start() {
 
     m_reply = m_netManager.get(request);
 
+    if (m_speedLimitMBps > 0) {
+        m_reply->setReadBufferSize(128 * 1024);
+        m_tokenBucket = qint64(m_speedLimitMBps) * 1024 * 1024 / 10;
+        m_rateTimer.restart();
+        m_throttleTimer->start();
+    } else {
+        m_throttleTimer->stop();
+    }
+
     connect(m_reply, &QNetworkReply::readyRead, this, &Downloader::onReadyRead);
     connect(m_reply, &QNetworkReply::downloadProgress, this, &Downloader::onDownloadProgress);
     connect(m_reply, &QNetworkReply::finished, this, &Downloader::onFinished);
@@ -82,6 +120,9 @@ void Downloader::pause() {
     if (!m_isRunning) return;
     m_isPaused = true;
     m_isRunning = false;
+    if (m_throttleTimer) {
+        m_throttleTimer->stop();
+    }
     emit runningChanged();
 
     if (m_reply) {
@@ -101,6 +142,9 @@ void Downloader::resume() {
 void Downloader::cancel() {
     m_isPaused = false;
     m_isRunning = false;
+    if (m_throttleTimer) {
+        m_throttleTimer->stop();
+    }
     emit runningChanged();
 
     if (m_reply) {
@@ -116,8 +160,44 @@ void Downloader::cancel() {
 void Downloader::onReadyRead() {
     if (!m_reply || !m_outputFile.isOpen()) return;
 
-    QByteArray chunk = m_reply->readAll();
-    m_outputFile.write(chunk);
+    if (m_speedLimitMBps <= 0) {
+        QByteArray chunk = m_reply->readAll();
+        if (!chunk.isEmpty()) {
+            m_outputFile.write(chunk);
+        }
+    } else {
+        processThrottledRead();
+    }
+}
+
+void Downloader::onThrottleTimeout() {
+    if (!m_reply || !m_outputFile.isOpen()) return;
+
+    if (m_speedLimitMBps > 0) {
+        qint64 elapsedMs = m_rateTimer.restart();
+        if (elapsedMs > 500) elapsedMs = 500;
+        qint64 allowedBytesPerSec = qint64(m_speedLimitMBps) * 1024 * 1024;
+        m_tokenBucket += (allowedBytesPerSec * elapsedMs) / 1000;
+
+        qint64 maxBurst = allowedBytesPerSec / 2;
+        if (m_tokenBucket > maxBurst) {
+            m_tokenBucket = maxBurst;
+        }
+        processThrottledRead();
+    }
+}
+
+void Downloader::processThrottledRead() {
+    if (!m_reply || !m_outputFile.isOpen()) return;
+
+    while (m_reply->bytesAvailable() > 0 && m_tokenBucket > 0) {
+        qint64 bytesToRead = qMin(m_reply->bytesAvailable(), m_tokenBucket);
+        bytesToRead = qMin(bytesToRead, qint64(64 * 1024));
+        QByteArray chunk = m_reply->read(bytesToRead);
+        if (chunk.isEmpty()) break;
+        m_outputFile.write(chunk);
+        m_tokenBucket -= chunk.size();
+    }
 }
 
 void Downloader::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
@@ -158,9 +238,21 @@ void Downloader::onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
 void Downloader::onFinished() {
     if (!m_reply) return;
 
+    if (m_throttleTimer) {
+        m_throttleTimer->stop();
+    }
+
     if (m_isPaused) {
         cleanup();
         return;
+    }
+
+    // Flush any pending buffered data in reply
+    if (m_outputFile.isOpen()) {
+        QByteArray chunk = m_reply->readAll();
+        if (!chunk.isEmpty()) {
+            m_outputFile.write(chunk);
+        }
     }
 
     int statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
@@ -187,6 +279,10 @@ void Downloader::onErrorOccurred(QNetworkReply::NetworkError code) {
     Q_UNUSED(code);
     if (!m_reply) return;
 
+    if (m_throttleTimer) {
+        m_throttleTimer->stop();
+    }
+
     if (m_isPaused || m_reply->error() == QNetworkReply::OperationCanceledError) {
         return;
     }
@@ -201,6 +297,9 @@ void Downloader::onErrorOccurred(QNetworkReply::NetworkError code) {
 }
 
 void Downloader::cleanup() {
+    if (m_throttleTimer) {
+        m_throttleTimer->stop();
+    }
     if (m_outputFile.isOpen()) {
         m_outputFile.flush();
         m_outputFile.close();

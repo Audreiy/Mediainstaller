@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.9 Pro",
+            "appVersion": "v1.1.0 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -76,7 +76,7 @@ QtObject {
             "waitingInQueue": "Waiting in queue...",
             "downloadModeConcurrent": "All at Once",
             "downloadModeSequential": "Sequential",
-            "downloadModeLimit": "Limit",
+            "downloadModeLimit": "Speed Limit",
             "moveUp": "Move Up",
             "moveDown": "Move Down",
             "openLogFile": "Error Log",
@@ -116,7 +116,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.0.7 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.1.0 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -132,6 +132,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log110_1": "Download Speed Limiter (MB/s): Integrated Token-Bucket engine and yt-dlp rate limiter with responsive presets",
+            "log110_2": "Decoupled Queue & Speed Limiting: Choose All at Once or Sequential while keeping custom MB/s caps",
+            "log110_3": "Live Update Progress HUD: Redesigned bottom-right update card with real-time download bar and percent display",
+            "log110_4": "UI Polish & Emoji Clutter Removal: Replaced legacy emojis with crisp vector canvas icons and refined button alignments",
             "log109_1": "Decoupled queue modes & concurrency limiter: All at Once and Sequential operate independently alongside custom limit",
             "log109_2": "Redesigned Queue HUD Header: Dedicated limit card with animated pulse LED indicator, status badge (ON/OFF), and responsive stepper",
             "log109_3": "Refined queue dispatch engine: Independent concurrency limits for background downloads without resetting queue modes",
@@ -160,7 +164,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.9 Pro",
+            "appVersion": "v1.1.0 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -225,7 +229,7 @@ QtObject {
             "waitingInQueue": "Sırada bekliyor...",
             "downloadModeConcurrent": "Aynı Anda",
             "downloadModeSequential": "Sırayla İndir",
-            "downloadModeLimit": "Sınır",
+            "downloadModeLimit": "Hız Limiti",
             "moveUp": "Yukarı Taşı",
             "moveDown": "Aşağı Taşı",
             "openLogFile": "Hata Günlüğü",
@@ -281,6 +285,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log110_1": "İndirme Hız Limitleyici (MB/s): Token-Bucket motoru ve yt-dlp hız sınırlandırma ile esnek MB/s kademeleri",
+            "log110_2": "Bağımsız Kuyruk ve Hız Limiti: Aynı Anda veya Sırayla modları seçilirken özel hız sınırları bağımsız uygulanır",
+            "log110_3": "Canlı Güncelleme Çubuğu: Sağ alttaki bildirim kartında gerçek zamanlı indirme yüzdesi ve ilerleme çubuğu",
+            "log110_4": "Minimalist Tasarım ve Emoji Temizliği: Eski emojiler kaldırıldı, yerlerine modern vektörel Canvas ikonlar entegre edildi",
             "log109_1": "Bağımsız İndirme Modları ve Limit Kontrolü: 'Tümünü İndir' ve 'Sırayla İndir' modları artık indirme limitleriyle birlikte bağımsız olarak seçilebilir",
             "log109_2": "Yenilenen Kuyruk HUD Başlığı: Animasyonlu LED göstergeli, durum rozetli (Açık/Kapalı) ve hızlı butonlu özel limit kartı",
             "log109_3": "Optimize Edilmiş Kuyruk Dağıtıcısı: Mod seçimini sıfırlamadan çalışan esnek eşzamanlı indirme sınırı motoru",
@@ -309,7 +317,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.9 Pro",
+            "appVersion": "v1.1.0 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -374,7 +382,7 @@ QtObject {
             "waitingInQueue": "Очікування в черзі...",
             "downloadModeConcurrent": "Одночасно",
             "downloadModeSequential": "По черзі",
-            "downloadModeLimit": "Ліміт",
+            "downloadModeLimit": "Ліміт швидкості",
             "moveUp": "Вгору",
             "moveDown": "Вниз",
             "openLogFile": "Журнал помилок",
@@ -430,6 +438,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log110_1": "Обмежувач швидкості завантаження (MB/s): Інтегровано рушій Token-Bucket та обмеження швидкості yt-dlp",
+            "log110_2": "Незалежні режими черги та ліміту: Можливість обирати «Одночасно» або «По черзі» з користувацьким лімітом MB/s",
+            "log110_3": "Живий індикатор оновлення: Оновлена картка сповіщення з прогрес-баром та відсотками завантаження",
+            "log110_4": "Очищення від емодзі та полірування інтерфейсу: Векторні Canvas іконки та покращене вирівнювання кнопок",
             "log109_1": "Розділені режими завантаження та керування лімітом: 'Всі одразу' та 'По черзі' тепер можна обирати незалежно разом із лімітом",
             "log109_2": "Оновлена панель черги HUD: окрема картка ліміту з пульсуючим LED індикатором, бейджем статусу та кнопками лічильника",
             "log109_3": "Оптимізований диспетчер черги: незалежні ліміти одночасних завантажень без скидання режимів черги",

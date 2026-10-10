@@ -5,6 +5,7 @@
 #include <QUrl>
 #include <QFile>
 #include <QElapsedTimer>
+#include <QTimer>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -26,6 +27,9 @@ public:
     double progress() const { return m_progress; }
     QString speedString() const { return m_speedString; }
 
+    void setSpeedLimitMBps(int mbps);
+    int speedLimitMBps() const { return m_speedLimitMBps; }
+
     void start();
     void pause();
     void resume();
@@ -40,12 +44,14 @@ signals:
 
 private slots:
     void onReadyRead();
+    void onThrottleTimeout();
     void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void onFinished();
     void onErrorOccurred(QNetworkReply::NetworkError code);
 
 private:
     void cleanup();
+    void processThrottledRead();
     QString formatSpeed(double bytesPerSec);
     QString formatEta(double seconds);
 
@@ -56,6 +62,11 @@ private:
     bool m_isPaused = false;
     double m_progress = 0.0;
     QString m_speedString;
+
+    int m_speedLimitMBps = 0;
+    qint64 m_tokenBucket = 0;
+    QTimer *m_throttleTimer = nullptr;
+    QElapsedTimer m_rateTimer;
 
     QNetworkAccessManager m_netManager;
     QNetworkReply *m_reply = nullptr;

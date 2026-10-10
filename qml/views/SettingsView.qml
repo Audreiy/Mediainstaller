@@ -642,10 +642,24 @@ Item {
                         border.width: 1
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Text {
+                        Item {
                             anchors.centerIn: parent
-                            text: "📄"
-                            font.pixelSize: 20
+                            width: 22; height: 22
+                            Canvas {
+                                anchors.fill: parent
+                                onPaint: {
+                                    var ctx = getContext("2d");
+                                    ctx.reset();
+                                    ctx.strokeStyle = Theme.accent;
+                                    ctx.lineWidth = 1.6;
+                                    ctx.strokeRect(3, 2, 16, 18);
+                                    ctx.beginPath();
+                                    ctx.moveTo(6, 7); ctx.lineTo(16, 7);
+                                    ctx.moveTo(6, 11); ctx.lineTo(16, 11);
+                                    ctx.moveTo(6, 15); ctx.lineTo(12, 15);
+                                    ctx.stroke();
+                                }
+                            }
                         }
                     }
 

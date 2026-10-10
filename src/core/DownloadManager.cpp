@@ -25,9 +25,9 @@ DownloadManager::DownloadManager(QObject *parent)
         }
     }
 
-    m_downloadLimitEnabled = settings.value("downloadLimitEnabled", false).toBool();
-    m_maxConcurrentDownloads = settings.value("maxConcurrentDownloads", 3).toInt();
-    if (m_maxConcurrentDownloads < 1) m_maxConcurrentDownloads = 1;
+    m_speedLimitEnabled = settings.value("speedLimitEnabled", settings.value("downloadLimitEnabled", false)).toBool();
+    m_speedLimitMBps = settings.value("speedLimitMBps", settings.value("maxConcurrentDownloads", 2)).toInt();
+    if (m_speedLimitMBps < 1) m_speedLimitMBps = 2;
     m_sequentialMode = settings.value("sequentialMode", false).toBool();
     m_videoBackgroundEnabled = settings.value("videoBackgroundEnabled", true).toBool();
     m_language = settings.value("appLanguage", "en").toString();
@@ -130,10 +130,7 @@ int DownloadManager::effectiveConcurrentLimit() const {
     if (m_sequentialMode) {
         return 1;
     }
-    if (m_downloadLimitEnabled && m_maxConcurrentDownloads > 0) {
-        return m_maxConcurrentDownloads;
-    }
-    return 0; // 0 means unlimited
+    return 0; // 0 means unlimited (All at Once)
 }
 
 void DownloadManager::setSequentialMode(bool seq) {
@@ -146,26 +143,43 @@ void DownloadManager::setSequentialMode(bool seq) {
     }
 }
 
-void DownloadManager::setDownloadLimitEnabled(bool enabled) {
-    if (m_downloadLimitEnabled != enabled) {
-        m_downloadLimitEnabled = enabled;
+void DownloadManager::setSpeedLimitEnabled(bool enabled) {
+    if (m_speedLimitEnabled != enabled) {
+        m_speedLimitEnabled = enabled;
         QSettings settings("YuYuDev", "YuYuInstaller");
-        settings.setValue("downloadLimitEnabled", m_downloadLimitEnabled);
+        settings.setValue("speedLimitEnabled", m_speedLimitEnabled);
+        settings.setValue("downloadLimitEnabled", m_speedLimitEnabled);
+        emit speedLimitEnabledChanged();
         emit downloadLimitEnabledChanged();
-        checkNextQueueItem();
+
+        int effectiveLimit = m_speedLimitEnabled ? m_speedLimitMBps : 0;
+        for (auto it = m_activeHttpDownloads.begin(); it != m_activeHttpDownloads.end(); ++it) {
+            if (it.value()) it.value()->setSpeedLimitMBps(effectiveLimit);
+        }
+        for (auto it = m_activeYtDlpDownloads.begin(); it != m_activeYtDlpDownloads.end(); ++it) {
+            if (it.value()) it.value()->setSpeedLimitMBps(effectiveLimit);
+        }
     }
 }
 
-void DownloadManager::setMaxConcurrentDownloads(int limit) {
+void DownloadManager::setSpeedLimitMBps(int limit) {
     if (limit < 1) limit = 1;
-    if (limit > 10) limit = 10;
-    if (m_maxConcurrentDownloads != limit) {
-        m_maxConcurrentDownloads = limit;
+    if (limit > 100) limit = 100;
+    if (m_speedLimitMBps != limit) {
+        m_speedLimitMBps = limit;
         QSettings settings("YuYuDev", "YuYuInstaller");
-        settings.setValue("maxConcurrentDownloads", m_maxConcurrentDownloads);
+        settings.setValue("speedLimitMBps", m_speedLimitMBps);
+        settings.setValue("maxConcurrentDownloads", m_speedLimitMBps);
+        emit speedLimitMBpsChanged();
         emit maxConcurrentDownloadsChanged();
-        if (m_downloadLimitEnabled && !m_sequentialMode) {
-            checkNextQueueItem();
+
+        if (m_speedLimitEnabled) {
+            for (auto it = m_activeHttpDownloads.begin(); it != m_activeHttpDownloads.end(); ++it) {
+                if (it.value()) it.value()->setSpeedLimitMBps(m_speedLimitMBps);
+            }
+            for (auto it = m_activeYtDlpDownloads.begin(); it != m_activeYtDlpDownloads.end(); ++it) {
+                if (it.value()) it.value()->setSpeedLimitMBps(m_speedLimitMBps);
+            }
         }
     }
 }
@@ -221,8 +235,11 @@ void DownloadManager::startTask(const QueuedTask &task) {
     m_queueModel.updateStatus(task.id, "Downloading");
     m_queueModel.updateProgress(task.id, 0.0, "Starting...", "--:--", -1, -1);
 
+    int effectiveLimit = m_speedLimitEnabled ? m_speedLimitMBps : 0;
+
     if (task.useYtDlp) {
         YtDlpDownloader *ytDownloader = new YtDlpDownloader(task.id, task.url, task.finalFilePath, task.formatId, this);
+        ytDownloader->setSpeedLimitMBps(effectiveLimit);
         m_activeYtDlpDownloads[task.id] = ytDownloader;
 
         connect(ytDownloader, &YtDlpDownloader::progressUpdated, this, [this, id = task.id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
@@ -248,6 +265,7 @@ void DownloadManager::startTask(const QueuedTask &task) {
         }
 
         Downloader *downloader = new Downloader(task.id, task.url, downloadPath, this);
+        downloader->setSpeedLimitMBps(effectiveLimit);
         m_activeHttpDownloads[task.id] = downloader;
 
         connect(downloader, &Downloader::progressUpdated, this, [this, id = task.id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
