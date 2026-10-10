@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.8 Pro",
+            "appVersion": "v1.0.9 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -132,6 +132,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log109_1": "Decoupled queue modes & concurrency limiter: All at Once and Sequential operate independently alongside custom limit",
+            "log109_2": "Redesigned Queue HUD Header: Dedicated limit card with animated pulse LED indicator, status badge (ON/OFF), and responsive stepper",
+            "log109_3": "Refined queue dispatch engine: Independent concurrency limits for background downloads without resetting queue modes",
+            "log109_4": "Interface polish & alignment: Unified header heights (36px) and smooth micro-animations across download controls",
             "log108_1": "YouTube engine upgrade: integrated mobile client bypass to resolve bot verification & HTTP 429 errors",
             "log108_2": "Automatic HTML & recursive iframe scraper: extracts hidden .m3u8/.mp4 streams from embedded players",
             "log108_3": "Detailed diagnostics error logging (downloads.log) with 1-click Notepad access & card retry button",
@@ -156,7 +160,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.8 Pro",
+            "appVersion": "v1.0.9 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -261,7 +265,7 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.0.7 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "aboutVersion": "Sürüm 1.0.9 Pro • Donanım Hızlandırmalı QML Arayüzü",
             "updateSection": "Uygulama Güncellemeleri",
             "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
             "currentVersionLabel": "Yüklü Sürüm",
@@ -277,6 +281,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log109_1": "Bağımsız İndirme Modları ve Limit Kontrolü: 'Tümünü İndir' ve 'Sırayla İndir' modları artık indirme limitleriyle birlikte bağımsız olarak seçilebilir",
+            "log109_2": "Yenilenen Kuyruk HUD Başlığı: Animasyonlu LED göstergeli, durum rozetli (Açık/Kapalı) ve hızlı butonlu özel limit kartı",
+            "log109_3": "Optimize Edilmiş Kuyruk Dağıtıcısı: Mod seçimini sıfırlamadan çalışan esnek eşzamanlı indirme sınırı motoru",
+            "log109_4": "Arayüz Uyumu ve İyileştirmeler: Eşitlenmiş buton yükseklikleri (36px) ve pürüzsüz geçiş animasyonları",
             "log108_1": "YouTube motoru güncellemesi: bot doğrulaması ve HTTP 429 hatalarını aşan mobil istemci bypass'ı entegre edildi",
             "log108_2": "Otomatik HTML ve özyinelemeli iframe kazıyıcı: gömülü oynatıcılardan gizli .m3u8/.mp4 akışlarını çözer",
             "log108_3": "Ayrıntılı hata günlüğü (downloads.log), tek tıkla Not Defteri'nde açma ve kartta tekrar dene butonu eklendi",
@@ -301,7 +309,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.0.8 Pro",
+            "appVersion": "v1.0.9 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -406,7 +414,7 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.0.7 Pro • Апаратно-прискорений інтерфейс QML",
+            "aboutVersion": "Версія 1.0.9 Pro • Апаратно-прискорений інтерфейс QML",
             "updateSection": "Оновлення програми",
             "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
             "currentVersionLabel": "Встановлена версія",
@@ -422,6 +430,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log109_1": "Розділені режими завантаження та керування лімітом: 'Всі одразу' та 'По черзі' тепер можна обирати незалежно разом із лімітом",
+            "log109_2": "Оновлена панель черги HUD: окрема картка ліміту з пульсуючим LED індикатором, бейджем статусу та кнопками лічильника",
+            "log109_3": "Оптимізований диспетчер черги: незалежні ліміти одночасних завантажень без скидання режимів черги",
+            "log109_4": "Полірування інтерфейсу: вирівняні висоти кнопок (36px) та плавні мікроанімації елементів керування",
             "log108_1": "Оновлення рушія YouTube: інтегровано обхід мобільного клієнта для усунення перевірок на роботів та помилок HTTP 429",
             "log108_2": "Автоматичний скрейпер HTML та рекурсивних iframe: видобуває приховані потоки .m3u8/.mp4 із вбудованих плеєрів",
             "log108_3": "Детальний журнал діагностики помилок (downloads.log) зі швидким відкриттям у Блокноті та кнопкою повтору на картці",

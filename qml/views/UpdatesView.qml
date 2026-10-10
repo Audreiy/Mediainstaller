@@ -352,6 +352,61 @@ Item {
                         width: parent.width
                         spacing: 10
 
+                        // v1.0.9 Pro
+                        Rectangle {
+                            width: parent.width
+                            implicitHeight: log109Col.implicitHeight + 20
+                            radius: Theme.radiusMd
+                            color: Theme.bgInput
+                            border.color: Theme.borderDim
+                            border.width: 1
+
+                            Column {
+                                id: log109Col
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 8
+
+                                Row {
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 58; height: 20; radius: 4
+                                        color: Theme.accent
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "v1.0.9"
+                                            color: "#07090e"
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                    Rectangle {
+                                        width: 54; height: 18; radius: 9
+                                        color: "#162338"
+                                        border.color: Theme.accent
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "CURRENT"
+                                            color: Theme.accent
+                                            font.pixelSize: 9
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: "• " + I18n.t("log109_1") + "\n• " + I18n.t("log109_2") + "\n• " + I18n.t("log109_3") + "\n• " + I18n.t("log109_4")
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    lineHeight: 1.45
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
                         // v1.0.8 Pro
                         Rectangle {
                             width: parent.width
@@ -371,25 +426,14 @@ Item {
                                     spacing: 8
                                     Rectangle {
                                         width: 58; height: 20; radius: 4
-                                        color: Theme.accent
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "v1.0.8"
-                                            color: "#07090e"
-                                            font.pixelSize: 11
-                                            font.weight: Font.Bold
-                                        }
-                                    }
-                                    Rectangle {
-                                        width: 54; height: 18; radius: 9
-                                        color: "#162338"
-                                        border.color: Theme.accent
+                                        color: Theme.bgElevated
+                                        border.color: Theme.borderDim
                                         border.width: 1
                                         Text {
                                             anchors.centerIn: parent
-                                            text: "CURRENT"
-                                            color: Theme.accent
-                                            font.pixelSize: 9
+                                            text: "v1.0.8"
+                                            color: Theme.textSecondary
+                                            font.pixelSize: 11
                                             font.weight: Font.Bold
                                         }
                                     }
