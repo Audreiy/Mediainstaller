@@ -33,3 +33,6 @@ setup_output/
 scratch/
 build_app.bat
 
+# Private development rules
+docs/Rule.md
+
