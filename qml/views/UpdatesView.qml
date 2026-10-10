@@ -352,17 +352,17 @@ Item {
                         width: parent.width
                         spacing: 10
 
-                        // v1.0.7 Pro
+                        // v1.0.8 Pro
                         Rectangle {
                             width: parent.width
-                            implicitHeight: log107Col.implicitHeight + 20
+                            implicitHeight: log108Col.implicitHeight + 20
                             radius: Theme.radiusMd
                             color: Theme.bgInput
                             border.color: Theme.borderDim
                             border.width: 1
 
                             Column {
-                                id: log107Col
+                                id: log108Col
                                 anchors.fill: parent
                                 anchors.margins: 12
                                 spacing: 8
@@ -374,7 +374,7 @@ Item {
                                         color: Theme.accent
                                         Text {
                                             anchors.centerIn: parent
-                                            text: "v1.0.7"
+                                            text: "v1.0.8"
                                             color: "#07090e"
                                             font.pixelSize: 11
                                             font.weight: Font.Bold
@@ -397,7 +397,51 @@ Item {
 
                                 Text {
                                     width: parent.width
-                                    text: "• " + I18n.t("log107_1") + "\n• " + I18n.t("log107_2") + "\n• " + I18n.t("log107_3") + "\n• " + I18n.t("log107_4") + "\n• " + I18n.t("log107_5") + "\n• " + I18n.t("log107_6")
+                                    text: "• " + I18n.t("log108_1") + "\n• " + I18n.t("log108_2") + "\n• " + I18n.t("log108_3") + "\n• " + I18n.t("log108_4")
+                                    color: Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    lineHeight: 1.45
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+
+                        // v1.0.7 Pro
+                        Rectangle {
+                            width: parent.width
+                            implicitHeight: log107Col.implicitHeight + 20
+                            radius: Theme.radiusMd
+                            color: Theme.bgInput
+                            border.color: Theme.borderDim
+                            border.width: 1
+
+                            Column {
+                                id: log107Col
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 8
+
+                                Row {
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 58; height: 20; radius: 4
+                                        color: Theme.bgElevated
+                                        border.color: Theme.borderDim
+                                        border.width: 1
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "v1.0.7"
+                                            color: Theme.textSecondary
+                                            font.pixelSize: 11
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    width: parent.width
+                                    text: "• " + I18n.t("log107_1") + "\n• " + I18n.t("log107_2") + "\n• " + I18n.t("log107_3")
                                     color: Theme.textSecondary
                                     font.pixelSize: 11
                                     font.family: Theme.fontFamily
