@@ -40,9 +40,9 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 10
 
-                // Mode Selector: All at Once | Sequential | Limit (with Stepper)
+                // 1. Download Mode Segmented Pill (All at Once | Sequential)
                 Rectangle {
-                    height: 38
+                    height: 36
                     width: modeRow.width + 8
                     radius: Theme.radiusMd
                     color: Theme.bgElevated
@@ -54,49 +54,60 @@ Item {
                         anchors.centerIn: parent
                         spacing: 4
 
-                        // Mode 1: All at Once
+                        // Option 1: All at Once
                         Rectangle {
-                            height: 30
-                            width: concurrentContent.width + 18
+                            height: 28
+                            width: concurrentContent.width + 20
                             radius: Theme.radiusSm
-                            color: !downloadManager.downloadLimitEnabled ? (Theme.accent + "2D") : (concurrentHover.containsMouse ? Theme.bgCardHover : "transparent")
-                            border.color: !downloadManager.downloadLimitEnabled ? Theme.accent : "transparent"
+                            color: !downloadManager.sequentialMode ? (Theme.accent + "26") : (concurrentHover.containsMouse ? Theme.bgCardHover : "transparent")
+                            border.color: !downloadManager.sequentialMode ? Theme.accent : "transparent"
                             border.width: 1
 
                             Behavior on color { ColorAnimation { duration: 150 } }
+                            Behavior on border.color { ColorAnimation { duration: 150 } }
 
                             MouseArea {
                                 id: concurrentHover
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: downloadManager.setDownloadLimitEnabled(false)
+                                onClicked: downloadManager.setSequentialMode(false)
                             }
 
                             Row {
                                 id: concurrentContent
                                 anchors.centerIn: parent
+                                spacing: 5
+
+                                Text {
+                                    text: "⚡"
+                                    color: !downloadManager.sequentialMode ? Theme.accent : Theme.textMuted
+                                    font.pixelSize: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
                                 Text {
                                     text: I18n.t("downloadModeConcurrent")
-                                    color: !downloadManager.downloadLimitEnabled ? Theme.textPrimary : Theme.textSecondary
+                                    color: !downloadManager.sequentialMode ? Theme.textPrimary : Theme.textSecondary
                                     font.pixelSize: 11
                                     font.family: Theme.fontFamily
-                                    font.weight: !downloadManager.downloadLimitEnabled ? Font.Bold : Font.Normal
+                                    font.weight: !downloadManager.sequentialMode ? Font.Bold : Font.DemiBold
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
                         }
 
-                        // Mode 2: Sequential (1 by 1)
+                        // Option 2: Sequential
                         Rectangle {
-                            height: 30
-                            width: seqContent.width + 18
+                            height: 28
+                            width: seqContent.width + 20
                             radius: Theme.radiusSm
-                            color: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads === 1) ? (Theme.accent + "2D") : (seqHover.containsMouse ? Theme.bgCardHover : "transparent")
-                            border.color: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads === 1) ? Theme.accent : "transparent"
+                            color: downloadManager.sequentialMode ? (Theme.accent + "26") : (seqHover.containsMouse ? Theme.bgCardHover : "transparent")
+                            border.color: downloadManager.sequentialMode ? Theme.accent : "transparent"
                             border.width: 1
 
                             Behavior on color { ColorAnimation { duration: 150 } }
+                            Behavior on border.color { ColorAnimation { duration: 150 } }
 
                             MouseArea {
                                 id: seqHover
@@ -109,147 +120,226 @@ Item {
                             Row {
                                 id: seqContent
                                 anchors.centerIn: parent
+                                spacing: 5
+
+                                Text {
+                                    text: "⇣"
+                                    color: downloadManager.sequentialMode ? Theme.accent : Theme.textMuted
+                                    font.pixelSize: 11
+                                    font.bold: true
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
                                 Text {
                                     text: I18n.t("downloadModeSequential")
-                                    color: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads === 1) ? Theme.textPrimary : Theme.textSecondary
+                                    color: downloadManager.sequentialMode ? Theme.textPrimary : Theme.textSecondary
                                     font.pixelSize: 11
                                     font.family: Theme.fontFamily
-                                    font.weight: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads === 1) ? Font.Bold : Font.Normal
+                                    font.weight: downloadManager.sequentialMode ? Font.Bold : Font.DemiBold
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
                         }
+                    }
+                }
 
-                        // Mode 3: Custom Concurrent Limit (with Stepper)
-                        Rectangle {
-                            property bool isLimitActive: downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads > 1
-                            height: 30
-                            width: limitRow.width + 14
-                            radius: Theme.radiusSm
-                            color: isLimitActive ? (Theme.accent + "2D") : (limitHover.containsMouse ? Theme.bgCardHover : "transparent")
-                            border.color: isLimitActive ? Theme.accent : "transparent"
-                            border.width: 1
+                // 2. Dedicated Limit Controller (HUD Glow Card with Toggle & Stepper)
+                Rectangle {
+                    id: limitCard
+                    property bool isActive: downloadManager.downloadLimitEnabled
+                    height: 36
+                    width: limitMainRow.width + 16
+                    radius: Theme.radiusMd
+                    color: isActive ? "#162332" : Theme.bgElevated
+                    border.color: isActive ? Theme.accent : (limitCardMouse.containsMouse ? Theme.borderBright : Theme.borderDim)
+                    border.width: 1
 
-                            Behavior on color { ColorAnimation { duration: 150 } }
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                    Behavior on border.color { ColorAnimation { duration: 180 } }
+
+                    Row {
+                        id: limitMainRow
+                        anchors.centerIn: parent
+                        spacing: 8
+
+                        // Clickable Toggle Section: [Pulse Dot] Limit [ON/OFF]
+                        Item {
+                            id: toggleAreaItem
+                            width: toggleContentRow.width
+                            height: 28
+                            anchors.verticalCenter: parent.verticalCenter
 
                             MouseArea {
-                                id: limitHover
+                                id: limitCardMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    downloadManager.setDownloadLimitEnabled(true)
-                                    if (downloadManager.maxConcurrentDownloads <= 1) {
-                                        downloadManager.setMaxConcurrentDownloads(2)
-                                    }
-                                }
+                                onClicked: downloadManager.setDownloadLimitEnabled(!downloadManager.downloadLimitEnabled)
                             }
 
                             Row {
-                                id: limitRow
-                                anchors.centerIn: parent
-                                spacing: 8
+                                id: toggleContentRow
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 7
+
+                                // Pulsing / Status LED Dot
+                                Item {
+                                    width: 10
+                                    height: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 10; height: 10; radius: 5
+                                        color: Theme.accent
+                                        opacity: 0.35
+                                        visible: limitCard.isActive
+                                        SequentialAnimation on scale {
+                                            running: limitCard.isActive
+                                            loops: Animation.Infinite
+                                            NumberAnimation { from: 0.8; to: 1.4; duration: 1000; easing.type: Easing.InOutQuad }
+                                            NumberAnimation { from: 1.4; to: 0.8; duration: 1000; easing.type: Easing.InOutQuad }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 6; height: 6; radius: 3
+                                        color: limitCard.isActive ? Theme.accent : Theme.textMuted
+                                    }
+                                }
 
                                 Text {
                                     text: I18n.t("downloadModeLimit")
-                                    color: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads > 1) ? Theme.textPrimary : Theme.textSecondary
+                                    color: limitCard.isActive ? Theme.textPrimary : Theme.textSecondary
                                     font.pixelSize: 11
                                     font.family: Theme.fontFamily
-                                    font.weight: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads > 1) ? Font.Bold : Font.Normal
+                                    font.weight: limitCard.isActive ? Font.Bold : Font.DemiBold
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
 
-                                Row {
+                                // Mini Status Badge (ON / OFF)
+                                Rectangle {
+                                    width: 24
+                                    height: 16
+                                    radius: 4
+                                    color: limitCard.isActive ? (Theme.accent + "33") : Theme.borderDim
+                                    border.color: limitCard.isActive ? (Theme.accent + "66") : "transparent"
+                                    border.width: 1
                                     anchors.verticalCenter: parent.verticalCenter
-                                    spacing: 4
 
-                                    // Decrement Button [-]
-                                    Rectangle {
-                                        width: 18
-                                        height: 18
-                                        radius: 4
-                                        color: minusMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
-                                        border.color: minusMouse.containsMouse ? Theme.accent : Theme.borderDim
-                                        border.width: 1
-                                        anchors.verticalCenter: parent.verticalCenter
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: limitCard.isActive ? "ON" : "OFF"
+                                        color: limitCard.isActive ? Theme.accent : Theme.textMuted
+                                        font.pixelSize: 8
+                                        font.weight: Font.Bold
+                                        font.family: Theme.fontFamily
+                                    }
+                                }
+                            }
+                        }
 
-                                        MouseArea {
-                                            id: minusMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                downloadManager.setDownloadLimitEnabled(true)
-                                                var cur = downloadManager.maxConcurrentDownloads
-                                                if (cur > 2) {
-                                                    downloadManager.setMaxConcurrentDownloads(cur - 1)
-                                                } else {
-                                                    downloadManager.setMaxConcurrentDownloads(2)
-                                                }
-                                            }
+                        // Divider
+                        Rectangle {
+                            width: 1
+                            height: 18
+                            color: Theme.borderDim
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        // Stepper Controls [-] [ N ] [+]
+                        Row {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 4
+
+                            // Decrement Button [-]
+                            Rectangle {
+                                width: 22
+                                height: 22
+                                radius: 5
+                                color: minusMouse.containsMouse ? Theme.bgCardHover : (limitCard.isActive ? "#1d2e40" : Theme.bgElevated)
+                                border.color: minusMouse.containsMouse ? Theme.accent : Theme.borderDim
+                                border.width: 1
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                MouseArea {
+                                    id: minusMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (!downloadManager.downloadLimitEnabled) {
+                                            downloadManager.setDownloadLimitEnabled(true)
                                         }
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "−"
-                                            color: Theme.textPrimary
-                                            font.pixelSize: 11
-                                            font.bold: true
+                                        var cur = downloadManager.maxConcurrentDownloads
+                                        if (cur > 1) {
+                                            downloadManager.setMaxConcurrentDownloads(cur - 1)
                                         }
                                     }
+                                }
 
-                                    // Number value pill
-                                    Rectangle {
-                                        width: 22
-                                        height: 18
-                                        radius: 4
-                                        color: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads > 1) ? (Theme.accent + "33") : Theme.bgElevated
-                                        anchors.verticalCenter: parent.verticalCenter
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "−"
+                                    color: limitCard.isActive ? Theme.textPrimary : Theme.textSecondary
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                }
+                            }
 
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: downloadManager.maxConcurrentDownloads > 1 ? downloadManager.maxConcurrentDownloads : 2
-                                            color: (downloadManager.downloadLimitEnabled && downloadManager.maxConcurrentDownloads > 1) ? Theme.accent : Theme.textSecondary
-                                            font.pixelSize: 11
-                                            font.family: Theme.fontFamily
-                                            font.weight: Font.Bold
+                            // Stepper Value Display Pill
+                            Rectangle {
+                                width: 28
+                                height: 22
+                                radius: 5
+                                color: limitCard.isActive ? (Theme.accent + "2D") : Theme.bgElevated
+                                border.color: limitCard.isActive ? (Theme.accent + "55") : Theme.borderDim
+                                border.width: 1
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: downloadManager.maxConcurrentDownloads
+                                    color: limitCard.isActive ? Theme.accent : Theme.textSecondary
+                                    font.pixelSize: 11
+                                    font.family: Theme.fontFamily
+                                    font.weight: Font.Bold
+                                }
+                            }
+
+                            // Increment Button [+]
+                            Rectangle {
+                                width: 22
+                                height: 22
+                                radius: 5
+                                color: plusMouse.containsMouse ? Theme.bgCardHover : (limitCard.isActive ? "#1d2e40" : Theme.bgElevated)
+                                border.color: plusMouse.containsMouse ? Theme.accent : Theme.borderDim
+                                border.width: 1
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                MouseArea {
+                                    id: plusMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (!downloadManager.downloadLimitEnabled) {
+                                            downloadManager.setDownloadLimitEnabled(true)
+                                        }
+                                        var cur = downloadManager.maxConcurrentDownloads
+                                        if (cur < 10) {
+                                            downloadManager.setMaxConcurrentDownloads(cur + 1)
                                         }
                                     }
+                                }
 
-                                    // Increment Button [+]
-                                    Rectangle {
-                                        width: 18
-                                        height: 18
-                                        radius: 4
-                                        color: plusMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
-                                        border.color: plusMouse.containsMouse ? Theme.accent : Theme.borderDim
-                                        border.width: 1
-                                        anchors.verticalCenter: parent.verticalCenter
-
-                                        MouseArea {
-                                            id: plusMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                downloadManager.setDownloadLimitEnabled(true)
-                                                var cur = downloadManager.maxConcurrentDownloads
-                                                if (cur < 2) {
-                                                    downloadManager.setMaxConcurrentDownloads(2)
-                                                } else if (cur < 10) {
-                                                    downloadManager.setMaxConcurrentDownloads(cur + 1)
-                                                }
-                                            }
-                                        }
-
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "+"
-                                            color: Theme.textPrimary
-                                            font.pixelSize: 11
-                                            font.bold: true
-                                        }
-                                    }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "+"
+                                    color: limitCard.isActive ? Theme.textPrimary : Theme.textSecondary
+                                    font.pixelSize: 12
+                                    font.bold: true
                                 }
                             }
                         }
@@ -259,8 +349,8 @@ Item {
                 // Clear Completed Button
                 Rectangle {
                     visible: queueModel.totalDownloadCount > 0
-                    width: 140
-                    height: 38
+                    width: 136
+                    height: 36
                     radius: Theme.radiusMd
                     color: clearMouse.containsMouse ? Theme.bgCardHover : Theme.bgElevated
                     border.color: clearMouse.containsMouse ? Theme.accent : Theme.borderDim

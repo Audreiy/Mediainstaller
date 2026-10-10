@@ -26,17 +26,9 @@ DownloadManager::DownloadManager(QObject *parent)
     }
 
     m_downloadLimitEnabled = settings.value("downloadLimitEnabled", false).toBool();
-    m_maxConcurrentDownloads = settings.value("maxConcurrentDownloads", 2).toInt();
+    m_maxConcurrentDownloads = settings.value("maxConcurrentDownloads", 3).toInt();
     if (m_maxConcurrentDownloads < 1) m_maxConcurrentDownloads = 1;
-    if (settings.contains("sequentialMode")) {
-        m_sequentialMode = settings.value("sequentialMode", false).toBool();
-        if (m_sequentialMode) {
-            m_downloadLimitEnabled = true;
-            m_maxConcurrentDownloads = 1;
-        }
-    } else {
-        m_sequentialMode = m_downloadLimitEnabled && (m_maxConcurrentDownloads == 1);
-    }
+    m_sequentialMode = settings.value("sequentialMode", false).toBool();
     m_videoBackgroundEnabled = settings.value("videoBackgroundEnabled", true).toBool();
     m_language = settings.value("appLanguage", "en").toString();
 
@@ -134,30 +126,33 @@ void DownloadManager::setDefaultDownloadPath(const QString &path) {
     }
 }
 
+int DownloadManager::effectiveConcurrentLimit() const {
+    if (m_sequentialMode) {
+        return 1;
+    }
+    if (m_downloadLimitEnabled && m_maxConcurrentDownloads > 0) {
+        return m_maxConcurrentDownloads;
+    }
+    return 0; // 0 means unlimited
+}
+
 void DownloadManager::setSequentialMode(bool seq) {
-    if (seq) {
-        setDownloadLimitEnabled(true);
-        setMaxConcurrentDownloads(1);
-    } else {
-        setDownloadLimitEnabled(false);
+    if (m_sequentialMode != seq) {
+        m_sequentialMode = seq;
+        QSettings settings("YuYuDev", "YuYuInstaller");
+        settings.setValue("sequentialMode", m_sequentialMode);
+        emit sequentialModeChanged();
+        checkNextQueueItem();
     }
 }
 
 void DownloadManager::setDownloadLimitEnabled(bool enabled) {
     if (m_downloadLimitEnabled != enabled) {
         m_downloadLimitEnabled = enabled;
-        m_sequentialMode = m_downloadLimitEnabled && (m_maxConcurrentDownloads == 1);
         QSettings settings("YuYuDev", "YuYuInstaller");
         settings.setValue("downloadLimitEnabled", m_downloadLimitEnabled);
-        settings.setValue("sequentialMode", m_sequentialMode);
         emit downloadLimitEnabledChanged();
-        emit sequentialModeChanged();
-
-        if (!m_downloadLimitEnabled) {
-            startAllQueuedTasks();
-        } else {
-            checkNextQueueItem();
-        }
+        checkNextQueueItem();
     }
 }
 
@@ -166,14 +161,10 @@ void DownloadManager::setMaxConcurrentDownloads(int limit) {
     if (limit > 10) limit = 10;
     if (m_maxConcurrentDownloads != limit) {
         m_maxConcurrentDownloads = limit;
-        m_sequentialMode = m_downloadLimitEnabled && (m_maxConcurrentDownloads == 1);
         QSettings settings("YuYuDev", "YuYuInstaller");
         settings.setValue("maxConcurrentDownloads", m_maxConcurrentDownloads);
-        settings.setValue("sequentialMode", m_sequentialMode);
         emit maxConcurrentDownloadsChanged();
-        emit sequentialModeChanged();
-
-        if (m_downloadLimitEnabled) {
+        if (m_downloadLimitEnabled && !m_sequentialMode) {
             checkNextQueueItem();
         }
     }
@@ -306,16 +297,17 @@ int DownloadManager::countActiveDownloads() const {
 }
 
 void DownloadManager::checkNextQueueItem() {
-    if (!m_downloadLimitEnabled || m_maxConcurrentDownloads <= 0) {
+    int limit = effectiveConcurrentLimit();
+    if (limit <= 0) {
         startAllQueuedTasks();
         return;
     }
 
     int activeCount = countActiveDownloads();
 
-    // If active count exceeds the limit (e.g. user lowered limit), pause excess from the bottom
-    if (activeCount > m_maxConcurrentDownloads) {
-        for (int i = m_queueModel.rowCount() - 1; i >= 0 && activeCount > m_maxConcurrentDownloads; --i) {
+    // If active count exceeds the limit (e.g. user lowered limit or switched to sequential), pause excess from the bottom
+    if (activeCount > limit) {
+        for (int i = m_queueModel.rowCount() - 1; i >= 0 && activeCount > limit; --i) {
             DownloadItem it = m_queueModel.getItemAt(i);
             if (it.status == "Downloading") {
                 onQueuePause(it.id);
@@ -325,7 +317,7 @@ void DownloadManager::checkNextQueueItem() {
     }
 
     // If active count is below limit, start next queued/paused tasks from top to bottom
-    for (int i = 0; i < m_queueModel.rowCount() && activeCount < m_maxConcurrentDownloads; ++i) {
+    for (int i = 0; i < m_queueModel.rowCount() && activeCount < limit; ++i) {
         DownloadItem it = m_queueModel.getItemAt(i);
         if (it.status == "Queued" || it.status == "Paused") {
             if (m_queuedTasks.contains(it.id)) {
@@ -427,7 +419,8 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
     m_taskRegistry[id] = task;
 
     int activeCount = countActiveDownloads();
-    if (m_downloadLimitEnabled && m_maxConcurrentDownloads > 0 && activeCount >= m_maxConcurrentDownloads) {
+    int limit = effectiveConcurrentLimit();
+    if (limit > 0 && activeCount >= limit) {
         item.status = "Queued";
         item.speed = "";
         item.eta = "--:--";
@@ -556,7 +549,8 @@ void DownloadManager::onQueueResume(const QString &id) {
         return;
     }
 
-    if (m_downloadLimitEnabled && countActiveDownloads() >= m_maxConcurrentDownloads) {
+    int limit = effectiveConcurrentLimit();
+    if (limit > 0 && countActiveDownloads() >= limit) {
         for (int i = m_queueModel.rowCount() - 1; i >= 0; --i) {
             DownloadItem it = m_queueModel.getItemAt(i);
             if (it.id != id && it.status == "Downloading") {

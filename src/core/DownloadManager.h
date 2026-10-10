@@ -91,6 +91,7 @@ private:
     QString sanitizeFileName(const QString &name) const;
     bool hasActiveDownload() const;
     int countActiveDownloads() const;
+    int effectiveConcurrentLimit() const;
     void startTask(const QueuedTask &task);
     void startAllQueuedTasks();
     void pauseActiveDownloadsExcept(const QString &keepId = QString());
