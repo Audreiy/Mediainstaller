@@ -14,6 +14,7 @@
   `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS /CURRENTUSER`
 - This ensures updates install 100% silently in the background without any Windows UAC permission prompt.
 
+
 ### 3. Release Version History & Changelog Continuity
 - Whenever a new version is released:
   1. Update version in `CMakeLists.txt`, `src/main.cpp`, `src/core/UpdateManager.h`, `installer.iss`.
@@ -21,3 +22,11 @@
   3. Add the new version block marked with `CURRENT` badge at the top of the timeline in `qml/views/UpdatesView.qml`.
   4. Change the previous version's badge from `CURRENT` to standard `Theme.bgElevated`.
   5. Never remove past version logs from the timeline so users can view the full release history.
+
+### 4. Build & Tag Automation Workflow
+- Release işlemlerinde agent tüm derlemeleri yapar:
+  1. `build.bat` ile Release binary derlenir.
+  2. `make_setup.bat` ile `setup_output\YuYuInstaller_Setup.exe` kurulum paketi hazırlanır.
+  3. Değişiklikler commit'lenir, ilgili Git tag'i oluşturulur ve GitHub'a pushlanır (`git push origin main`, `git push origin <tag>`).
+- Kurulum paketi dosyasını (`YuYuInstaller_Setup.exe`) GitHub Release'e agent YÜKLEMEZ; upload işlemi kullanıcı tarafından manuel olarak yapılır.
+
