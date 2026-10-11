@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.0 Pro",
+            "appVersion": "v1.1.1 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -116,7 +116,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.1.0 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.1.1 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -132,6 +132,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log111_1": "4K/2K Support: Dynamic quality options based on the video's real max resolution; no more low-res fallback pixelation",
+            "log111_2": "Instagram, TikTok & X Fix: Social links go straight to the yt-dlp engine with IPv4, timeout and retry protection",
+            "log111_3": "Faster Analysis: Known video platforms skip HTML scraping for quicker results",
+            "log111_4": "MIT License added to the project and installer",
             "log110_1": "Download Speed Limiter (MB/s): Integrated Token-Bucket engine and yt-dlp rate limiter with responsive presets",
             "log110_2": "Decoupled Queue & Speed Limiting: Choose All at Once or Sequential while keeping custom MB/s caps",
             "log110_3": "Live Update Progress HUD: Redesigned bottom-right update card with real-time download bar and percent display",
@@ -164,7 +168,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.0 Pro",
+            "appVersion": "v1.1.1 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -285,6 +289,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log111_1": "4K/2K Desteği: Video gerçek maksimum çözünürlüğüne göre dinamik kalite seçenekleri; düşük çözünürlük pikselleşmesi giderildi",
+            "log111_2": "Instagram, TikTok ve X Düzeltmesi: Sosyal medya linkleri doğrudan yt-dlp motoruna yönlendirilir; IPv4, zaman aşımı ve yeniden deneme korumalı",
+            "log111_3": "Hızlı Analiz: Bilinen video platformları HTML taramasını atlayarak daha hızlı sonuç verir",
+            "log111_4": "Projeye ve kurulum paketine MIT Lisansı eklendi",
             "log110_1": "İndirme Hız Limitleyici (MB/s): Token-Bucket motoru ve yt-dlp hız sınırlandırma ile esnek MB/s kademeleri",
             "log110_2": "Bağımsız Kuyruk ve Hız Limiti: Aynı Anda veya Sırayla modları seçilirken özel hız sınırları bağımsız uygulanır",
             "log110_3": "Canlı Güncelleme Çubuğu: Sağ alttaki bildirim kartında gerçek zamanlı indirme yüzdesi ve ilerleme çubuğu",
@@ -317,7 +325,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.0 Pro",
+            "appVersion": "v1.1.1 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -438,6 +446,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log111_1": "Підтримка 4K/2K: Динамічні опції якості за реальною максимальною роздільною здатністю відео; усунено пікселізацію",
+            "log111_2": "Виправлення Instagram, TikTok і X: Посилання напряму йдуть до рушія yt-dlp із захистом IPv4, тайм-аутом і повторами",
+            "log111_3": "Швидший аналіз: Відомі відеоплатформи пропускають сканування HTML",
+            "log111_4": "До проєкту та інсталятора додано ліцензію MIT",
             "log110_1": "Обмежувач швидкості завантаження (MB/s): Інтегровано рушій Token-Bucket та обмеження швидкості yt-dlp",
             "log110_2": "Незалежні режими черги та ліміту: Можливість обирати «Одночасно» або «По черзі» з користувацьким лімітом MB/s",
             "log110_3": "Живий індикатор оновлення: Оновлена картка сповіщення з прогрес-баром та відсотками завантаження",
