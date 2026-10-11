@@ -53,6 +53,9 @@ void YtDlpDownloader::start() {
     args << "--no-playlist";
     args << "--no-check-certificates";
     args << "--continue";
+    args << "--socket-timeout" << "20";
+    args << "--retries" << "3";
+    args << "--force-ipv4";
 
     if (m_speedLimitMBps > 0) {
         args << "--limit-rate" << QString("%1M").arg(m_speedLimitMBps);
@@ -60,11 +63,14 @@ void YtDlpDownloader::start() {
 
     QString lowerUrl = m_url.toLower();
     bool isYouTube = lowerUrl.contains("youtube.com") || lowerUrl.contains("youtu.be");
+    bool isSocial = lowerUrl.contains("instagram.com") || lowerUrl.contains("tiktok.com") ||
+                    lowerUrl.contains("twitter.com") || lowerUrl.contains("x.com") ||
+                    lowerUrl.contains("facebook.com") || lowerUrl.contains("fb.watch");
 
     if (isYouTube) {
         // Use android and ios player clients to bypass YouTube SABR bot check and 429 login requirements
         args << "--extractor-args" << "youtube:player_client=android,ios";
-    } else {
+    } else if (!isSocial) {
         args << "--extractor-args" << "generic:impersonate";
         args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
     }

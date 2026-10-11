@@ -136,6 +136,16 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
         return;
     }
 
+    // 1.1 Direct social media & streaming video platforms (Instagram, TikTok, Twitter/X, Facebook, etc.)
+    if (lower.contains("instagram.com") || lower.contains("tiktok.com") ||
+        lower.contains("twitter.com") || lower.contains("x.com") ||
+        lower.contains("facebook.com") || lower.contains("fb.watch") ||
+        lower.contains("reddit.com") || lower.contains("twitch.tv") ||
+        lower.contains("vimeo.com") || lower.contains("dailymotion.com")) {
+        startYtDlpProbe(trimmed);
+        return;
+    }
+
     // 2. Direct HLS Stream (.m3u8)
     if (lower.contains(".m3u8")) {
         QString baseName = QFileInfo(url.path()).completeBaseName();
@@ -756,12 +766,19 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
     args << "--no-warnings";
     args << "--no-playlist";
     args << "--no-check-certificates";
+    args << "--socket-timeout" << "20";
+    args << "--retries" << "3";
+    args << "--force-ipv4";
 
     QString lower = rawUrl.toLower();
     bool isYouTube = lower.contains("youtube.com") || lower.contains("youtu.be");
+    bool isSocial = lower.contains("instagram.com") || lower.contains("tiktok.com") ||
+                    lower.contains("twitter.com") || lower.contains("x.com") ||
+                    lower.contains("facebook.com") || lower.contains("fb.watch");
+
     if (isYouTube) {
         args << "--extractor-args" << "youtube:player_client=android,ios";
-    } else {
+    } else if (!isSocial) {
         args << "--extractor-args" << "generic:impersonate";
         args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
     }
