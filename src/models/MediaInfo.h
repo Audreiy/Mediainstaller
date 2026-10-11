@@ -33,6 +33,7 @@ class MediaInfo : public QObject {
     Q_PROPERTY(QString thumbnailUrl READ thumbnailUrl WRITE setThumbnailUrl NOTIFY thumbnailUrlChanged)
     Q_PROPERTY(bool isDirectFile READ isDirectFile WRITE setIsDirectFile NOTIFY isDirectFileChanged)
     Q_PROPERTY(bool isAudioOnly READ isAudioOnly WRITE setIsAudioOnly NOTIFY isAudioOnlyChanged)
+    Q_PROPERTY(int maxHeight READ maxHeight WRITE setMaxHeight NOTIFY maxHeightChanged)
     Q_PROPERTY(QVariantList streamOptions READ streamOptionsVariant NOTIFY streamOptionsChanged)
 
 public:
@@ -59,6 +60,9 @@ public:
     bool isAudioOnly() const { return m_isAudioOnly; }
     void setIsAudioOnly(bool audioOnly);
 
+    int maxHeight() const { return m_maxHeight; }
+    void setMaxHeight(int h);
+
     QList<MediaStreamOption> streamOptions() const { return m_streamOptions; }
     void setStreamOptions(const QList<MediaStreamOption> &options);
 
@@ -72,6 +76,7 @@ signals:
     void thumbnailUrlChanged();
     void isDirectFileChanged();
     void isAudioOnlyChanged();
+    void maxHeightChanged();
     void streamOptionsChanged();
 
 private:
@@ -82,5 +87,6 @@ private:
     QString m_thumbnailUrl;
     bool m_isDirectFile = false;
     bool m_isAudioOnly = false;
+    int m_maxHeight = 1080;
     QList<MediaStreamOption> m_streamOptions;
 };

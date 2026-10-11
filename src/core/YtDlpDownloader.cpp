@@ -93,17 +93,28 @@ void YtDlpDownloader::start() {
     } else if (m_formatId == "audio_m4a") {
         args << "-f" << "bestaudio/best";
         args << "-x" << "--audio-format" << "m4a";
+    } else if (m_formatId == "video_4k") {
+        args << "-f" << "bestvideo[height<=2160]+bestaudio/best[height<=2160]/best";
+        args << "--merge-output-format" << "mp4";
+    } else if (m_formatId == "video_1440p") {
+        args << "-f" << "bestvideo[height<=1440]+bestaudio/best[height<=1440]/best";
+        args << "--merge-output-format" << "mp4";
     } else if (m_formatId == "video_1080p") {
-        args << "-f" << "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/18/best";
+        args << "-f" << "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best";
+        args << "--merge-output-format" << "mp4";
     } else if (m_formatId == "video_720p") {
-        args << "-f" << "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]/18/best";
+        args << "-f" << "bestvideo[height<=720]+bestaudio/best[height<=720]/best";
+        args << "--merge-output-format" << "mp4";
     } else if (m_formatId == "video_480p") {
-        args << "-f" << "bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]/18/best";
+        args << "-f" << "bestvideo[height<=480]+bestaudio/best[height<=480]/best";
+        args << "--merge-output-format" << "mp4";
     } else if (m_formatId == "video_360p") {
-        args << "-f" << "bestvideo[height<=360][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]/18/best";
+        args << "-f" << "bestvideo[height<=360]+bestaudio/best[height<=360]/best";
+        args << "--merge-output-format" << "mp4";
     } else {
-        // High quality video with merged audio and robust 18/best fallback
-        args << "-f" << "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best[ext=mp4]/18/best";
+        // High quality video with merged audio (Best available)
+        args << "-f" << "bestvideo+bestaudio/best";
+        args << "--merge-output-format" << "mp4";
     }
 
     // Output template: use %(ext)s so yt-dlp correctly writes the target extension without duplication

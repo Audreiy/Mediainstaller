@@ -546,6 +546,7 @@ void UrlAnalyzer::onOembedFinished() {
                 m_currentInfo->setAuthor(author);
                 m_currentInfo->setThumbnailUrl(thumb);
                 m_currentInfo->setIsDirectFile(false);
+                m_currentInfo->setMaxHeight(2160);
 
                 populateWebStreamOptions(m_currentInfo);
 
@@ -762,7 +763,7 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
 
     m_ytDlpProcess = new QProcess(this);
     QStringList args;
-    args << "--print" << "%(title)s|||%(uploader)s|||%(duration_string)s|||%(thumbnail)s";
+    args << "--print" << "%(title)s|||%(uploader)s|||%(duration_string)s|||%(thumbnail)s|||%(height)s";
     args << "--no-warnings";
     args << "--no-playlist";
     args << "--no-check-certificates";
@@ -808,6 +809,8 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
         QString author = (parts.size() > 1) ? parts.value(1).trimmed() : "";
         QString duration = (parts.size() > 2) ? parts.value(2).trimmed() : "";
         QString thumbnail = (parts.size() > 3) ? parts.value(3).trimmed() : "";
+        int maxHeight = (parts.size() > 4) ? parts.value(4).trimmed().toInt() : 1080;
+        if (maxHeight <= 0) maxHeight = 1080;
 
         if (!title.isEmpty()) {
             if (m_currentInfo) {
@@ -820,6 +823,7 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
             m_currentInfo->setDuration(duration);
             m_currentInfo->setThumbnailUrl(thumbnail);
             m_currentInfo->setIsDirectFile(false);
+            m_currentInfo->setMaxHeight(maxHeight);
 
             populateWebStreamOptions(m_currentInfo);
 

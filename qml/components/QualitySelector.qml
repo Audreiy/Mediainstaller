@@ -20,13 +20,41 @@ Rectangle {
     property string customFolder: downloadManager.defaultDownloadPath
 
     onMediaInfoChanged: {
+        selectedVideoQuality = "best_video"
         if (mediaInfo && mediaInfo.isAudioOnly) {
             selectedFormatType = "audio"
             selectedOptionId = selectedAudioQuality
         } else {
             selectedFormatType = "video"
-            selectedOptionId = selectedVideoQuality
+            selectedOptionId = "best_video"
         }
+    }
+
+    function getVideoQualities() {
+        var h = (root.mediaInfo && root.mediaInfo.maxHeight > 0) ? root.mediaInfo.maxHeight : 1080;
+        var list = [];
+
+        var bestDesc = (h >= 2160) ? "4K UHD" : ((h >= 1440) ? "2K QHD" : ((h >= 1080) ? "1080p FHD" : (h + "p")));
+        list.push({ id: "best_video", label: I18n.t("qualityBest") + " (" + bestDesc + ")" });
+
+        if (h >= 2160) {
+            list.push({ id: "video_4k", label: "4K (2160p)" });
+        }
+        if (h >= 1440) {
+            list.push({ id: "video_1440p", label: "2K (1440p)" });
+        }
+        if (h >= 1080) {
+            list.push({ id: "video_1080p", label: "1080p Full HD" });
+        }
+        if (h >= 720) {
+            list.push({ id: "video_720p", label: "720p HD" });
+        }
+        if (h >= 480) {
+            list.push({ id: "video_480p", label: "480p SD" });
+        }
+        list.push({ id: "video_360p", label: "360p" });
+
+        return list;
     }
 
     signal downloadTriggered(string url, string title, string formatId, string folder)
@@ -297,24 +325,18 @@ Rectangle {
                 }
             }
 
-            // Video Qualities Pills
-            Row {
+            // Video Qualities Pills (Dynamic by Video Source & Resolution)
+            Flow {
                 width: parent.width
                 spacing: 8
                 visible: root.selectedFormatType === "video"
 
                 Repeater {
-                    model: [
-                        { id: "best_video", label: I18n.t("qualityBest") },
-                        { id: "video_1080p", label: "1080p Full HD" },
-                        { id: "video_720p", label: "720p HD" },
-                        { id: "video_480p", label: "480p SD" },
-                        { id: "video_360p", label: "360p" }
-                    ]
+                    model: root.getVideoQualities()
 
                     delegate: Rectangle {
                         required property var modelData
-                        width: (parent.width - 32) / 5
+                        width: Math.max(86, pillText.implicitWidth + 24)
                         height: 34
                         radius: Theme.radiusSm
                         color: root.selectedVideoQuality === modelData.id ? Theme.activeTabBg : (vPillHover.hovered ? Theme.bgCardHover : Theme.bgElevated)
@@ -330,6 +352,7 @@ Rectangle {
                         }
 
                         Text {
+                            id: pillText
                             anchors.centerIn: parent
                             text: modelData.label
                             color: root.selectedVideoQuality === modelData.id ? Theme.accent : Theme.textPrimary

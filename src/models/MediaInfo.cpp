@@ -55,6 +55,13 @@ void MediaInfo::setIsAudioOnly(bool audioOnly) {
     }
 }
 
+void MediaInfo::setMaxHeight(int h) {
+    if (m_maxHeight != h) {
+        m_maxHeight = h;
+        emit maxHeightChanged();
+    }
+}
+
 void MediaInfo::setStreamOptions(const QList<MediaStreamOption> &options) {
     m_streamOptions = options;
     emit streamOptionsChanged();
