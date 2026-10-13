@@ -2,6 +2,10 @@
 
 [Türkçe](README.md) | [Українська](README_uk.md)
 
+> [!TIP]
+> **In-App Auto-Update Notice:**  
+> When a new version is released, you do not need to manually download the new installer (`.exe`) from GitHub Releases every time! Once installed, you can update to the latest version directly from within the app via the **Updates** tab or the update notification card—**100% silently and automatically** in the background. Your desktop icon position and all your settings are fully preserved.
+
 YuYuInstaller is a next-generation Windows media downloader and audio converter built with modern C++20 and Qt 6 Quick / QML. It features a hardware-accelerated anime video background, multi-language support (English, Turkish, Ukrainian), and a high-performance streaming engine.
 
 ---

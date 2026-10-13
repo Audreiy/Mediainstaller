@@ -2,6 +2,10 @@
 
 [English](README_en.md) | [Українська](README_uk.md)
 
+> [!TIP]
+> **Otomatik Güncelleme Bilgilendirmesi:**  
+> Yeni bir sürüm çıktığında GitHub Releases sayfasından her defasında yeni kurulum dosyası (`.exe`) indirmenize gerek yoktur! Uygulamayı bir kez kurduktan sonra, uygulama içindeki **Güncellemeler (Updates)** sekmesinden veya bildirim kartından en son sürüme güncelleyebilirsiniz. Masaüstü kısayolunuzun konumu ve tüm ayarlarınız korunur.
+
 YuYuInstaller, modern C++20 ve Qt 6 Quick / QML mimarisiyle geliştirilmiş; donanım hızlandırmalı anime video arka planına, çok dilli arayüze (İngilizce, Türkçe, Ukraynaca) ve yüksek performanslı akış motoruna sahip yeni nesil bir Windows medya indirme ve ses dönüştürme yazılımıdır.
 
 ---
