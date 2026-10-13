@@ -11,7 +11,7 @@ YuYuInstaller is a high-performance Windows media downloader and audio converter
 
 ## Features
 
-- **Multi-Platform:** Download from YouTube, Instagram, TikTok, Twitter/X, Pornhub, Animecix, and hundreds of sites.
+- **Multi-Platform:** Download from YouTube, Instagram, TikTok, Twitter/X, Facebook, Animecix, and hundreds of sites.
 - **High Resolution:** Up to 4K UHD, 2K QHD, and 1080p FHD video; editable video titles prior to downloading.
 - **320 kbps MP3:** Studio-quality audio extraction powered by FFmpeg.
 - **Smart Queue:** Speed limit caps (MB/s), concurrent or sequential modes, pause & resume.

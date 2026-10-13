@@ -11,7 +11,7 @@ YuYuInstaller, modern ve yüksek performanslı bir Windows medya indirme ve dön
 
 ## Özellikler
 
-- **Çoklu Platform:** YouTube, Instagram, TikTok, Twitter/X, Pornhub, Animecix ve yüzlerce siteden medya indirme.
+- **Çoklu Platform:** YouTube, Instagram, TikTok, Twitter/X, Facebook, Animecix ve yüzlerce siteden medya indirme.
 - **Yüksek Kalite:** 4K UHD, 2K QHD ve 1080p FHD video seçenekleri; video başlığını indirmeden önce düzenleyebilme.
 - **320 kbps MP3:** FFmpeg motoru ile stüdyo kalitesinde kayıpsız ses ayıklama.
 - **Akıllı Kuyruk:** İndirme hız sınırı (MB/s), eşzamanlı / sıralı indirme modları ve duraklat/devam et kontrolleri.
