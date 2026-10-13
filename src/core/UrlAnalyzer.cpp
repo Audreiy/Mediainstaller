@@ -8,6 +8,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDateTime>
+#include <QSet>
+#include <algorithm>
 #include <QDebug>
 
 UrlAnalyzer::UrlAnalyzer(QObject *parent)
@@ -139,27 +141,19 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
         return;
     }
 
-    // 1. YouTube specific fast oEmbed
-    if (lower.contains("youtube.com") || lower.contains("youtu.be")) {
-        startYouTubeOembedProbe(url);
-        return;
-    }
-
-    // 1.1 Direct social media & streaming video platforms (Instagram, TikTok, Twitter/X, Facebook, Pornhub, Rumble, etc.)
-    if (lower.contains("instagram.com") || lower.contains("tiktok.com") ||
+    // 1. YouTube & Direct social media & streaming video platforms
+    if (lower.contains("youtube.com") || lower.contains("youtu.be") ||
+        lower.contains("instagram.com") || lower.contains("tiktok.com") ||
         lower.contains("twitter.com") || lower.contains("x.com") ||
         lower.contains("facebook.com") || lower.contains("fb.watch") ||
         lower.contains("reddit.com") || lower.contains("twitch.tv") ||
         lower.contains("vimeo.com") || lower.contains("dailymotion.com") ||
-        lower.contains("pornhub.com") || lower.contains("xvideos.com") ||
-        lower.contains("xnxx.com") || lower.contains("redtube.com") ||
-        lower.contains("youporn.com") || lower.contains("spankbang.com") ||
-        lower.contains("eporner.com") || lower.contains("rumble.com") ||
-        lower.contains("bilibili") || lower.contains("vk.com") ||
-        lower.contains("streamable.com") || lower.contains("threads.net") ||
-        lower.contains("bsky.app") || lower.contains("pinterest.com") ||
-        lower.contains("pin.it") || lower.contains("soundcloud.com") ||
-        lower.contains("bandcamp.com") || lower.contains("mixcloud.com")) {
+        lower.contains("rumble.com") || lower.contains("bilibili") ||
+        lower.contains("vk.com") || lower.contains("streamable.com") ||
+        lower.contains("threads.net") || lower.contains("bsky.app") ||
+        lower.contains("pinterest.com") || lower.contains("pin.it") ||
+        lower.contains("soundcloud.com") || lower.contains("bandcamp.com") ||
+        lower.contains("mixcloud.com")) {
         startYtDlpProbe(trimmed);
         return;
     }
@@ -564,7 +558,7 @@ void UrlAnalyzer::onOembedFinished() {
                 m_currentInfo->setAuthor(author);
                 m_currentInfo->setThumbnailUrl(thumb);
                 m_currentInfo->setIsDirectFile(false);
-                m_currentInfo->setMaxHeight(2160);
+                m_currentInfo->setMaxHeight(1080);
 
                 populateWebStreamOptions(m_currentInfo);
 
@@ -787,7 +781,7 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
 
     m_ytDlpProcess = new QProcess(this);
     QStringList args;
-    args << "--print" << "%(title)s|||%(uploader)s|||%(duration_string)s|||%(thumbnail)s|||%(height)s";
+    args << "--print" << "%(title)s|||%(uploader)s|||%(duration_string)s|||%(thumbnail)s|||%(height)s|||%(formats.:.height)#j";
     args << "--no-warnings";
     args << "--no-playlist";
     args << "--no-check-certificates";
@@ -801,9 +795,7 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
                     lower.contains("twitter.com") || lower.contains("x.com") ||
                     lower.contains("facebook.com") || lower.contains("fb.watch");
 
-    if (isYouTube) {
-        args << "--extractor-args" << "youtube:player_client=android,ios";
-    } else if (!isSocial) {
+    if (!isSocial && !isYouTube) {
         args << "--extractor-args" << "generic:impersonate";
         args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
     }
@@ -836,6 +828,27 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
         int maxHeight = (parts.size() > 4) ? parts.value(4).trimmed().toInt() : 1080;
         if (maxHeight <= 0) maxHeight = 1080;
 
+        QList<int> detectedHeights;
+        if (parts.size() > 5) {
+            QString jsonStr = parts.mid(5).join("|||").trimmed();
+            QJsonDocument doc = QJsonDocument::fromJson(jsonStr.toUtf8());
+            if (doc.isArray()) {
+                QSet<int> uniqueHeights;
+                for (const QJsonValue &v : doc.array()) {
+                    int h = v.toInt();
+                    if (h >= 144) {
+                        uniqueHeights.insert(h);
+                    }
+                }
+                QList<int> sorted = uniqueHeights.values();
+                std::sort(sorted.begin(), sorted.end(), std::greater<int>());
+                detectedHeights = sorted;
+                if (!detectedHeights.isEmpty() && detectedHeights.first() > 0) {
+                    maxHeight = detectedHeights.first();
+                }
+            }
+        }
+
         if (!title.isEmpty()) {
             if (m_currentInfo) {
                 m_currentInfo->deleteLater();
@@ -848,6 +861,7 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
             m_currentInfo->setThumbnailUrl(thumbnail);
             m_currentInfo->setIsDirectFile(false);
             m_currentInfo->setMaxHeight(maxHeight);
+            m_currentInfo->setAvailableHeights(detectedHeights);
 
             populateWebStreamOptions(m_currentInfo);
 
@@ -855,6 +869,12 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
             emit analysisSuccess(m_currentInfo);
             return;
         }
+    }
+
+    // Fallback to oEmbed probe if yt-dlp failed on YouTube
+    if (m_analyzingUrl.contains("youtube.com") || m_analyzingUrl.contains("youtu.be")) {
+        startYouTubeOembedProbe(QUrl(m_analyzingUrl));
+        return;
     }
 
     // Informative guidance error if extraction failed

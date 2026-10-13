@@ -34,6 +34,7 @@ class MediaInfo : public QObject {
     Q_PROPERTY(bool isDirectFile READ isDirectFile WRITE setIsDirectFile NOTIFY isDirectFileChanged)
     Q_PROPERTY(bool isAudioOnly READ isAudioOnly WRITE setIsAudioOnly NOTIFY isAudioOnlyChanged)
     Q_PROPERTY(int maxHeight READ maxHeight WRITE setMaxHeight NOTIFY maxHeightChanged)
+    Q_PROPERTY(QVariantList availableHeights READ availableHeightsVariant WRITE setAvailableHeightsVariant NOTIFY availableHeightsChanged)
     Q_PROPERTY(QVariantList streamOptions READ streamOptionsVariant NOTIFY streamOptionsChanged)
 
 public:
@@ -63,6 +64,12 @@ public:
     int maxHeight() const { return m_maxHeight; }
     void setMaxHeight(int h);
 
+    QList<int> availableHeights() const { return m_availableHeights; }
+    void setAvailableHeights(const QList<int> &heights);
+
+    QVariantList availableHeightsVariant() const;
+    void setAvailableHeightsVariant(const QVariantList &list);
+
     QList<MediaStreamOption> streamOptions() const { return m_streamOptions; }
     void setStreamOptions(const QList<MediaStreamOption> &options);
 
@@ -77,6 +84,7 @@ signals:
     void isDirectFileChanged();
     void isAudioOnlyChanged();
     void maxHeightChanged();
+    void availableHeightsChanged();
     void streamOptionsChanged();
 
 private:
@@ -88,5 +96,6 @@ private:
     bool m_isDirectFile = false;
     bool m_isAudioOnly = false;
     int m_maxHeight = 1080;
+    QList<int> m_availableHeights;
     QList<MediaStreamOption> m_streamOptions;
 };

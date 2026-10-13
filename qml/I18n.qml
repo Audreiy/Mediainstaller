@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.2 Pro",
+            "appVersion": "v1.1.3 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -120,7 +120,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.1.1 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.1.3 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -136,6 +136,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log113_1": "YouTube HD & 4K Fix: Removed SABR mobile client limitation that caused videos to download in 360p; full 1080p, 1440p, and 4K downloads restored",
+            "log113_2": "Dynamic Quality Detection: Real resolutions are now scanned directly from video sources; videos without 4K no longer display ghost 4K options",
+            "log113_3": "Universal Resolution Support: Added seamless high-quality downloading and ffmpeg remuxing for 144p, 240p, 360p, 480p, 720p, 1080p, 2K, and 4K",
+            "log113_4": "Probing Optimization: YouTube analysis seamlessly retrieves actual streams, duration, author, and available resolutions",
             "log112_1": "Editable Video Title: Click directly on the video title after analysis to rename the file before downloading",
             "log112_2": "Resolved 0 MB Download Issue: Fixed an issue where streaming sites generated empty 0-byte video files (Error 0xC00D36C4)",
             "log112_3": "Expanded Platform Integration: Fast direct stream extraction for Rumble, Bilibili, and streaming video hosts",
@@ -176,7 +180,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.2 Pro",
+            "appVersion": "v1.1.3 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -285,7 +289,7 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.0.9 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "aboutVersion": "Sürüm 1.1.3 Pro • Donanım Hızlandırmalı QML Arayüzü",
             "updateSection": "Uygulama Güncellemeleri",
             "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
             "currentVersionLabel": "Yüklü Sürüm",
@@ -301,6 +305,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log113_1": "YouTube Yüksek Kalite ve 4K Düzeltmesi: Videoların 360p'ye düşmesine yol açan mobil istemci kısıtlaması kaldırıldı; 1080p, 1440p ve 4K indirme tamamen düzeltildi",
+            "log113_2": "Sayfadaki Kaliteleri Otomatik Okuma: Sayfadaki gerçek çözünürlükler taranır; 4K olmayan videolarda artık sahte 4K seçeneği çıkmaz",
+            "log113_3": "Evrensel Çözünürlük Desteği: 144p, 240p, 360p, 480p, 720p, 1080p, 2K ve 4K için sorunsuz yüksek kaliteli indirme ve ses birleştirme",
+            "log113_4": "Analiz Optimizasyonu: YouTube bağlantılarında gerçek akışlar, süre, kanal adı ve mevcut çözünürlükler eksiksiz okunur",
             "log112_1": "Düzenlenebilir Video Başlığı: Analiz sonrası başlığa tıklayarak indirmeden önce dosya adını dilediğiniz gibi değiştirin",
             "log112_2": "0 MB İndirme Sorunu Giderildi: Bazı video sitelerinde dosyanın 0 bayt inmesine ve açılamamasına (0xC00D36C4) yol açan sorun çözüldü",
             "log112_3": "Genişletilmiş Platform Desteği: Rumble, Bilibili ve tüm yayın platformları için yüksek hızlı akış motoru entegrasyonu",
@@ -341,7 +349,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.2 Pro",
+            "appVersion": "v1.1.3 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -450,7 +458,7 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.0.9 Pro • Апаратно-прискорений інтерфейс QML",
+            "aboutVersion": "Версія 1.1.3 Pro • Апаратно-прискорений інтерфейс QML",
             "updateSection": "Оновлення програми",
             "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
             "currentVersionLabel": "Встановлена версія",
@@ -466,6 +474,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log113_1": "Виправлення якості YouTube: Усунено обмеження мобільного клієнта SABR, яке знижувало якість до 360p; відновлено повне завантаження 1080p, 1440p та 4K",
+            "log113_2": "Автоматичне зчитування якостей: Сканування реальних роздільних здатностей; на відео без 4K більше не з'являється фіктивна опція 4K",
+            "log113_3": "Універсальна підтримка роздільних здатностей: Бездоганне високоякісне завантаження для 144p, 240p, 360p, 480p, 720p, 1080p, 2K та 4K",
+            "log113_4": "Оптимізація аналізу: Точне визначення тривалості, каналу та списку доступних якостей відео",
             "log112_1": "Редагована назва відео: Натисніть на назву після аналізу, щоб перейменувати файл перед завантаженням",
             "log112_2": "Виправлено проблему 0 МБ завантаження: Усунено створення порожніх файлів 0 байт на деяких сайтах (Помилка 0xC00D36C4)",
             "log112_3": "Розширена інтеграція платформ: Швидке вилучення потоків для Rumble, Bilibili та стрімінгових відеохостингів",

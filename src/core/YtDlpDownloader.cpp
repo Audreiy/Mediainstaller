@@ -68,8 +68,8 @@ void YtDlpDownloader::start() {
                     lowerUrl.contains("facebook.com") || lowerUrl.contains("fb.watch");
 
     if (isYouTube) {
-        // Use android and ios player clients to bypass YouTube SABR bot check and 429 login requirements
-        args << "--extractor-args" << "youtube:player_client=android,ios";
+        // Do NOT pass android,ios player client: modern YouTube SABR policy strips HD video streams for android/ios clients.
+        // Default yt-dlp extractor downloads full 4K/1440p/1080p/720p with audio separation and merges seamlessly.
     } else if (!isSocial) {
         args << "--extractor-args" << "generic:impersonate";
         args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
@@ -93,23 +93,17 @@ void YtDlpDownloader::start() {
     } else if (m_formatId == "audio_m4a") {
         args << "-f" << "bestaudio/best";
         args << "-x" << "--audio-format" << "m4a";
-    } else if (m_formatId == "video_4k") {
-        args << "-f" << "bestvideo[height<=2160]+bestaudio/best[height<=2160]/best";
-        args << "--merge-output-format" << "mp4";
-    } else if (m_formatId == "video_1440p") {
-        args << "-f" << "bestvideo[height<=1440]+bestaudio/best[height<=1440]/best";
-        args << "--merge-output-format" << "mp4";
-    } else if (m_formatId == "video_1080p") {
-        args << "-f" << "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best";
-        args << "--merge-output-format" << "mp4";
-    } else if (m_formatId == "video_720p") {
-        args << "-f" << "bestvideo[height<=720]+bestaudio/best[height<=720]/best";
-        args << "--merge-output-format" << "mp4";
-    } else if (m_formatId == "video_480p") {
-        args << "-f" << "bestvideo[height<=480]+bestaudio/best[height<=480]/best";
-        args << "--merge-output-format" << "mp4";
-    } else if (m_formatId == "video_360p") {
-        args << "-f" << "bestvideo[height<=360]+bestaudio/best[height<=360]/best";
+    } else if (m_formatId.startsWith("video_") && m_formatId != "best_video") {
+        int targetHeight = 1080;
+        if (m_formatId == "video_4k") {
+            targetHeight = 2160;
+        } else {
+            QString numStr = m_formatId;
+            numStr.remove("video_").remove("p");
+            targetHeight = numStr.toInt();
+            if (targetHeight <= 0) targetHeight = 1080;
+        }
+        args << "-f" << QString("bestvideo[height<=%1]+bestaudio/best[height<=%1]/best").arg(targetHeight);
         args << "--merge-output-format" << "mp4";
     } else {
         // High quality video with merged audio (Best available)

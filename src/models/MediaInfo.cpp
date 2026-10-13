@@ -62,6 +62,29 @@ void MediaInfo::setMaxHeight(int h) {
     }
 }
 
+void MediaInfo::setAvailableHeights(const QList<int> &heights) {
+    if (m_availableHeights != heights) {
+        m_availableHeights = heights;
+        emit availableHeightsChanged();
+    }
+}
+
+QVariantList MediaInfo::availableHeightsVariant() const {
+    QVariantList list;
+    for (int h : m_availableHeights) {
+        list.append(h);
+    }
+    return list;
+}
+
+void MediaInfo::setAvailableHeightsVariant(const QVariantList &list) {
+    QList<int> heights;
+    for (const QVariant &v : list) {
+        heights.append(v.toInt());
+    }
+    setAvailableHeights(heights);
+}
+
 void MediaInfo::setStreamOptions(const QList<MediaStreamOption> &options) {
     m_streamOptions = options;
     emit streamOptionsChanged();
@@ -74,3 +97,4 @@ QVariantList MediaInfo::streamOptionsVariant() const {
     }
     return list;
 }
+

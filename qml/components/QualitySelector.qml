@@ -38,25 +38,45 @@ Rectangle {
         var h = (root.mediaInfo && root.mediaInfo.maxHeight > 0) ? root.mediaInfo.maxHeight : 1080;
         var list = [];
 
-        var bestDesc = (h >= 2160) ? "4K UHD" : ((h >= 1440) ? "2K QHD" : ((h >= 1080) ? "1080p FHD" : (h + "p")));
+        var bestDesc = (h >= 2160) ? "4K UHD" : ((h >= 1440) ? "2K QHD" : ((h >= 1080) ? "1080p FHD" : ((h >= 720) ? "720p HD" : (h + "p"))));
         list.push({ id: "best_video", label: I18n.t("qualityBest") + " (" + bestDesc + ")" });
 
-        if (h >= 2160) {
-            list.push({ id: "video_4k", label: "4K (2160p)" });
+        var heights = (root.mediaInfo && root.mediaInfo.availableHeights && root.mediaInfo.availableHeights.length > 0)
+                      ? root.mediaInfo.availableHeights
+                      : [];
+
+        if (heights.length > 0) {
+            for (var i = 0; i < heights.length; ++i) {
+                var vh = heights[i];
+                var label = "";
+                var id = "video_" + vh + "p";
+                if (vh >= 2160) { id = "video_4k"; label = "4K (2160p)"; }
+                else if (vh >= 1440) { id = "video_1440p"; label = "2K (1440p)"; }
+                else if (vh >= 1080) { id = "video_1080p"; label = "1080p Full HD"; }
+                else if (vh >= 720) { id = "video_720p"; label = "720p HD"; }
+                else if (vh >= 480) { id = "video_480p"; label = "480p SD"; }
+                else if (vh >= 360) { id = "video_360p"; label = "360p"; }
+                else if (vh >= 240) { id = "video_240p"; label = "240p"; }
+                else if (vh >= 144) { id = "video_144p"; label = "144p"; }
+                else { label = vh + "p"; }
+
+                var exists = false;
+                for (var j = 0; j < list.length; ++j) {
+                    if (list[j].id === id) { exists = true; break; }
+                }
+                if (!exists) {
+                    list.push({ id: id, label: label });
+                }
+            }
+        } else {
+            if (h >= 2160) list.push({ id: "video_4k", label: "4K (2160p)" });
+            if (h >= 1440) list.push({ id: "video_1440p", label: "2K (1440p)" });
+            if (h >= 1080) list.push({ id: "video_1080p", label: "1080p Full HD" });
+            if (h >= 720) list.push({ id: "video_720p", label: "720p HD" });
+            if (h >= 480) list.push({ id: "video_480p", label: "480p SD" });
+            if (h >= 360) list.push({ id: "video_360p", label: "360p" });
+            if (h < 360) list.push({ id: "video_" + h + "p", label: h + "p" });
         }
-        if (h >= 1440) {
-            list.push({ id: "video_1440p", label: "2K (1440p)" });
-        }
-        if (h >= 1080) {
-            list.push({ id: "video_1080p", label: "1080p Full HD" });
-        }
-        if (h >= 720) {
-            list.push({ id: "video_720p", label: "720p HD" });
-        }
-        if (h >= 480) {
-            list.push({ id: "video_480p", label: "480p SD" });
-        }
-        list.push({ id: "video_360p", label: "360p" });
 
         return list;
     }
