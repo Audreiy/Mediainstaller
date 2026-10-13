@@ -48,6 +48,16 @@ QString DownloadManager::logFilePath() {
 }
 
 void DownloadManager::logDownloadFailure(const QString &title, const QString &url, const QString &errorMessage, const QString &details) {
+    QString combined = (title + " " + url + " " + errorMessage + " " + details).toLower();
+    // Privacy protection: never log adult/sensitive websites or explicit titles to downloads.log
+    if (combined.contains("porn") || combined.contains("xvideos") || combined.contains("xnxx") ||
+        combined.contains("doeda") || combined.contains("7dak") || combined.contains("stiefmutter") ||
+        combined.contains("xmilf") || combined.contains("rainblow") || combined.contains("redtube") ||
+        combined.contains("youporn") || combined.contains("spankbang") || combined.contains("eporner") ||
+        combined.contains("sikis") || combined.contains("sevisir")) {
+        return;
+    }
+
     QString path = logFilePath();
     QFile file(path);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
@@ -475,6 +485,8 @@ void DownloadManager::handleProgressUpdated(double percent, const QString &speed
 }
 
 void DownloadManager::handleDownloadCompleted(const QString &id, const QString &filePath) {
+    qint64 finalSize = QFileInfo(filePath).size();
+
     if (m_pendingAudioConversion.value(id, false)) {
         m_pendingAudioConversion.remove(id);
         m_queueModel.updateStatus(id, "Converting");
@@ -486,7 +498,8 @@ void DownloadManager::handleDownloadCompleted(const QString &id, const QString &
             Q_UNUSED(out);
             if (ok) {
                 QFile::remove(filePath);
-                m_queueModel.updateStatus(id, "Completed");
+                qint64 mp3Size = QFileInfo(finalMp3Path).size();
+                m_queueModel.setCompleted(id, mp3Size, finalMp3Path);
             } else {
                 m_queueModel.updateStatus(id, "Failed", err);
             }
@@ -504,7 +517,7 @@ void DownloadManager::handleDownloadCompleted(const QString &id, const QString &
         m_ffmpegProcessor.extractAudio(filePath, finalMp3Path, "mp3", 320);
         return;
     } else {
-        m_queueModel.updateStatus(id, "Completed");
+        m_queueModel.setCompleted(id, finalSize, filePath);
     }
 
     if (m_activeHttpDownloads.contains(id)) {

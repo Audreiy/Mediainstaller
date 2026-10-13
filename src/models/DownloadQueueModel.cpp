@@ -5,6 +5,18 @@
 #include <QDir>
 #include <QProcess>
 
+static QString formatBytes(qint64 bytes) {
+    if (bytes <= 0) return QString();
+    double b = static_cast<double>(bytes);
+    if (b < 1024.0 * 1024.0) {
+        return QString::asprintf("%.1f KB", b / 1024.0);
+    } else if (b < 1024.0 * 1024.0 * 1024.0) {
+        return QString::asprintf("%.1f MB", b / (1024.0 * 1024.0));
+    } else {
+        return QString::asprintf("%.2f GB", b / (1024.0 * 1024.0 * 1024.0));
+    }
+}
+
 DownloadQueueModel::DownloadQueueModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -32,6 +44,7 @@ QVariant DownloadQueueModel::data(const QModelIndex &index, int role) const {
     case EtaRole: return item.eta;
     case DownloadedFormattedRole: return item.downloadedFormatted;
     case TotalFormattedRole: return item.totalFormatted;
+    case RemainingFormattedRole: return item.remainingFormatted;
     case IsAudioOnlyRole: return item.isAudioOnly;
     case ErrorMessageRole: return item.errorMessage;
     default: return QVariant();
@@ -50,6 +63,7 @@ QHash<int, QByteArray> DownloadQueueModel::roleNames() const {
     roles[EtaRole] = "eta";
     roles[DownloadedFormattedRole] = "downloadedFormatted";
     roles[TotalFormattedRole] = "totalFormatted";
+    roles[RemainingFormattedRole] = "remainingFormatted";
     roles[IsAudioOnlyRole] = "isAudioOnly";
     roles[ErrorMessageRole] = "errorMessage";
     return roles;
@@ -98,14 +112,31 @@ void DownloadQueueModel::updateProgress(const QString &id, double progress, cons
     if (downloaded >= 0) {
         it.bytesDownloaded = downloaded;
     }
-    if (total > 0) {
-        it.totalBytes = total;
-        it.downloadedFormatted = QString::asprintf("%.1f MB", it.bytesDownloaded / (1024.0 * 1024.0));
-        it.totalFormatted = QString::asprintf("%.1f MB", total / (1024.0 * 1024.0));
+
+    qint64 effTotal = total;
+    if (effTotal <= 0 && it.totalBytes > 0) {
+        effTotal = it.totalBytes;
+    }
+    // Estimate total from progress if not known yet
+    if (effTotal <= 0 && it.progress > 0.5 && it.bytesDownloaded > 0) {
+        effTotal = static_cast<qint64>((it.bytesDownloaded * 100.0) / it.progress);
+    }
+
+    if (it.bytesDownloaded > 0) {
+        it.downloadedFormatted = formatBytes(it.bytesDownloaded);
+    }
+    if (effTotal > 0) {
+        it.totalBytes = effTotal;
+        it.totalFormatted = formatBytes(effTotal);
+        if (effTotal > it.bytesDownloaded) {
+            it.remainingFormatted = formatBytes(effTotal - it.bytesDownloaded);
+        } else {
+            it.remainingFormatted = "";
+        }
     }
 
     QModelIndex modelIndex = index(idx, 0);
-    emit dataChanged(modelIndex, modelIndex, {ProgressRole, SpeedRole, EtaRole, DownloadedFormattedRole, TotalFormattedRole});
+    emit dataChanged(modelIndex, modelIndex, {ProgressRole, SpeedRole, EtaRole, DownloadedFormattedRole, TotalFormattedRole, RemainingFormattedRole});
 }
 
 void DownloadQueueModel::updateStatus(const QString &id, const QString &status, const QString &errorMsg) {
@@ -118,6 +149,35 @@ void DownloadQueueModel::updateStatus(const QString &id, const QString &status, 
 
     QModelIndex modelIndex = index(idx, 0);
     emit dataChanged(modelIndex, modelIndex, {StatusRole, ErrorMessageRole});
+    emit activeCountChanged();
+}
+
+void DownloadQueueModel::setCompleted(const QString &id, qint64 finalSize, const QString &finalPath) {
+    int idx = findIndexById(id);
+    if (idx < 0) return;
+
+    auto &it = m_items[idx];
+    it.status = "Completed";
+    it.progress = 100.0;
+    it.speed = "";
+    it.eta = "";
+    it.errorMessage = "";
+    if (!finalPath.isEmpty()) {
+        it.destinationPath = finalPath;
+    }
+    if (finalSize > 0) {
+        it.bytesDownloaded = finalSize;
+        it.totalBytes = finalSize;
+        it.downloadedFormatted = formatBytes(finalSize);
+        it.totalFormatted = formatBytes(finalSize);
+    } else if (it.bytesDownloaded > 0) {
+        it.totalBytes = it.bytesDownloaded;
+        it.totalFormatted = it.downloadedFormatted;
+    }
+    it.remainingFormatted = "";
+
+    QModelIndex modelIndex = index(idx, 0);
+    emit dataChanged(modelIndex, modelIndex, {StatusRole, ProgressRole, SpeedRole, EtaRole, DownloadedFormattedRole, TotalFormattedRole, RemainingFormattedRole, DestinationPathRole});
     emit activeCountChanged();
 }
 

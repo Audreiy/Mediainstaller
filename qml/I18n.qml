@@ -86,6 +86,7 @@ QtObject {
             "openLogFile": "Error Log",
             "viewLogHint": "Open error diagnostics log in Notepad",
             "retryDownload": "Retry",
+            "remainingPrefix": "Remaining: ",
 
             // Settings
             "settingsTitle": "Settings & Preferences",
@@ -255,6 +256,7 @@ QtObject {
             "openLogFile": "Hata Günlüğü",
             "viewLogHint": "Hata günlüğünü Not Defteri'nde aç",
             "retryDownload": "Tekrar Dene",
+            "remainingPrefix": "Kalan: ",
 
             // Settings
             "settingsTitle": "Ayarlar ve Tercihler",
@@ -424,6 +426,7 @@ QtObject {
             "openLogFile": "Журнал помилок",
             "viewLogHint": "Відкрити журнал діагностики помилок у блокноті",
             "retryDownload": "Повторити",
+            "remainingPrefix": "Залишилось: ",
 
             // Settings
             "settingsTitle": "Налаштування та параметри",

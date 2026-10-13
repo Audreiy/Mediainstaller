@@ -787,7 +787,6 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
     args << "--no-check-certificates";
     args << "--socket-timeout" << "20";
     args << "--retries" << "3";
-    args << "--force-ipv4";
 
     QString lower = rawUrl.toLower();
     bool isYouTube = lower.contains("youtube.com") || lower.contains("youtu.be");

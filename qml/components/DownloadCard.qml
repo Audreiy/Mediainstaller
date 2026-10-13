@@ -119,7 +119,19 @@ Rectangle {
                 spacing: 12
 
                 Text {
-                    text: model.downloadedFormatted + (model.totalFormatted ? (" / " + model.totalFormatted) : "")
+                    text: {
+                        if (model.status === "Completed") {
+                            return model.totalFormatted || model.downloadedFormatted || ""
+                        }
+                        var dl = model.downloadedFormatted || ""
+                        var tot = model.totalFormatted || ""
+                        if (!dl && !tot) return ""
+                        var base = dl + (tot ? (" / " + tot) : "")
+                        if (model.status === "Downloading" && model.remainingFormatted && model.remainingFormatted.length > 0) {
+                            return base + " (" + I18n.t("remainingPrefix") + model.remainingFormatted + ")"
+                        }
+                        return base
+                    }
                     color: Theme.textMuted
                     font.pixelSize: 11
                     font.family: Theme.fontFamily

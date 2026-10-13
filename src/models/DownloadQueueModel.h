@@ -18,6 +18,7 @@ struct DownloadItem {
     qint64 totalBytes = 0;
     QString downloadedFormatted;
     QString totalFormatted;
+    QString remainingFormatted;
     bool isAudioOnly = false;
     QString errorMessage;
     QDateTime createdTime;
@@ -40,6 +41,7 @@ public:
         EtaRole,
         DownloadedFormattedRole,
         TotalFormattedRole,
+        RemainingFormattedRole,
         IsAudioOnlyRole,
         ErrorMessageRole
     };
@@ -56,6 +58,7 @@ public:
     void addItem(const DownloadItem &item);
     void updateProgress(const QString &id, double progress, const QString &speed, const QString &eta, qint64 downloaded, qint64 total);
     void updateStatus(const QString &id, const QString &status, const QString &errorMsg = QString());
+    void setCompleted(const QString &id, qint64 finalSize, const QString &finalPath = QString());
     DownloadItem getItem(const QString &id) const;
     DownloadItem getItemAt(int index) const;
 

@@ -55,7 +55,6 @@ void YtDlpDownloader::start() {
     args << "--continue";
     args << "--socket-timeout" << "20";
     args << "--retries" << "3";
-    args << "--force-ipv4";
 
     if (m_speedLimitMBps > 0) {
         args << "--limit-rate" << QString("%1M").arg(m_speedLimitMBps);
@@ -116,8 +115,8 @@ void YtDlpDownloader::start() {
     QString templatePath = fi.dir().filePath(fi.completeBaseName() + ".%(ext)s");
     args << "-o" << templatePath;
 
-    // Progress template: DOWNLOAD_PROGRESS:percent|speed|eta|downloaded_bytes|total_bytes
-    args << "--progress-template" << "DOWNLOAD_PROGRESS:%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s";
+    // Progress template: DOWNLOAD_PROGRESS:percent|speed|eta|downloaded_bytes|total_bytes|total_bytes_estimate
+    args << "--progress-template" << "DOWNLOAD_PROGRESS:%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s|%(progress.total_bytes_estimate)s";
 
     args << m_url;
 
@@ -250,6 +249,9 @@ void YtDlpDownloader::parseOutputLine(const QString &line) {
             qint64 down = parts[3].trimmed().toLongLong(&downOk);
             bool totOk = false;
             qint64 tot = parts[4].trimmed().toLongLong(&totOk);
+            if (!totOk && parts.size() > 5) {
+                tot = parts[5].trimmed().toLongLong(&totOk);
+            }
 
             if (pctOk && pct >= 0.0) {
                 m_progress = pct;
@@ -299,9 +301,8 @@ void YtDlpDownloader::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
 
     if (success) {
         m_progress = 100.0;
-        emit progressUpdated(100.0, "Done", "00:00", 0, 0);
 
-        // Verify destination file exists
+        // Verify destination file exists and get real completed size
         QString finalPath = m_targetPath;
         if (!QFile::exists(finalPath)) {
             QFileInfo fi(m_targetPath);
@@ -322,6 +323,7 @@ void YtDlpDownloader::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
 
         qint64 finalSize = QFileInfo(finalPath).size();
         if (finalSize > 0) {
+            emit progressUpdated(100.0, "Done", "00:00", finalSize, finalSize);
             emit downloadCompleted(m_id, finalPath);
         } else {
             if (QFile::exists(finalPath)) {
