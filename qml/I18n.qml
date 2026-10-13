@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.3 Pro",
+            "appVersion": "v1.1.4 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -121,7 +121,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.1.3 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.1.4 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -137,6 +137,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log114_1": "Accurate Completed Size: Corrected download completion logic to display true final file size on disk rather than intermediate audio/video stream sizes",
+            "log114_2": "Remaining MB Indicator: Live real-time remaining download size shown on download cards (e.g. Downloaded / Total with Remaining MB)",
+            "log114_3": "Social Media & Reels IPv6 Fix: Removed restrictive IPv4-only flag that caused 'Could not resolve host' DNS failures on Instagram Reels and social platforms",
+            "log114_4": "Privacy-Protected Logging: Strengthened error diagnostics filter to strictly prevent logging sensitive queries or explicit adult titles",
             "log113_1": "YouTube HD & 4K Fix: Removed SABR mobile client limitation that caused videos to download in 360p; full 1080p, 1440p, and 4K downloads restored",
             "log113_2": "Dynamic Quality Detection: Real resolutions are now scanned directly from video sources; videos without 4K no longer display ghost 4K options",
             "log113_3": "Universal Resolution Support: Added seamless high-quality downloading and ffmpeg remuxing for 144p, 240p, 360p, 480p, 720p, 1080p, 2K, and 4K",
@@ -181,7 +185,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.3 Pro",
+            "appVersion": "v1.1.4 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -291,7 +295,7 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.1.3 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "aboutVersion": "Sürüm 1.1.4 Pro • Donanım Hızlandırmalı QML Arayüzü",
             "updateSection": "Uygulama Güncellemeleri",
             "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
             "currentVersionLabel": "Yüklü Sürüm",
@@ -307,6 +311,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log114_1": "Hassas Dosya Boyutu: İndirme tamamlandığında parça akış boyutları yerine diske yazılan gerçek nihai dosya boyutu gösterilir",
+            "log114_2": "Kalan MB Göstergesi: İndirme kartlarında kaç MB kaldığı canlı ve anlık olarak gösterilir (İndirilen / Toplam ve Kalan MB)",
+            "log114_3": "Instagram Reels ve Sosyal Ağ DNS Düzeltmesi: 'Could not resolve host' hatasına yol açan IPv4 kısıtlaması kaldırılarak çift katmanlı IPv4/IPv6 desteği sağlandı",
+            "log114_4": "Gelişmiş Gizlilik Koruması: Hata günlüklerine hassas içeriklerin ve özel linklerin yazılmasını engelleyen güvenlik filtresi güçlendirildi",
             "log113_1": "YouTube Yüksek Kalite ve 4K Düzeltmesi: Videoların 360p'ye düşmesine yol açan mobil istemci kısıtlaması kaldırıldı; 1080p, 1440p ve 4K indirme tamamen düzeltildi",
             "log113_2": "Sayfadaki Kaliteleri Otomatik Okuma: Sayfadaki gerçek çözünürlükler taranır; 4K olmayan videolarda artık sahte 4K seçeneği çıkmaz",
             "log113_3": "Evrensel Çözünürlük Desteği: 144p, 240p, 360p, 480p, 720p, 1080p, 2K ve 4K için sorunsuz yüksek kaliteli indirme ve ses birleştirme",
@@ -351,7 +359,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.3 Pro",
+            "appVersion": "v1.1.4 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -461,7 +469,7 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.1.3 Pro • Апаратно-прискорений інтерфейс QML",
+            "aboutVersion": "Версія 1.1.4 Pro • Апаратно-прискорений інтерфейс QML",
             "updateSection": "Оновлення програми",
             "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
             "currentVersionLabel": "Встановлена версія",
@@ -477,6 +485,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log114_1": "Точний розмір завантаженого файлу: Після завершення відображається реальний розмір на диску замість проміжних потоків",
+            "log114_2": "Індикатор залишку МБ: На картках завантаження в реальному часі відображається, скільки МБ залишилося",
+            "log114_3": "Виправлення DNS для Reels та соцмереж: Усунено помилку 'Could not resolve host' завдяки підтримці IPv4/IPv6",
+            "log114_4": "Посилений захист конфіденційності: Запобігання запису приватних чи чутливих запитів до журналу помилок",
             "log113_1": "Виправлення якості YouTube: Усунено обмеження мобільного клієнта SABR, яке знижувало якість до 360p; відновлено повне завантаження 1080p, 1440p та 4K",
             "log113_2": "Автоматичне зчитування якостей: Сканування реальних роздільних здатностей; на відео без 4K більше не з'являється фіктивна опція 4K",
             "log113_3": "Універсальна підтримка роздільних здатностей: Бездоганне високоякісне завантаження для 144p, 240p, 360p, 480p, 720p, 1080p, 2K та 4K",
