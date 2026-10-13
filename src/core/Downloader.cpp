@@ -256,20 +256,25 @@ void Downloader::onFinished() {
     }
 
     int statusCode = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    bool isOk = (m_reply->error() == QNetworkReply::NoError) || (statusCode == 200 || statusCode == 206);
+    bool isOk = (m_reply->error() == QNetworkReply::NoError) && (statusCode == 200 || statusCode == 206 || statusCode == 0);
+    qint64 fileSize = m_outputFile.isOpen() ? m_outputFile.size() : QFileInfo(m_targetPath).size();
 
-    if (isOk) {
+    if (isOk && fileSize > 0) {
         m_outputFile.flush();
         m_outputFile.close();
         m_isRunning = false;
         emit runningChanged();
-        emit progressUpdated(100.0, "Done", "00:00", m_totalBytes, m_totalBytes);
+        emit progressUpdated(100.0, "Done", "00:00", fileSize, fileSize);
         emit downloadCompleted(m_id, m_targetPath);
     } else {
+        if (m_outputFile.isOpen()) {
+            m_outputFile.close();
+        }
+        m_outputFile.remove();
         m_isRunning = false;
         emit runningChanged();
-        QString err = QString("HTTP error (Status %1)").arg(statusCode);
-        QString details = QString("HTTP Status: %1\nURL: %2\nOutput File: %3").arg(statusCode).arg(m_url, m_targetPath);
+        QString err = (fileSize == 0 && isOk) ? "Download failed: Server sent 0 bytes (access restricted or expired link)." : QString("HTTP error (Status %1)").arg(statusCode);
+        QString details = QString("HTTP Status: %1\nURL: %2\nOutput File: %3\nFile Size: %4 bytes").arg(statusCode).arg(m_url, m_targetPath).arg(fileSize);
         emit downloadFailed(m_id, err, details);
     }
     cleanup();

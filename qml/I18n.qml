@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.1 Pro",
+            "appVersion": "v1.1.2 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -46,6 +46,10 @@ QtObject {
             "audioMp3Desc": "Studio-quality audio track converted with FFmpeg",
             "saveTo": "Save To",
             "changeFolder": "Change Folder",
+            "editTitleHint": "Click to rename video",
+            "editTitlePlaceholder": "Enter video file name...",
+            "editTitleSave": "Save",
+            "editTitleCancel": "Cancel",
             "feature1Title": "High-Speed Stream Engine",
             "feature1Desc": "Direct-to-disk streaming architecture ensures blazing fast speeds with zero memory overhead.",
             "feature2Title": "320 kbps MP3 Converter",
@@ -132,6 +136,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log112_1": "Editable Video Title: Click directly on the video title after analysis to rename the file before downloading",
+            "log112_2": "Resolved 0 MB Download Issue: Fixed an issue where streaming sites generated empty 0-byte video files (Error 0xC00D36C4)",
+            "log112_3": "Expanded Platform Integration: Fast direct stream extraction for Pornhub, Rumble, Bilibili, and video hosts",
+            "log112_4": "Corrupt File Prevention: Automatic verification ensures incomplete or empty downloads are never saved as finished files",
             "log111_1": "4K/2K Support: Dynamic quality options based on the video's real max resolution; no more low-res fallback pixelation",
             "log111_2": "Instagram, TikTok & X Fix: Social links go straight to the yt-dlp engine with IPv4, timeout and retry protection",
             "log111_3": "Faster Analysis: Known video platforms skip HTML scraping for quicker results",
@@ -168,7 +176,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.1 Pro",
+            "appVersion": "v1.1.2 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -203,6 +211,10 @@ QtObject {
             "audioMp3Desc": "FFmpeg ile stüdyo kalitesinde dönüştürülmüş MP3 ses parçası",
             "saveTo": "Kaydedilecek Yer",
             "changeFolder": "Klasörü Değiştir",
+            "editTitleHint": "Videonun ismini değiştirmek için tıklayın",
+            "editTitlePlaceholder": "Video dosya adını yazın...",
+            "editTitleSave": "Kaydet",
+            "editTitleCancel": "İptal",
             "feature1Title": "Turbo Çok Kanallı İndirme",
             "feature1Desc": "Eşzamanlı parça akışı indirmeleri 10 kata kadar hızlandırır ve doğrudan diske yazar.",
             "feature2Title": "320 kbps MP3 Dönüştürücü",
@@ -289,6 +301,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log112_1": "Düzenlenebilir Video Başlığı: Analiz sonrası başlığa tıklayarak indirmeden önce dosya adını dilediğiniz gibi değiştirin",
+            "log112_2": "0 MB İndirme Sorunu Giderildi: Bazı video sitelerinde dosyanın 0 bayt inmesine ve açılamamasına (0xC00D36C4) yol açan sorun çözüldü",
+            "log112_3": "Genişletilmiş Platform Desteği: Pornhub, Rumble, Bilibili ve tüm video barındırıcıları için yüksek hızlı akış motoru entegrasyonu",
+            "log112_4": "Bozuk Dosya Koruması: Boş veya tamamlanmamış indirmelerin bitmiş gibi diske kaydedilmesi tamamen engellendi",
             "log111_1": "4K/2K Desteği: Video gerçek maksimum çözünürlüğüne göre dinamik kalite seçenekleri; düşük çözünürlük pikselleşmesi giderildi",
             "log111_2": "Instagram, TikTok ve X Düzeltmesi: Sosyal medya linkleri doğrudan yt-dlp motoruna yönlendirilir; IPv4, zaman aşımı ve yeniden deneme korumalı",
             "log111_3": "Hızlı Analiz: Bilinen video platformları HTML taramasını atlayarak daha hızlı sonuç verir",
@@ -325,7 +341,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.1 Pro",
+            "appVersion": "v1.1.2 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -360,6 +376,10 @@ QtObject {
             "audioMp3Desc": "Аудіодоріжка студійної якості, конвертована через FFmpeg",
             "saveTo": "Зберегти до",
             "changeFolder": "Змінити папку",
+            "editTitleHint": "Натисніть, щоб перейменувати відео",
+            "editTitlePlaceholder": "Введіть назву відеофайлу...",
+            "editTitleSave": "Зберегти",
+            "editTitleCancel": "Скасувати",
             "feature1Title": "Турбо потік завантаження",
             "feature1Desc": "Прямий запис на диск забезпечує блискавичну швидкість без навантаження на оперативну пам'ять.",
             "feature2Title": "Конвертер MP3 320 кбіт/с",
@@ -446,6 +466,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log112_1": "Редагована назва відео: Натисніть на назву після аналізу, щоб перейменувати файл перед завантаженням",
+            "log112_2": "Виправлено проблему 0 МБ завантаження: Усунено створення порожніх файлів 0 байт на деяких сайтах (Помилка 0xC00D36C4)",
+            "log112_3": "Розширена інтеграція платформ: Швидке вилучення потоків для Pornhub, Rumble, Bilibili та відеохостингів",
+            "log112_4": "Захист від пошкоджених файлів: Автоматична перевірка гарантує, що неповні завантаження не зберігаються як готові",
             "log111_1": "Підтримка 4K/2K: Динамічні опції якості за реальною максимальною роздільною здатністю відео; усунено пікселізацію",
             "log111_2": "Виправлення Instagram, TikTok і X: Посилання напряму йдуть до рушія yt-dlp із захистом IPv4, тайм-аутом і повторами",
             "log111_3": "Швидший аналіз: Відомі відеоплатформи пропускають сканування HTML",

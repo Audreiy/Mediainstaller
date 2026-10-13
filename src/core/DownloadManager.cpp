@@ -402,16 +402,29 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
     QString finalFilePath = targetDir + "/" + finalFileName;
 
     QString lowerUrl = url.trimmed().toLower();
+    QUrl parsedUrl(url.trimmed());
+    QString pathLower = parsedUrl.path().toLower();
+
     bool isWebPlatform = lowerUrl.contains("youtube.com") || lowerUrl.contains("youtu.be") ||
                          lowerUrl.contains("twitter.com") || lowerUrl.contains("x.com") ||
                          lowerUrl.contains("tiktok.com") || lowerUrl.contains("instagram.com") ||
                          lowerUrl.contains("vimeo.com") || lowerUrl.contains("reddit.com") ||
                          lowerUrl.contains("soundcloud.com") || lowerUrl.contains("twitch.tv") ||
-                         lowerUrl.contains("facebook.com");
-    bool isDirectFile = lowerUrl.contains(".mp4") || lowerUrl.contains(".mp3") ||
-                        lowerUrl.contains(".m4a") || lowerUrl.contains(".wav") ||
-                        lowerUrl.contains(".webm") || lowerUrl.contains(".mkv") ||
-                        lowerUrl.contains("tau-video");
+                         lowerUrl.contains("facebook.com") || lowerUrl.contains("fb.watch") ||
+                         lowerUrl.contains("pornhub.com") || lowerUrl.contains("xvideos.com") ||
+                         lowerUrl.contains("xnxx.com") || lowerUrl.contains("redtube.com") ||
+                         lowerUrl.contains("youporn.com") || lowerUrl.contains("spankbang.com") ||
+                         lowerUrl.contains("eporner.com") || lowerUrl.contains("rumble.com") ||
+                         lowerUrl.contains("bilibili") || lowerUrl.contains("vk.com") ||
+                         lowerUrl.contains("streamable.com") || lowerUrl.contains("threads.net") ||
+                         lowerUrl.contains("bsky.app") || lowerUrl.contains("pinterest.com") ||
+                         lowerUrl.contains("pin.it") || lowerUrl.contains("bandcamp.com") ||
+                         lowerUrl.contains("mixcloud.com");
+
+    bool isDirectFile = !isWebPlatform && (pathLower.endsWith(".mp4") || pathLower.endsWith(".mp3") ||
+                        pathLower.endsWith(".m4a") || pathLower.endsWith(".wav") ||
+                        pathLower.endsWith(".webm") || pathLower.endsWith(".mkv") ||
+                        lowerUrl.contains("tau-video"));
 
     bool useYtDlp = isWebPlatform || (!isDirectFile && !FFmpegProcessor::findYtDlpExecutable().isEmpty());
 

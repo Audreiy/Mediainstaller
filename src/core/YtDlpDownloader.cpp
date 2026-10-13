@@ -326,7 +326,17 @@ void YtDlpDownloader::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
             }
         }
 
-        emit downloadCompleted(m_id, finalPath);
+        qint64 finalSize = QFileInfo(finalPath).size();
+        if (finalSize > 0) {
+            emit downloadCompleted(m_id, finalPath);
+        } else {
+            if (QFile::exists(finalPath)) {
+                QFile::remove(finalPath);
+            }
+            QString errorReason = "Download failed: Resulting media file is empty (0 bytes).";
+            QString details = m_errorLogs.join("\n");
+            emit downloadFailed(m_id, errorReason, details);
+        }
     } else {
         QString errorReason = m_lastErrorMessage;
         if (errorReason.isEmpty()) {

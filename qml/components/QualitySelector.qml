@@ -18,8 +18,12 @@ Rectangle {
     property string selectedAudioQuality: "audio_mp3_320"
     property string selectedOptionId: "best_video"
     property string customFolder: downloadManager.defaultDownloadPath
+    property string customTitle: ""
+    property bool isEditingTitle: false
 
     onMediaInfoChanged: {
+        customTitle = mediaInfo ? mediaInfo.title : ""
+        isEditingTitle = false
         selectedVideoQuality = "best_video"
         if (mediaInfo && mediaInfo.isAudioOnly) {
             selectedFormatType = "audio"
@@ -112,14 +116,165 @@ Rectangle {
                 width: parent.width - 86
                 spacing: 4
 
-                Text {
+                // Video Title (Click to Edit or Leave As Is)
+                Item {
                     width: parent.width
-                    text: root.mediaInfo ? root.mediaInfo.title : "Media Item"
-                    color: Theme.textPrimary
-                    font.pixelSize: 14
-                    font.family: Theme.fontFamily
-                    font.weight: Font.DemiBold
-                    elide: Text.ElideMiddle
+                    height: root.isEditingTitle ? 32 : 24
+
+                    // Display Mode (Click to Rename)
+                    Rectangle {
+                        id: titleDisplayArea
+                        visible: !root.isEditingTitle
+                        anchors.fill: parent
+                        color: titleHover.hovered ? Theme.bgCardHover : "transparent"
+                        radius: Theme.radiusSm
+                        border.color: titleHover.hovered ? Theme.borderBright : "transparent"
+                        border.width: 1
+
+                        HoverHandler { id: titleHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler {
+                            onTapped: {
+                                root.isEditingTitle = true
+                                titleInput.text = (root.customTitle.length > 0) ? root.customTitle : (root.mediaInfo ? root.mediaInfo.title : "")
+                                titleInput.forceActiveFocus()
+                                titleInput.selectAll()
+                            }
+                        }
+
+                        Row {
+                            anchors.fill: parent
+                            anchors.leftMargin: 4
+                            anchors.rightMargin: 4
+                            spacing: 8
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - (titleHover.hovered ? 68 : 24)
+                                text: (root.customTitle.length > 0) ? root.customTitle : (root.mediaInfo ? root.mediaInfo.title : "Media Item")
+                                color: Theme.textPrimary
+                                font.pixelSize: 14
+                                font.family: Theme.fontFamily
+                                font.weight: Font.DemiBold
+                                elide: Text.ElideMiddle
+                            }
+
+                            // Edit Badge
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: titleHover.hovered ? 60 : 18
+                                height: 18
+                                radius: 4
+                                color: titleHover.hovered ? (Theme.accent + "33") : "transparent"
+                                border.color: titleHover.hovered ? Theme.accent : "transparent"
+                                border.width: 1
+
+                                Row {
+                                    anchors.centerIn: parent
+                                    spacing: 3
+                                    Text {
+                                        text: "✎"
+                                        color: titleHover.hovered ? Theme.accent : Theme.textMuted
+                                        font.pixelSize: 11
+                                    }
+                                    Text {
+                                        visible: titleHover.hovered
+                                        text: I18n.t("editTitleSave") === "Kaydet" ? "Düzenle" : "Edit"
+                                        color: Theme.accent
+                                        font.pixelSize: 10
+                                        font.family: Theme.fontFamily
+                                        font.weight: Font.Medium
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Edit Mode (Inline Input with Save / Cancel)
+                    Rectangle {
+                        id: titleEditArea
+                        visible: root.isEditingTitle
+                        anchors.fill: parent
+                        color: Theme.bgInput
+                        radius: Theme.radiusSm
+                        border.color: Theme.accent
+                        border.width: 1.5
+
+                        Row {
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            spacing: 6
+
+                            TextField {
+                                id: titleInput
+                                width: parent.width - 64
+                                height: parent.height
+                                text: root.customTitle
+                                font.pixelSize: 13
+                                font.family: Theme.fontFamily
+                                color: Theme.textPrimary
+                                verticalAlignment: TextInput.AlignVCenter
+                                placeholderText: I18n.t("editTitlePlaceholder")
+                                selectByMouse: true
+                                background: Rectangle { color: "transparent" }
+
+                                Keys.onReturnPressed: {
+                                    if (titleInput.text.trim().length > 0) {
+                                        root.customTitle = titleInput.text.trim()
+                                    }
+                                    root.isEditingTitle = false
+                                }
+                                Keys.onEscapePressed: {
+                                    root.isEditingTitle = false
+                                }
+                            }
+
+                            // Confirm Button (✓)
+                            Rectangle {
+                                width: 24; height: 24
+                                radius: 4
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: confirmHover.hovered ? Theme.accentHover : Theme.accent
+                                HoverHandler { id: confirmHover; cursorShape: Qt.PointingHandCursor }
+                                TapHandler {
+                                    onTapped: {
+                                        if (titleInput.text.trim().length > 0) {
+                                            root.customTitle = titleInput.text.trim()
+                                        }
+                                        root.isEditingTitle = false
+                                    }
+                                }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "✓"
+                                    color: "#FFFFFF"
+                                    font.pixelSize: 12
+                                    font.bold: true
+                                }
+                            }
+
+                            // Cancel Button (✕)
+                            Rectangle {
+                                width: 24; height: 24
+                                radius: 4
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: cancelHover.hovered ? Theme.bgCardHover : Theme.bgElevated
+                                border.color: Theme.borderDim
+                                border.width: 1
+                                HoverHandler { id: cancelHover; cursorShape: Qt.PointingHandCursor }
+                                TapHandler {
+                                    onTapped: {
+                                        root.isEditingTitle = false
+                                    }
+                                }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "✕"
+                                    color: Theme.textMuted
+                                    font.pixelSize: 11
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Row {
@@ -483,9 +638,14 @@ Rectangle {
                 TapHandler {
                     onTapped: {
                         if (root.mediaInfo) {
+                            if (root.isEditingTitle && titleInput.text.trim().length > 0) {
+                                root.customTitle = titleInput.text.trim()
+                                root.isEditingTitle = false
+                            }
+                            var titleToUse = (root.customTitle && root.customTitle.trim().length > 0) ? root.customTitle.trim() : root.mediaInfo.title
                             root.downloadTriggered(
                                 root.mediaInfo.url,
-                                root.mediaInfo.title,
+                                titleToUse,
                                 root.selectedOptionId,
                                 root.customFolder
                             )

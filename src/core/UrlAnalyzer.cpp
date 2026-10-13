@@ -48,7 +48,16 @@ UrlCategory UrlAnalyzer::categorizeUrl(const QString &rawUrl) {
         lower.contains("soundcloud.com") || lower.contains("twitch.tv") ||
         lower.contains("dailymotion.com") || lower.contains("streamtape.com") ||
         lower.contains("dood") || lower.contains("filemoon") ||
-        lower.contains("facebook.com")) {
+        lower.contains("facebook.com") || lower.contains("fb.watch") ||
+        lower.contains("pornhub.com") || lower.contains("xvideos.com") ||
+        lower.contains("xnxx.com") || lower.contains("redtube.com") ||
+        lower.contains("youporn.com") || lower.contains("spankbang.com") ||
+        lower.contains("eporner.com") || lower.contains("rumble.com") ||
+        lower.contains("bilibili") || lower.contains("vk.com") ||
+        lower.contains("streamable.com") || lower.contains("threads.net") ||
+        lower.contains("bsky.app") || lower.contains("pinterest.com") ||
+        lower.contains("pin.it") || lower.contains("bandcamp.com") ||
+        lower.contains("mixcloud.com")) {
         return UrlCategory::GenericWebPage;
     }
     return UrlCategory::Unknown;
@@ -136,12 +145,21 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
         return;
     }
 
-    // 1.1 Direct social media & streaming video platforms (Instagram, TikTok, Twitter/X, Facebook, etc.)
+    // 1.1 Direct social media & streaming video platforms (Instagram, TikTok, Twitter/X, Facebook, Pornhub, Rumble, etc.)
     if (lower.contains("instagram.com") || lower.contains("tiktok.com") ||
         lower.contains("twitter.com") || lower.contains("x.com") ||
         lower.contains("facebook.com") || lower.contains("fb.watch") ||
         lower.contains("reddit.com") || lower.contains("twitch.tv") ||
-        lower.contains("vimeo.com") || lower.contains("dailymotion.com")) {
+        lower.contains("vimeo.com") || lower.contains("dailymotion.com") ||
+        lower.contains("pornhub.com") || lower.contains("xvideos.com") ||
+        lower.contains("xnxx.com") || lower.contains("redtube.com") ||
+        lower.contains("youporn.com") || lower.contains("spankbang.com") ||
+        lower.contains("eporner.com") || lower.contains("rumble.com") ||
+        lower.contains("bilibili") || lower.contains("vk.com") ||
+        lower.contains("streamable.com") || lower.contains("threads.net") ||
+        lower.contains("bsky.app") || lower.contains("pinterest.com") ||
+        lower.contains("pin.it") || lower.contains("soundcloud.com") ||
+        lower.contains("bandcamp.com") || lower.contains("mixcloud.com")) {
         startYtDlpProbe(trimmed);
         return;
     }
@@ -660,7 +678,13 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         return;
     }
 
-    // 5. Scan for direct MP4 stream in HTML
+    // 5. Try dynamic yt-dlp probe first if available, so full stream extractors handle the video
+    if (!FFmpegProcessor::findYtDlpExecutable().isEmpty()) {
+        startYtDlpProbe(m_analyzingUrl);
+        return;
+    }
+
+    // 6. Fallback: Scan for direct MP4 stream in HTML
     QRegularExpression mp4Re(R"((https?://[^"'\s<>]+\.mp4[^"'\s<>]*))", QRegularExpression::CaseInsensitiveOption);
     auto mp4Match = mp4Re.match(html);
     if (mp4Match.hasMatch()) {
@@ -669,7 +693,7 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         return;
     }
 
-    // 6. If static HTML didn't expose the video stream, run dynamic yt-dlp probe with referer
+    // 7. Last resort probe
     startYtDlpProbe(m_analyzingUrl);
 }
 
