@@ -6,6 +6,13 @@ MediaInfo::MediaInfo(QObject *parent)
 {
 }
 
+void MediaInfo::setReferer(const QString &ref) {
+    if (m_referer != ref) {
+        m_referer = ref;
+        emit refererChanged();
+    }
+}
+
 void MediaInfo::setUrl(const QString &url) {
     if (m_url != url) {
         m_url = url;

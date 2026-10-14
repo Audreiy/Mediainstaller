@@ -26,6 +26,7 @@ public:
 
 class MediaInfo : public QObject {
     Q_OBJECT
+    Q_PROPERTY(QString referer READ referer WRITE setReferer NOTIFY refererChanged)
     Q_PROPERTY(QString url READ url WRITE setUrl NOTIFY urlChanged)
     Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
     Q_PROPERTY(QString author READ author WRITE setAuthor NOTIFY authorChanged)
@@ -39,6 +40,9 @@ class MediaInfo : public QObject {
 
 public:
     explicit MediaInfo(QObject *parent = nullptr);
+
+    QString referer() const { return m_referer; }
+    void setReferer(const QString &ref);
 
     QString url() const { return m_url; }
     void setUrl(const QString &url);
@@ -76,6 +80,7 @@ public:
     QVariantList streamOptionsVariant() const;
 
 signals:
+    void refererChanged();
     void urlChanged();
     void titleChanged();
     void authorChanged();
@@ -88,6 +93,7 @@ signals:
     void streamOptionsChanged();
 
 private:
+    QString m_referer;
     QString m_url;
     QString m_title;
     QString m_author;

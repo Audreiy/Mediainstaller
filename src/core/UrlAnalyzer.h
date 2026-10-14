@@ -31,6 +31,7 @@ public:
     Q_INVOKABLE void analyzeUrl(const QString &rawUrl);
     Q_INVOKABLE void clear();
     static UrlCategory categorizeUrl(const QString &rawUrl);
+    static QString cleanUrl(const QString &rawUrl);
 
 signals:
     void analyzingChanged();
@@ -57,7 +58,7 @@ private:
     void parseHtmlForMedia(const QString &html, const QUrl &baseUrl);
     void startYtDlpProbe(const QString &rawUrl);
     void startDirectProbe(const QUrl &url);
-    void setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail = QString());
+    void setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail = QString(), const QString &referer = QString());
     void populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, const QString &mimeType, const QString &fileName);
     void populateWebStreamOptions(MediaInfo *info);
     QString extractFileName(const QUrl &url, const QString &contentDisposition);
@@ -68,6 +69,7 @@ private:
     QNetworkReply *m_currentReply = nullptr;
     QProcess *m_ytDlpProcess = nullptr;
     QString m_analyzingUrl;
+    QString m_pageReferer;
     QString m_spotifyTitle;
     QString m_spotifyThumb;
     QUrl m_pendingIframeUrl;

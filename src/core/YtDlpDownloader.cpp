@@ -53,8 +53,9 @@ void YtDlpDownloader::start() {
     args << "--no-playlist";
     args << "--no-check-certificates";
     args << "--continue";
-    args << "--socket-timeout" << "20";
-    args << "--retries" << "3";
+    args << "--socket-timeout" << "30";
+    args << "--retries" << "5";
+    args << "--impersonate" << "Chrome";
 
     if (m_speedLimitMBps > 0) {
         args << "--limit-rate" << QString("%1M").arg(m_speedLimitMBps);
@@ -66,16 +67,10 @@ void YtDlpDownloader::start() {
                     lowerUrl.contains("twitter.com") || lowerUrl.contains("x.com") ||
                     lowerUrl.contains("facebook.com") || lowerUrl.contains("fb.watch");
 
-    if (isYouTube) {
-        // Do NOT pass android,ios player client: modern YouTube SABR policy strips HD video streams for android/ios clients.
-        // Default yt-dlp extractor downloads full 4K/1440p/1080p/720p with audio separation and merges seamlessly.
-    } else if (!isSocial) {
-        args << "--extractor-args" << "generic:impersonate";
-        args << "--user-agent" << "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
-    }
-
     if (!m_referer.isEmpty()) {
         args << "--referer" << m_referer;
+    } else if (!isSocial && !isYouTube) {
+        args << "--referer" << m_url;
     }
 
     if (!ffmpegExe.isEmpty()) {
@@ -102,7 +97,7 @@ void YtDlpDownloader::start() {
             targetHeight = numStr.toInt();
             if (targetHeight <= 0) targetHeight = 1080;
         }
-        args << "-f" << QString("bestvideo[height<=%1]+bestaudio/best[height<=%1]/best").arg(targetHeight);
+        args << "-f" << QString("bestvideo[height<=%1]+bestaudio/best[height<=%1]/bestvideo+bestaudio/best").arg(targetHeight);
         args << "--merge-output-format" << "mp4";
     } else {
         // High quality video with merged audio (Best available)

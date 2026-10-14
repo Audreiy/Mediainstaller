@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.4 Pro",
+            "appVersion": "v1.1.5 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -121,7 +121,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.1.4 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.1.5 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -137,6 +137,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log115_1": "Universal Stream Sniffer: Automatically detects and extracts HLS (.m3u8), MP4/WebM, and JavaScript video player configurations (mediaDefinition, videoUrl) from embedded web pages",
+            "log115_2": "Browser TLS Impersonation: Emulates authentic Chrome TLS handshakes and headers for Instagram Reels and social media, eliminating TCP connection resets and host resolution drops",
+            "log115_3": "Referer & CDN Protection: Automatic originating page referer propagation prevents 403 Forbidden errors when fetching media segments from protected streaming hosts",
+            "log115_4": "Self-Healing Fallback Engine: Seamlessly switches to resilient browser-emulating downloader if direct HTTP stream download is blocked or fails",
             "log114_1": "Accurate Completed Size: Corrected download completion logic to display true final file size on disk rather than intermediate audio/video stream sizes",
             "log114_2": "Remaining MB Indicator: Live real-time remaining download size shown on download cards (e.g. Downloaded / Total with Remaining MB)",
             "log114_3": "Social Media & Reels IPv6 Fix: Removed restrictive IPv4-only flag that caused 'Could not resolve host' DNS failures on Instagram Reels and social platforms",
@@ -185,7 +189,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.4 Pro",
+            "appVersion": "v1.1.5 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -295,7 +299,7 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.1.4 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "aboutVersion": "Sürüm 1.1.5 Pro • Donanım Hızlandırmalı QML Arayüzü",
             "updateSection": "Uygulama Güncellemeleri",
             "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
             "currentVersionLabel": "Yüklü Sürüm",
@@ -311,6 +315,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log115_1": "Evrensel Akış Yakalayıcı: Gömülü web sayfalarındaki HLS (.m3u8), MP4/WebM ve JavaScript oynatıcı yapılandırmalarını (mediaDefinition, videoUrl) otomatik tespit eder ve çözer",
+            "log115_2": "Tarayıcı TLS İstemci Koruması: Instagram Reels ve sosyal ağlarda TCP bağlantı sıfırlama ve sunucu erişim hatalarını önlemek için gerçek Chrome TLS el sıkışması ve başlıkları kullanır",
+            "log115_3": "Referer ve CDN Erişim Koruması: Kaynak sayfa yönlendirici (Referer) başlığını otomatik ileterek korumalı medya sunucularından 403 Erişim Engeli alınmasını önler",
+            "log115_4": "Otomatik Kurtarma Motoru: Doğrudan HTTP akış indirmesi engellenirse veya başarısız olursa kesintisiz olarak tarayıcı emülasyonlu yt-dlp motoruna geçiş yapar",
             "log114_1": "Hassas Dosya Boyutu: İndirme tamamlandığında parça akış boyutları yerine diske yazılan gerçek nihai dosya boyutu gösterilir",
             "log114_2": "Kalan MB Göstergesi: İndirme kartlarında kaç MB kaldığı canlı ve anlık olarak gösterilir (İndirilen / Toplam ve Kalan MB)",
             "log114_3": "Instagram Reels ve Sosyal Ağ DNS Düzeltmesi: 'Could not resolve host' hatasına yol açan IPv4 kısıtlaması kaldırılarak çift katmanlı IPv4/IPv6 desteği sağlandı",
@@ -359,7 +367,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.4 Pro",
+            "appVersion": "v1.1.5 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -469,7 +477,7 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.1.4 Pro • Апаратно-прискорений інтерфейс QML",
+            "aboutVersion": "Версія 1.1.5 Pro • Апаратно-прискорений інтерфейс QML",
             "updateSection": "Оновлення програми",
             "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
             "currentVersionLabel": "Встановлена версія",
@@ -485,6 +493,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log115_1": "Універсальний перехоплювач потоків: Автоматично виявляє та вилучає HLS (.m3u8), MP4/WebM та конфігурації JS-плеєрів (mediaDefinition, videoUrl) із вбудованих вебсторінок",
+            "log115_2": "Емуляція браузерного TLS: Використовує автентичне TLS-рукостискання Chrome для Instagram Reels та соцмереж, усуваючи скидання з'єднання TCP та збої DNS",
+            "log115_3": "Захист Referer та CDN: Автоматична передача заголовка Referer вихідної сторінки запобігає помилкам 403 Forbidden на захищених хостингах",
+            "log115_4": "Система автоматичного відновлення: Безперешкодне перемикання на стійкий рушій із емуляцією браузера, якщо пряме завантаження через HTTP заблоковано",
             "log114_1": "Точний розмір завантаженого файлу: Після завершення відображається реальний розмір на диску замість проміжних потоків",
             "log114_2": "Індикатор залишку МБ: На картках завантаження в реальному часі відображається, скільки МБ залишилося",
             "log114_3": "Виправлення DNS для Reels та соцмереж: Усунено помилку 'Could not resolve host' завдяки підтримці IPv4/IPv6",

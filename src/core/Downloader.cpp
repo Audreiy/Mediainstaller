@@ -74,7 +74,11 @@ void Downloader::start() {
     QNetworkRequest request;
     request.setUrl(QUrl(m_url));
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
     request.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    if (!m_referer.isEmpty()) {
+        request.setRawHeader("Referer", m_referer.toUtf8());
+    }
 
     if (m_downloadedBytes > 0) {
         request.setRawHeader("Range", QString("bytes=%1-").arg(m_downloadedBytes).toUtf8());

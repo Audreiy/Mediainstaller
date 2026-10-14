@@ -30,6 +30,9 @@ public:
     void setSpeedLimitMBps(int mbps);
     int speedLimitMBps() const { return m_speedLimitMBps; }
 
+    void setReferer(const QString &ref) { m_referer = ref; }
+    QString referer() const { return m_referer; }
+
     void start();
     void pause();
     void resume();
@@ -58,6 +61,7 @@ private:
     QString m_id;
     QString m_url;
     QString m_targetPath;
+    QString m_referer;
     bool m_isRunning = false;
     bool m_isPaused = false;
     double m_progress = 0.0;

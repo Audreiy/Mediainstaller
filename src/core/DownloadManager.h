@@ -17,6 +17,7 @@ struct QueuedTask {
     QString formatId;
     QString customFolder;
     QString finalFilePath;
+    QString referer;
     bool isAudioOnly = false;
     bool useYtDlp = false;
 };

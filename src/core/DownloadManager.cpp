@@ -250,6 +250,9 @@ void DownloadManager::startTask(const QueuedTask &task) {
     if (task.useYtDlp) {
         YtDlpDownloader *ytDownloader = new YtDlpDownloader(task.id, task.url, task.finalFilePath, task.formatId, this);
         ytDownloader->setSpeedLimitMBps(effectiveLimit);
+        if (!task.referer.isEmpty()) {
+            ytDownloader->setReferer(task.referer);
+        }
         m_activeYtDlpDownloads[task.id] = ytDownloader;
 
         connect(ytDownloader, &YtDlpDownloader::progressUpdated, this, [this, id = task.id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
@@ -276,6 +279,9 @@ void DownloadManager::startTask(const QueuedTask &task) {
 
         Downloader *downloader = new Downloader(task.id, task.url, downloadPath, this);
         downloader->setSpeedLimitMBps(effectiveLimit);
+        if (!task.referer.isEmpty()) {
+            downloader->setReferer(task.referer);
+        }
         m_activeHttpDownloads[task.id] = downloader;
 
         connect(downloader, &Downloader::progressUpdated, this, [this, id = task.id](double pct, const QString &speed, const QString &eta, qint64 down, qint64 tot) {
@@ -438,6 +444,11 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
 
     bool useYtDlp = isWebPlatform || (!isDirectFile && !FFmpegProcessor::findYtDlpExecutable().isEmpty());
 
+    QString referer;
+    if (m_urlAnalyzer.currentMediaInfo()) {
+        referer = m_urlAnalyzer.currentMediaInfo()->referer();
+    }
+
     QueuedTask task;
     task.id = id;
     task.url = url;
@@ -445,6 +456,7 @@ void DownloadManager::addDownload(const QString &url, const QString &title, cons
     task.formatId = formatId;
     task.customFolder = customFolder;
     task.finalFilePath = finalFilePath;
+    task.referer = referer;
     task.isAudioOnly = isAudioOnly;
     task.useYtDlp = useYtDlp;
 
@@ -533,6 +545,21 @@ void DownloadManager::handleDownloadCompleted(const QString &id, const QString &
 }
 
 void DownloadManager::handleDownloadFailed(const QString &id, const QString &errorMsg, const QString &details) {
+    if (m_taskRegistry.contains(id) && !m_taskRegistry[id].useYtDlp && !FFmpegProcessor::findYtDlpExecutable().isEmpty()) {
+        // Fallback: try yt-dlp with Chrome impersonation if direct HTTP download failed
+        QueuedTask task = m_taskRegistry[id];
+        task.useYtDlp = true;
+        m_taskRegistry[id] = task;
+        m_queueModel.updateStatus(id, "Downloading");
+        m_queueModel.updateProgress(id, 0.0, "Switching engine...", "--:--", -1, -1);
+        if (m_activeHttpDownloads.contains(id)) {
+            if (m_activeHttpDownloads[id]) m_activeHttpDownloads[id]->deleteLater();
+            m_activeHttpDownloads.remove(id);
+        }
+        startTask(task);
+        return;
+    }
+
     m_queueModel.updateStatus(id, "Failed", errorMsg);
 
     QString title = id;
