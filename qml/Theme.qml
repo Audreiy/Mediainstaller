@@ -46,5 +46,5 @@ QtObject {
     readonly property int radiusXl: 20
 
     // Font Family (Universal Windows typography supporting all Latin, Turkish, and Cyrillic glyphs)
-    readonly property string fontFamily: "Segoe UI"
+    readonly property string fontFamily: "Segoe UI, Segoe UI Variable Text, Arial, Roboto, sans-serif"
 }

@@ -63,16 +63,20 @@ void YtDlpDownloader::start() {
         args << "--limit-rate" << QString("%1M").arg(m_speedLimitMBps);
     }
 
-    QString lowerUrl = m_url.toLower();
+    QString encodedUrl = QString::fromUtf8(QUrl::fromUserInput(m_url.trimmed()).toEncoded(QUrl::FullyEncoded));
+    if (encodedUrl.isEmpty()) encodedUrl = m_url.trimmed();
+
+    QString lowerUrl = encodedUrl.toLower();
     bool isYouTube = lowerUrl.contains("youtube.com") || lowerUrl.contains("youtu.be");
     bool isSocial = lowerUrl.contains("instagram.com") || lowerUrl.contains("tiktok.com") ||
                     lowerUrl.contains("twitter.com") || lowerUrl.contains("x.com") ||
                     lowerUrl.contains("facebook.com") || lowerUrl.contains("fb.watch");
 
     if (!m_referer.isEmpty()) {
-        args << "--referer" << m_referer;
+        QString encodedRef = QString::fromUtf8(QUrl::fromUserInput(m_referer.trimmed()).toEncoded(QUrl::FullyEncoded));
+        args << "--referer" << (encodedRef.isEmpty() ? m_referer : encodedRef);
     } else if (!isSocial && !isYouTube) {
-        args << "--referer" << m_url;
+        args << "--referer" << encodedUrl;
     }
 
     if (!ffmpegExe.isEmpty()) {
@@ -115,7 +119,7 @@ void YtDlpDownloader::start() {
     // Progress template: DOWNLOAD_PROGRESS:percent|speed|eta|downloaded_bytes|total_bytes|total_bytes_estimate
     args << "--progress-template" << "DOWNLOAD_PROGRESS:%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s|%(progress.downloaded_bytes)s|%(progress.total_bytes)s|%(progress.total_bytes_estimate)s";
 
-    args << m_url;
+    args << encodedUrl;
 
     if (m_process) {
         disconnect(m_process, nullptr, this, nullptr);
@@ -128,6 +132,11 @@ void YtDlpDownloader::start() {
     }
 
     m_process = new QProcess(this);
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("PYTHONIOENCODING", "utf-8");
+    env.insert("PYTHONUTF8", "1");
+    m_process->setProcessEnvironment(env);
+
     connect(m_process, &QProcess::readyReadStandardOutput, this, &YtDlpDownloader::onReadyReadStandardOutput);
     connect(m_process, &QProcess::readyReadStandardError, this, &YtDlpDownloader::onReadyReadStandardError);
     connect(m_process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &YtDlpDownloader::onProcessFinished);

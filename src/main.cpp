@@ -43,10 +43,11 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName("YuYuInstaller");
     app.setOrganizationName("YuYuDev");
-    app.setApplicationVersion("1.1.6");
+    app.setApplicationVersion("1.1.7");
 
     QFont defaultFont("Segoe UI", 10);
     defaultFont.setStyleHint(QFont::SansSerif);
+    defaultFont.setFamilies({"Segoe UI", "Segoe UI Variable Text", "Arial", "Roboto", "Noto Sans"});
     app.setFont(defaultFont);
 
     QIcon appIcon;

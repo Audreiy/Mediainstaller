@@ -59,6 +59,9 @@ private:
     void startYtDlpProbe(const QString &rawUrl);
     void startDirectProbe(const QUrl &url);
     void startKvsResolve(const QUrl &baseUrl, const QString &videoId, const QString &videoDir, const QString &title, const QString &thumb);
+    void resolveMindGeekHls(const QUrl &hlsApiUrl, const QUrl &baseUrl, const QString &title, const QString &thumb);
+    void resolveCanliTvAjax(const QUrl &iframeUrl, const QString &vid, const QString &title, const QString &thumb);
+    static QString encodeUrlSafely(const QString &raw);
     static QString base164Decode(const QString &rawInput);
     void setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail = QString(), const QString &referer = QString());
     void populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, const QString &mimeType, const QString &fileName);

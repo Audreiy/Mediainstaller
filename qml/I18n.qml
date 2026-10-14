@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.6 Pro",
+            "appVersion": "v1.1.7 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -121,7 +121,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.1.6 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.1.7 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -137,6 +137,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log117_1": "CanliTV & Embedded Player Resolver: Dedicated Ajax source resolution for CanliTV, Astalavista, and Doeda embedded video players, bypassing legacy SWF flash placeholders",
+            "log117_2": "Full Unicode URL Percent-Encoding: Fixed 'UnicodeEncodeError: latin-1' when processing video URLs containing Turkish/Unicode characters",
+            "log117_3": "Dynamic Stream Quality Detection: Quality selector dynamically extracts available resolutions (4K, 2K, 1080p, 720p, 480p, 360p) matching detected stream heights",
+            "log117_4": "UTF-8 Subprocess & Log Encoding: Fixed question marks (?) in Turkish video titles and download logs by enforcing UTF-8 encoding across probe and download processes",
             "log116_1": "Dual-Stage TLS & DNS Recovery: Automatic fallback mechanism for Instagram Reels and social media seamlessly bypasses c-ares host resolution drops, ensuring reliable metadata extraction and download",
             "log116_2": "Kernel Video Sharing (KVS) Decoder: Native base164 decoding engine for xmilf, stiefmutter, doeda, and modern SPA video streaming architectures",
             "log116_3": "Turkish Character & Typography Fix: Fully corrected font rendering to Segoe UI across all dialogs, preventing Turkish glyphs from displaying as question marks (?)",
@@ -193,7 +197,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.6 Pro",
+            "appVersion": "v1.1.7 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -303,7 +307,7 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.1.6 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "aboutVersion": "Sürüm 1.1.7 Pro • Donanım Hızlandırmalı QML Arayüzü",
             "updateSection": "Uygulama Güncellemeleri",
             "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
             "currentVersionLabel": "Yüklü Sürüm",
@@ -319,6 +323,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log117_1": "CanliTV ve Gömülü Oynatıcı Çözücü: CanliTV, Astalavista ve Doeda gömülü oynatıcıları için özel Ajax kaynak çözücü eklendi, eski SWF flash kalıntıları engellendi",
+            "log117_2": "Tam Unicode URL Kodlaması: Türkçe ve özel karakter içeren URL'lerdeki latin-1 codec kodlama hatası (UnicodeEncodeError) tamamen giderildi",
+            "log117_3": "Dinamik Akış Kalitesi Algılama: Kalite seçenekleri artık sitedeki gerçek akış çözünürlüklerine (4K, 2K, 1080p, 720p, 480p, 360p) göre dinamik olarak listelenir",
+            "log117_4": "UTF-8 Alt İşlem ve Günlük Kodlaması: Türkçe video başlıklarında ve günlük dosyalarında soru işareti (?) çıkma sorunu UTF-8 desteğiyle düzeltildi",
             "log116_1": "Çift Kademeli TLS & DNS Otomatik Kurtarma: Instagram Reels ve sosyal ağlarda c-ares DNS sunucu erişim kesintilerini otomatik olarak atlayarak kesintisiz analiz ve indirme sağlar",
             "log116_2": "Kernel Video Sharing (KVS) Akış Çözücü: xmilf, stiefmutter, doeda ve modern SPA video mimarileri için yerleşik base164 algoritması entegre edildi",
             "log116_3": "Türkçe Karakter & Tipografi Düzeltmesi: Yazı tipi tüm pencerelerde Segoe UI olarak optimize edildi; Türkçe karakterlerin soru işareti (?) çıkma sorunu giderildi",
@@ -375,7 +383,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.6 Pro",
+            "appVersion": "v1.1.7 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -485,7 +493,7 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.1.6 Pro • Апаратно-прискорений інтерфейс QML",
+            "aboutVersion": "Версія 1.1.7 Pro • Апаратно-прискорений інтерфейс QML",
             "updateSection": "Оновлення програми",
             "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
             "currentVersionLabel": "Встановлена версія",
@@ -501,6 +509,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log117_1": "Розпізнавач CanliTV та вбудованих плеєрів: Інтегровано виділений резолвер джерел Ajax для плеєрів CanliTV, Astalavista та Doeda з обходом застарілих SWF",
+            "log117_2": "Повне кодування Unicode URL: Виправлено помилку 'UnicodeEncodeError: latin-1' при обробці посилань із спеціальними символами",
+            "log117_3": "Динамічне визначення якості потоку: Вибір якості динамічно підлаштовується під виявлені роздільні здатності (4K, 2K, 1080p, 720p, 480p, 360p)",
+            "log117_4": "Кодування UTF-8 для процесів та логів: Виправлено відображення знаків питання (?) у заголовках відео та журналах завантажень",
             "log116_1": "Двоетапне відновлення TLS та DNS: Автоматичний механізм обходу збоїв DNS для Instagram Reels та соцмереж для надійного аналізу та завантаження",
             "log116_2": "Декодер Kernel Video Sharing (KVS): Вбудований алгоритм base164 для сайтів xmilf, stiefmutter, doeda та сучасних SPA відеоплатформ",
             "log116_3": "Виправлення шрифтів та турецьких символів: Оптимізація системного шрифту Segoe UI для коректного відображення всіх символів без знаків питання (?)",

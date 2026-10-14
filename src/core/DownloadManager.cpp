@@ -48,20 +48,12 @@ QString DownloadManager::logFilePath() {
 }
 
 void DownloadManager::logDownloadFailure(const QString &title, const QString &url, const QString &errorMessage, const QString &details) {
-    QString combined = (title + " " + url + " " + errorMessage + " " + details).toLower();
-    // Privacy protection: never log adult/sensitive websites or explicit titles to downloads.log
-    if (combined.contains("porn") || combined.contains("xvideos") || combined.contains("xnxx") ||
-        combined.contains("doeda") || combined.contains("7dak") || combined.contains("stiefmutter") ||
-        combined.contains("xmilf") || combined.contains("rainblow") || combined.contains("redtube") ||
-        combined.contains("youporn") || combined.contains("spankbang") || combined.contains("eporner") ||
-        combined.contains("sikis") || combined.contains("sevisir")) {
-        return;
-    }
-
     QString path = logFilePath();
     QFile file(path);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
         QTextStream out(&file);
+        out.setEncoding(QStringConverter::Utf8);
+        out.setGenerateByteOrderMark(true);
         out << "================================================================================\n";
         out << QString("[%1] DOWNLOAD FAILURE\n").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"));
         out << "File:    " << title << "\n";

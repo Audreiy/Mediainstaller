@@ -65,40 +65,56 @@ UrlCategory UrlAnalyzer::categorizeUrl(const QString &rawUrl) {
     return UrlCategory::Unknown;
 }
 
+QString UrlAnalyzer::encodeUrlSafely(const QString &raw) {
+    QString trimmed = raw.trimmed();
+    if (trimmed.isEmpty()) return QString();
+
+    QUrl u = QUrl::fromUserInput(trimmed);
+    if (!u.isValid()) {
+        u = QUrl(trimmed);
+    }
+    if (u.isValid()) {
+        return QString::fromUtf8(u.toEncoded(QUrl::FullyEncoded));
+    }
+    return trimmed;
+}
+
 QString UrlAnalyzer::cleanUrl(const QString &rawUrl) {
     QString trimmed = rawUrl.trimmed();
     if (trimmed.isEmpty()) return trimmed;
 
-    QUrl url(trimmed);
+    QUrl url = QUrl::fromUserInput(trimmed);
+    if (!url.isValid()) {
+        url = QUrl(trimmed);
+    }
     if (!url.isValid()) return trimmed;
 
     QUrlQuery query(url);
-    if (query.isEmpty()) return trimmed;
+    if (!query.isEmpty()) {
+        static const QSet<QString> trackingKeys = {
+            "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+            "igsh", "obrf", "si", "fbclid", "subid", "subid1", "subid2", "campaign",
+            "ref", "source", "feature", "context", "gclid", "dclid", "msclkid"
+        };
 
-    static const QSet<QString> trackingKeys = {
-        "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
-        "igsh", "obrf", "si", "fbclid", "subid", "subid1", "subid2", "campaign",
-        "ref", "source", "feature", "context", "gclid", "dclid", "msclkid"
-    };
+        QList<QPair<QString, QString>> keptItems;
+        for (const auto &item : query.queryItems()) {
+            QString keyLower = item.first.toLower();
+            if (!trackingKeys.contains(keyLower)) {
+                keptItems.append(item);
+            }
+        }
 
-    QList<QPair<QString, QString>> keptItems;
-    for (const auto &item : query.queryItems()) {
-        QString keyLower = item.first.toLower();
-        if (!trackingKeys.contains(keyLower)) {
-            keptItems.append(item);
+        if (keptItems.isEmpty()) {
+            url.setQuery(QString());
+        } else {
+            QUrlQuery cleanQuery;
+            cleanQuery.setQueryItems(keptItems);
+            url.setQuery(cleanQuery);
         }
     }
 
-    QUrl cleanedUrl = url;
-    if (keptItems.isEmpty()) {
-        cleanedUrl.setQuery(QString());
-    } else {
-        QUrlQuery cleanQuery;
-        cleanQuery.setQueryItems(keptItems);
-        cleanedUrl.setQuery(cleanQuery);
-    }
-
-    return cleanedUrl.toString(QUrl::FullyEncoded);
+    return QString::fromUtf8(url.toEncoded(QUrl::FullyEncoded));
 }
 
 void UrlAnalyzer::clear() {
@@ -179,6 +195,21 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
     if (lower.contains("spotify.com/")) {
         startSpotifyResolve(url);
         return;
+    }
+
+    // 0.3 Doeda / CanliTV / Astalavista direct player link
+    if (lower.contains("play.php") || (lower.contains("canlitv") && lower.contains("vid="))) {
+        QUrlQuery q(url);
+        QString vid = q.queryItemValue("vid");
+        if (vid.isEmpty()) {
+            QRegularExpression vidRe(R"((?:vid|hash)[=:]([a-f0-9]{20,}))", QRegularExpression::CaseInsensitiveOption);
+            auto vm = vidRe.match(trimmed);
+            if (vm.hasMatch()) vid = vm.captured(1);
+        }
+        if (!vid.isEmpty()) {
+            resolveCanliTvAjax(url, vid, "Web Video", "");
+            return;
+        }
     }
 
     // 1. YouTube & Direct social media & streaming video platforms
@@ -687,12 +718,27 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         }
     }
 
-    // 2.5. Check for KVS (Kernel Video Sharing) sites (e.g. xmilf, stiefmutter, doeda, etc.)
+    // 2.3. Check for Doeda / Astalavista / CanliTV player (play.php / ajax_sources.php)
+    if (unescapedHtml.contains("ajax_sources.php") || baseUrl.path().contains("play.php") || baseUrl.host().contains("canlitv")) {
+        QUrlQuery q(baseUrl);
+        QString vid = q.queryItemValue("vid");
+        if (vid.isEmpty()) {
+            QRegularExpression vidRe(R"((?:vid|hash)\s*[:=]\s*["']([a-f0-9]{20,})["'])", QRegularExpression::CaseInsensitiveOption);
+            auto vm = vidRe.match(unescapedHtml);
+            if (vm.hasMatch()) vid = vm.captured(1);
+        }
+        if (!vid.isEmpty()) {
+            resolveCanliTvAjax(baseUrl, vid, title, thumb);
+            return;
+        }
+    }
+
+    // 2.5. Check for KVS (Kernel Video Sharing) sites (e.g. xmilf, etc.)
     QRegularExpression kvsUrlRe(R"(/(?:video|embed)/(\d+)(?:/([^/?#]+))?)", QRegularExpression::CaseInsensitiveOption);
     auto kvsMatch = kvsUrlRe.match(baseUrl.path());
     if (kvsMatch.hasMatch() && (unescapedHtml.contains("videofile.php") || unescapedHtml.contains("base164") ||
         unescapedHtml.contains("kt_player") || unescapedHtml.contains("constants") ||
-        baseUrl.host().contains("xmilf") || baseUrl.host().contains("stiefmutter") || baseUrl.host().contains("doeda"))) {
+        baseUrl.host().contains("xmilf"))) {
         QString videoId = kvsMatch.captured(1);
         QString videoDir = kvsMatch.captured(2);
         startKvsResolve(baseUrl, videoId, videoDir, title, thumb);
@@ -700,7 +746,7 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
     } else {
         QRegularExpression constVidRe(R"(video_id["':\s]+(\d+))", QRegularExpression::CaseInsensitiveOption);
         auto constMatch = constVidRe.match(unescapedHtml);
-        if (constMatch.hasMatch() && (unescapedHtml.contains("videofile.php") || unescapedHtml.contains("base164") || baseUrl.host().contains("xmilf") || baseUrl.host().contains("stiefmutter"))) {
+        if (constMatch.hasMatch() && (unescapedHtml.contains("videofile.php") || unescapedHtml.contains("base164") || baseUrl.host().contains("xmilf"))) {
             QString videoId = constMatch.captured(1);
             QRegularExpression constDirRe(R"(video_dir["':\s]+["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
             auto dirMatch = constDirRe.match(unescapedHtml);
@@ -710,13 +756,19 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         }
     }
 
-    // 3. Check for mediaDefinition or playerParams (Stiefmutter, Xmilf, MindGeek, adult tube players)
+    // 3. Check for mediaDefinition or playerParams (Stiefmutter, MindGeek, YouPorn, adult tube players)
     QRegularExpression mediaDefRe(R"raw("videoUrl"\s*:\s*"([^"]+)")raw", QRegularExpression::CaseInsensitiveOption);
     auto mediaDefMatch = mediaDefRe.match(unescapedHtml);
     if (mediaDefMatch.hasMatch()) {
         QString streamUrl = mediaDefMatch.captured(1).trimmed();
         if (streamUrl.startsWith("//")) streamUrl = "https:" + streamUrl;
         else if (streamUrl.startsWith("/")) streamUrl = baseUrl.resolved(QUrl(streamUrl)).toString();
+
+        if (streamUrl.contains("/media/hls/") || streamUrl.contains("/media/mp4/")) {
+            resolveMindGeekHls(QUrl(streamUrl), baseUrl, title, thumb);
+            return;
+        }
+
         setupStreamMediaInfo(streamUrl, title, "Embedded Stream", thumb, baseUrl.toString());
         return;
     }
@@ -761,7 +813,7 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         bool isIgnored = lowerSrc.endsWith(".swf") || lowerSrc.endsWith(".js") || lowerSrc.endsWith(".css") ||
                          lowerSrc.endsWith(".png") || lowerSrc.endsWith(".jpg") || lowerSrc.endsWith(".jpeg") ||
                          lowerSrc.endsWith(".gif") || lowerSrc.endsWith(".svg") || lowerSrc.endsWith(".webp") ||
-                         lowerSrc.contains("jwplayer.flash") || lowerSrc.contains(".xml");
+                         lowerSrc.contains("jwplayer.flash") || lowerSrc.contains(".xml") || lowerSrc.contains("vast.");
         if (!isIgnored) {
             setupStreamMediaInfo(src, title, "Player Stream", thumb, baseUrl.toString());
             return;
@@ -801,6 +853,10 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         } else if (lowerSrc.contains("sibnet")) {
             foundIframe = src;
             providerName = "Sibnet Player";
+            break;
+        } else if (lowerSrc.contains("canlitv") || lowerSrc.contains("play.php")) {
+            foundIframe = src;
+            providerName = "CanliTV Player";
             break;
         } else if (lowerSrc.contains("streamtape") || lowerSrc.contains("dood") ||
                    lowerSrc.contains("filemoon") || lowerSrc.contains("voe") ||
@@ -854,13 +910,34 @@ void UrlAnalyzer::onIframeFetchFinished() {
         QString unescaped = html;
         unescaped.replace(R"(\/)", "/");
 
-        // 1. Check for mediaDefinition in iframe
+        // 0. Check for Doeda / CanliTV ajax_sources
+        if (unescaped.contains("ajax_sources.php") || finalUrl.path().contains("play.php")) {
+            QUrlQuery q(finalUrl);
+            QString vid = q.queryItemValue("vid");
+            if (vid.isEmpty()) {
+                QRegularExpression vidRe(R"((?:vid|hash)\s*[:=]\s*["']([a-f0-9]+)["'])", QRegularExpression::CaseInsensitiveOption);
+                auto vm = vidRe.match(unescaped);
+                if (vm.hasMatch()) vid = vm.captured(1);
+            }
+            if (!vid.isEmpty()) {
+                resolveCanliTvAjax(finalUrl, vid, m_pendingTitle, m_pendingThumb);
+                return;
+            }
+        }
+
+        // 1. Check for mediaDefinition in iframe (Stiefmutter, MindGeek)
         QRegularExpression mediaDefRe(R"raw("videoUrl"\s*:\s*"([^"]+)")raw", QRegularExpression::CaseInsensitiveOption);
         auto mediaDefMatch = mediaDefRe.match(unescaped);
         if (mediaDefMatch.hasMatch()) {
             QString streamUrl = mediaDefMatch.captured(1).trimmed();
             if (streamUrl.startsWith("//")) streamUrl = "https:" + streamUrl;
             else if (streamUrl.startsWith("/")) streamUrl = finalUrl.resolved(QUrl(streamUrl)).toString();
+
+            if (streamUrl.contains("/media/hls/") || streamUrl.contains("/media/mp4/")) {
+                resolveMindGeekHls(QUrl(streamUrl), finalUrl, m_pendingTitle, m_pendingThumb);
+                return;
+            }
+
             setupStreamMediaInfo(streamUrl, m_pendingTitle, m_pendingProvider, m_pendingThumb, finalUrl.toString());
             return;
         }
@@ -1016,6 +1093,169 @@ void UrlAnalyzer::startKvsResolve(const QUrl &baseUrl, const QString &videoId, c
     });
 }
 
+void UrlAnalyzer::resolveMindGeekHls(const QUrl &hlsApiUrl, const QUrl &baseUrl, const QString &title, const QString &thumb) {
+    QNetworkRequest req(hlsApiUrl);
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
+    req.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    req.setRawHeader("Referer", baseUrl.toString().toUtf8());
+
+    QNetworkReply *reply = m_netManager.get(req);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, baseUrl, title, thumb]() {
+        reply->deleteLater();
+        if (reply->error() != QNetworkReply::NoError) {
+            startYtDlpProbe(m_analyzingUrl);
+            return;
+        }
+
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        QString realUrl;
+        if (doc.isArray()) {
+            for (const QJsonValue &v : doc.array()) {
+                if (v.isObject()) {
+                    QJsonObject obj = v.toObject();
+                    QString u = obj.value("videoUrl").toString();
+                    if (!u.isEmpty()) {
+                        realUrl = u;
+                        if (obj.value("defaultQuality").toBool()) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!realUrl.isEmpty()) {
+            realUrl.replace(R"(\/)", "/");
+            setupStreamMediaInfo(realUrl, title, baseUrl.host(), thumb, baseUrl.toString());
+        } else {
+            startYtDlpProbe(m_analyzingUrl);
+        }
+    });
+}
+
+void UrlAnalyzer::resolveCanliTvAjax(const QUrl &iframeUrl, const QString &vid, const QString &title, const QString &thumb) {
+    QUrl ajaxUrl = iframeUrl.resolved(QUrl("ajax_sources.php"));
+
+    QNetworkRequest req(ajaxUrl);
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    req.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
+    req.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
+    req.setRawHeader("Referer", iframeUrl.toString().toUtf8());
+    req.setRawHeader("X-Requested-With", "XMLHttpRequest");
+
+    QUrlQuery postParams;
+    postParams.addQueryItem("vid", vid);
+    postParams.addQueryItem("alternative", "ankacdn");
+    postParams.addQueryItem("ord", "0");
+    QByteArray postData = postParams.query(QUrl::FullyEncoded).toUtf8();
+
+    QNetworkReply *reply = m_netManager.post(req, postData);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, iframeUrl, vid, title, thumb]() {
+        reply->deleteLater();
+        if (reply->error() != QNetworkReply::NoError) {
+            startYtDlpProbe(m_analyzingUrl);
+            return;
+        }
+
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        QString foundFile;
+        int foundHeight = 720;
+        QString foundThumb = thumb;
+
+        if (doc.isObject()) {
+            QJsonObject rootObj = doc.object();
+            if (foundThumb.isEmpty() && rootObj.contains("image")) {
+                foundThumb = rootObj.value("image").toString();
+            }
+            if (rootObj.contains("source") && rootObj["source"].isArray()) {
+                for (const QJsonValue &v : rootObj["source"].toArray()) {
+                    if (v.isObject()) {
+                        QString fileUrl = v.toObject().value("file").toString();
+                        if (!fileUrl.isEmpty()) {
+                            foundFile = fileUrl;
+                            QString label = v.toObject().value("label").toString().toLower();
+                            if (label.contains("1080")) foundHeight = 1080;
+                            else if (label.contains("720")) foundHeight = 720;
+                            else if (label.contains("480")) foundHeight = 480;
+                            else if (label.contains("360")) foundHeight = 360;
+                            break;
+                        }
+                    }
+                }
+            } else if (rootObj.contains("iframe") && !rootObj["iframe"].isNull()) {
+                QString iframeSrc = rootObj.value("iframe").toString();
+                if (!iframeSrc.isEmpty()) {
+                    fetchIframeContent(QUrl(iframeSrc), title, foundThumb, "Embedded Video");
+                    return;
+                }
+            }
+        }
+
+        if (!foundFile.isEmpty()) {
+            foundFile.replace(R"(\/)", "/");
+            QString finalTitle = title;
+            if (finalTitle.isEmpty() || finalTitle.startsWith("Web_Video_") || finalTitle == "Web Video") {
+                QString baseName = QFileInfo(QUrl(foundFile).path()).completeBaseName();
+                if (!baseName.isEmpty()) {
+                    baseName.replace('-', ' ').replace('_', ' ');
+                    finalTitle = baseName;
+                }
+            }
+            setupStreamMediaInfo(foundFile, finalTitle, "CanliTV Player", foundThumb, iframeUrl.toString());
+            if (m_currentInfo) {
+                m_currentInfo->setMaxHeight(foundHeight);
+                m_currentInfo->setAvailableHeights({foundHeight});
+                populateWebStreamOptions(m_currentInfo);
+            }
+        } else {
+            // Fallback retry with empty alternative
+            QUrl ajaxUrl = iframeUrl.resolved(QUrl("ajax_sources.php"));
+            QNetworkRequest altReq(ajaxUrl);
+            altReq.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+            altReq.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+            altReq.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
+            altReq.setRawHeader("Referer", iframeUrl.toString().toUtf8());
+            altReq.setRawHeader("X-Requested-With", "XMLHttpRequest");
+            QUrlQuery altParams;
+            altParams.addQueryItem("vid", vid);
+            altParams.addQueryItem("alternative", "");
+            altParams.addQueryItem("ord", "0");
+            QNetworkReply *altReply = m_netManager.post(altReq, altParams.query(QUrl::FullyEncoded).toUtf8());
+            connect(altReply, &QNetworkReply::finished, this, [this, altReply, iframeUrl, title, thumb]() {
+                altReply->deleteLater();
+                if (altReply->error() != QNetworkReply::NoError) {
+                    startYtDlpProbe(m_analyzingUrl);
+                    return;
+                }
+                QByteArray altData = altReply->readAll();
+                QJsonDocument altDoc = QJsonDocument::fromJson(altData);
+                QString altFile;
+                if (altDoc.isObject() && altDoc.object().contains("source") && altDoc.object()["source"].isArray()) {
+                    for (const QJsonValue &v : altDoc.object()["source"].toArray()) {
+                        if (v.isObject()) {
+                            QString fileUrl = v.toObject().value("file").toString();
+                            if (!fileUrl.isEmpty()) {
+                                altFile = fileUrl;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!altFile.isEmpty()) {
+                    altFile.replace(R"(\/)", "/");
+                    setupStreamMediaInfo(altFile, title, "CanliTV Player", thumb, iframeUrl.toString());
+                } else {
+                    startYtDlpProbe(m_analyzingUrl);
+                }
+            });
+        }
+    });
+}
+
 void UrlAnalyzer::setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail, const QString &referer) {
     m_isAnalyzing = false;
     emit analyzingChanged();
@@ -1038,14 +1278,22 @@ void UrlAnalyzer::setupStreamMediaInfo(const QString &streamUrl, const QString &
 }
 
 void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
-    m_analyzingUrl = rawUrl;
+    QString encodedUrl = encodeUrlSafely(rawUrl);
+    if (encodedUrl.isEmpty()) encodedUrl = rawUrl;
+    m_analyzingUrl = encodedUrl;
+
     QString ytDlpExe = FFmpegProcessor::findYtDlpExecutable();
     if (ytDlpExe.isEmpty()) {
-        startDirectProbe(QUrl(rawUrl));
+        startDirectProbe(QUrl(encodedUrl));
         return;
     }
 
     m_ytDlpProcess = new QProcess(this);
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("PYTHONIOENCODING", "utf-8");
+    env.insert("PYTHONUTF8", "1");
+    m_ytDlpProcess->setProcessEnvironment(env);
+
     QStringList args;
     args << "--print" << "%(title)s|||%(uploader)s|||%(duration_string)s|||%(thumbnail)s|||%(height)s|||%(formats.:.height)#j";
     args << "--no-warnings";
@@ -1057,18 +1305,19 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
         args << "--impersonate" << "Chrome";
     }
 
-    QString lower = rawUrl.toLower();
+    QString lower = encodedUrl.toLower();
     bool isYouTube = lower.contains("youtube.com") || lower.contains("youtu.be");
     bool isSocial = lower.contains("instagram.com") || lower.contains("tiktok.com") ||
                     lower.contains("twitter.com") || lower.contains("x.com") ||
                     lower.contains("facebook.com") || lower.contains("fb.watch");
 
     if (!isSocial) {
-        QString ref = !m_pageReferer.isEmpty() ? m_pageReferer : rawUrl;
-        args << "--referer" << ref;
+        QString ref = !m_pageReferer.isEmpty() ? m_pageReferer : encodedUrl;
+        QString encRef = encodeUrlSafely(ref);
+        args << "--referer" << (encRef.isEmpty() ? ref : encRef);
     }
 
-    args << rawUrl;
+    args << encodedUrl;
 
     connect(m_ytDlpProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &UrlAnalyzer::onYtDlpFinished);
 
@@ -1324,15 +1573,77 @@ void UrlAnalyzer::populateDirectFileOptions(MediaInfo *info, qint64 sizeBytes, c
 void UrlAnalyzer::populateWebStreamOptions(MediaInfo *info) {
     QList<MediaStreamOption> options;
 
-    MediaStreamOption bestVideo;
-    bestVideo.id = "best_video";
-    bestVideo.resolution = "Video (MP4 / Best Quality)";
-    bestVideo.container = "mp4";
-    bestVideo.codec = "H.264 / AAC (HD/4K)";
-    bestVideo.sizeFormatted = "Full Quality";
-    bestVideo.isAudioOnly = false;
-    options.append(bestVideo);
+    QList<int> heights = info->availableHeights();
+    int maxH = info->maxHeight();
 
+    if (heights.isEmpty() && maxH > 0) {
+        static const QList<int> standardHeights = {2160, 1440, 1080, 720, 480, 360};
+        for (int h : standardHeights) {
+            if (h <= maxH) {
+                heights.append(h);
+            }
+        }
+    }
+
+    if (!heights.isEmpty()) {
+        std::sort(heights.begin(), heights.end(), std::greater<int>());
+        QList<int> uniqueHeights;
+        for (int h : heights) {
+            if (!uniqueHeights.contains(h) && h >= 144) {
+                uniqueHeights.append(h);
+            }
+        }
+
+        // 1. Highest available (Best Quality)
+        MediaStreamOption bestVideo;
+        bestVideo.id = "best_video";
+        int topH = uniqueHeights.first();
+        QString topLabel = QString::number(topH) + "p";
+        if (topH >= 2160) topLabel = "4K (2160p)";
+        else if (topH >= 1440) topLabel = "2K (1440p)";
+        else if (topH >= 1080) topLabel = "1080p (Full HD)";
+        else if (topH >= 720) topLabel = "720p (HD)";
+        bestVideo.resolution = QString("Best Quality (%1)").arg(topLabel);
+        bestVideo.container = "mp4";
+        bestVideo.codec = "H.264 / AAC (Highest)";
+        bestVideo.sizeFormatted = "Max Quality";
+        bestVideo.isAudioOnly = false;
+        options.append(bestVideo);
+
+        // 2. Specific resolutions if more than 1 available
+        if (uniqueHeights.size() > 1) {
+            for (int h : uniqueHeights) {
+                MediaStreamOption opt;
+                if (h >= 2160) {
+                    opt.id = "video_4k";
+                    opt.resolution = "2160p (4K Ultra HD)";
+                } else {
+                    opt.id = QString("video_%1p").arg(h);
+                    if (h == 1440) opt.resolution = "1440p (2K Quad HD)";
+                    else if (h == 1080) opt.resolution = "1080p (Full HD)";
+                    else if (h == 720) opt.resolution = "720p (HD)";
+                    else if (h == 480) opt.resolution = "480p (SD)";
+                    else opt.resolution = QString("%1p").arg(h);
+                }
+                opt.container = "mp4";
+                opt.codec = "H.264 / AAC";
+                opt.sizeFormatted = QString("%1p Stream").arg(h);
+                opt.isAudioOnly = false;
+                options.append(opt);
+            }
+        }
+    } else {
+        MediaStreamOption bestVideo;
+        bestVideo.id = "best_video";
+        bestVideo.resolution = "Video (MP4 / Best Quality)";
+        bestVideo.container = "mp4";
+        bestVideo.codec = "H.264 / AAC (HD/4K)";
+        bestVideo.sizeFormatted = "Full Quality";
+        bestVideo.isAudioOnly = false;
+        options.append(bestVideo);
+    }
+
+    // Audio options
     MediaStreamOption audioMp3;
     audioMp3.id = "audio_mp3";
     audioMp3.resolution = "Audio Only (320 kbps MP3)";
@@ -1341,6 +1652,15 @@ void UrlAnalyzer::populateWebStreamOptions(MediaInfo *info) {
     audioMp3.sizeFormatted = "Studio Quality";
     audioMp3.isAudioOnly = true;
     options.append(audioMp3);
+
+    MediaStreamOption audioM4a;
+    audioM4a.id = "audio_m4a";
+    audioM4a.resolution = "Audio Only (M4A / AAC)";
+    audioM4a.container = "m4a";
+    audioM4a.codec = "AAC HQ";
+    audioM4a.sizeFormatted = "Original Audio";
+    audioM4a.isAudioOnly = true;
+    options.append(audioM4a);
 
     info->setStreamOptions(options);
 }
