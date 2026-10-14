@@ -11,6 +11,7 @@
 #include <QQuickStyle>
 #include <QQuickWindow>
 #include <QIcon>
+#include <QFont>
 #include <QDebug>
 #include <iostream>
 
@@ -42,7 +43,11 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName("YuYuInstaller");
     app.setOrganizationName("YuYuDev");
-    app.setApplicationVersion("1.1.5");
+    app.setApplicationVersion("1.1.6");
+
+    QFont defaultFont("Segoe UI", 10);
+    defaultFont.setStyleHint(QFont::SansSerif);
+    app.setFont(defaultFont);
 
     QIcon appIcon;
     const QStringList iconCandidates = {

@@ -117,6 +117,7 @@ void UrlAnalyzer::clear() {
         m_currentInfo = nullptr;
         emit mediaInfoChanged();
     }
+    m_ytDlpRetried = false;
     m_analyzingUrl.clear();
     m_pageReferer.clear();
     if (m_isAnalyzing) {
@@ -152,6 +153,7 @@ void UrlAnalyzer::analyzeUrl(const QString &rawUrl) {
 
     m_analyzingUrl = trimmed;
     m_pageReferer.clear();
+    m_ytDlpRetried = false;
     m_isAnalyzing = true;
     emit analyzingChanged();
 
@@ -685,6 +687,29 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
         }
     }
 
+    // 2.5. Check for KVS (Kernel Video Sharing) sites (e.g. xmilf, stiefmutter, doeda, etc.)
+    QRegularExpression kvsUrlRe(R"(/(?:video|embed)/(\d+)(?:/([^/?#]+))?)", QRegularExpression::CaseInsensitiveOption);
+    auto kvsMatch = kvsUrlRe.match(baseUrl.path());
+    if (kvsMatch.hasMatch() && (unescapedHtml.contains("videofile.php") || unescapedHtml.contains("base164") ||
+        unescapedHtml.contains("kt_player") || unescapedHtml.contains("constants") ||
+        baseUrl.host().contains("xmilf") || baseUrl.host().contains("stiefmutter") || baseUrl.host().contains("doeda"))) {
+        QString videoId = kvsMatch.captured(1);
+        QString videoDir = kvsMatch.captured(2);
+        startKvsResolve(baseUrl, videoId, videoDir, title, thumb);
+        return;
+    } else {
+        QRegularExpression constVidRe(R"(video_id["':\s]+(\d+))", QRegularExpression::CaseInsensitiveOption);
+        auto constMatch = constVidRe.match(unescapedHtml);
+        if (constMatch.hasMatch() && (unescapedHtml.contains("videofile.php") || unescapedHtml.contains("base164") || baseUrl.host().contains("xmilf") || baseUrl.host().contains("stiefmutter"))) {
+            QString videoId = constMatch.captured(1);
+            QRegularExpression constDirRe(R"(video_dir["':\s]+["']([^"']+)["'])", QRegularExpression::CaseInsensitiveOption);
+            auto dirMatch = constDirRe.match(unescapedHtml);
+            QString videoDir = dirMatch.hasMatch() ? dirMatch.captured(1) : "";
+            startKvsResolve(baseUrl, videoId, videoDir, title, thumb);
+            return;
+        }
+    }
+
     // 3. Check for mediaDefinition or playerParams (Stiefmutter, Xmilf, MindGeek, adult tube players)
     QRegularExpression mediaDefRe(R"raw("videoUrl"\s*:\s*"([^"]+)")raw", QRegularExpression::CaseInsensitiveOption);
     auto mediaDefMatch = mediaDefRe.match(unescapedHtml);
@@ -732,8 +757,15 @@ void UrlAnalyzer::parseHtmlForMedia(const QString &html, const QUrl &baseUrl) {
     auto jsMatch = jsPlayerRe.match(unescapedHtml);
     if (jsMatch.hasMatch()) {
         QString src = jsMatch.captured(1).trimmed();
-        setupStreamMediaInfo(src, title, "Player Stream", thumb, baseUrl.toString());
-        return;
+        QString lowerSrc = src.toLower();
+        bool isIgnored = lowerSrc.endsWith(".swf") || lowerSrc.endsWith(".js") || lowerSrc.endsWith(".css") ||
+                         lowerSrc.endsWith(".png") || lowerSrc.endsWith(".jpg") || lowerSrc.endsWith(".jpeg") ||
+                         lowerSrc.endsWith(".gif") || lowerSrc.endsWith(".svg") || lowerSrc.endsWith(".webp") ||
+                         lowerSrc.contains("jwplayer.flash") || lowerSrc.contains(".xml");
+        if (!isIgnored) {
+            setupStreamMediaInfo(src, title, "Player Stream", thumb, baseUrl.toString());
+            return;
+        }
     }
 
     // 8. Scan for meta video tags
@@ -854,16 +886,134 @@ void UrlAnalyzer::onIframeFetchFinished() {
         auto sourcesMatch = sourcesRe.match(unescaped);
         if (sourcesMatch.hasMatch()) {
             QString src = sourcesMatch.captured(1).trimmed();
-            if (src.startsWith("//")) src = "https:" + src;
-            else if (src.startsWith("/")) src = finalUrl.resolved(QUrl(src)).toString();
-            setupStreamMediaInfo(src, m_pendingTitle, m_pendingProvider, m_pendingThumb, finalUrl.toString());
-            return;
+            QString lowerSrc = src.toLower();
+            bool isIgnored = lowerSrc.endsWith(".swf") || lowerSrc.endsWith(".js") || lowerSrc.endsWith(".css") ||
+                             lowerSrc.endsWith(".png") || lowerSrc.endsWith(".jpg") || lowerSrc.endsWith(".jpeg") ||
+                             lowerSrc.endsWith(".gif") || lowerSrc.endsWith(".svg") || lowerSrc.endsWith(".webp") ||
+                             lowerSrc.contains("jwplayer.flash") || lowerSrc.contains(".xml");
+            if (!isIgnored) {
+                if (src.startsWith("//")) src = "https:" + src;
+                else if (src.startsWith("/")) src = finalUrl.resolved(QUrl(src)).toString();
+                setupStreamMediaInfo(src, m_pendingTitle, m_pendingProvider, m_pendingThumb, finalUrl.toString());
+                return;
+            }
         }
     }
 
     // Method 2 fallback: dynamic probe via yt-dlp on the iframe URL with referer
     m_pageReferer = m_analyzingUrl;
     startYtDlpProbe(m_pendingIframeUrl.toString());
+}
+
+QString UrlAnalyzer::base164Decode(const QString &rawInput) {
+    static const QString t = QString::fromUtf8(u8"\u0410\u0412\u0421D\u0415FGHIJKL\u041cNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,~");
+    QString e;
+    for (const QChar &ch : rawInput) {
+        if (t.contains(ch)) {
+            e.append(ch);
+        }
+    }
+
+    QByteArray outBytes;
+    int o = 0;
+    while (o < e.length()) {
+        int r = (o < e.length()) ? t.indexOf(e.at(o++)) : -1;
+        int i = (o < e.length()) ? t.indexOf(e.at(o++)) : -1;
+        int s = (o < e.length()) ? t.indexOf(e.at(o++)) : -1;
+        int a = (o < e.length()) ? t.indexOf(e.at(o++)) : -1;
+
+        if (r < 0) r = 0;
+        if (i < 0) i = 0;
+        if (s < 0) s = 64;
+        if (a < 0) a = 64;
+
+        int b1 = (r << 2) | (i >> 4);
+        int b2 = ((15 & i) << 4) | (s >> 2);
+        int b3 = ((3 & s) << 6) | a;
+
+        outBytes.append(static_cast<char>(b1));
+        if (s != 64) outBytes.append(static_cast<char>(b2));
+        if (a != 64) outBytes.append(static_cast<char>(b3));
+    }
+
+    return QUrl::fromPercentEncoding(outBytes);
+}
+
+void UrlAnalyzer::startKvsResolve(const QUrl &baseUrl, const QString &videoId, const QString &videoDir, const QString &title, const QString &thumb) {
+    if (videoId.isEmpty()) {
+        startYtDlpProbe(baseUrl.toString());
+        return;
+    }
+
+    QUrl kvsApiUrl(QString("%1://%2/api/videofile.php?video_id=%3&video_dir=%4")
+                   .arg(baseUrl.scheme().isEmpty() ? "https" : baseUrl.scheme(),
+                        baseUrl.host(),
+                        videoId,
+                        videoDir));
+
+    QNetworkRequest request(kvsApiUrl);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    request.setAttribute(QNetworkRequest::Http2AllowedAttribute, true);
+    request.setHeader(QNetworkRequest::UserAgentHeader, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+    request.setRawHeader("Accept", "application/json, text/javascript, */*; q=0.01");
+    request.setRawHeader("Referer", baseUrl.toString().toUtf8());
+
+    QNetworkReply *reply = m_netManager.get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply, baseUrl, title, thumb]() {
+        reply->deleteLater();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            startYtDlpProbe(baseUrl.toString());
+            return;
+        }
+
+        QByteArray data = reply->readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(data);
+        QJsonArray items;
+        if (doc.isArray()) {
+            items = doc.array();
+        } else if (doc.isObject() && doc.object().contains("value") && doc.object()["value"].isArray()) {
+            items = doc.object()["value"].toArray();
+        }
+
+        QString chosenUrl;
+        int bestHeight = 0;
+
+        for (const QJsonValue &val : items) {
+            if (!val.isObject()) continue;
+            QJsonObject obj = val.toObject();
+            QString rawVideoUrl = obj.value("video_url").toString();
+            if (rawVideoUrl.isEmpty()) continue;
+
+            QString decoded = base164Decode(rawVideoUrl);
+            if (decoded.isEmpty()) continue;
+
+            QString format = obj.value("format").toString().toLower();
+            int h = 720;
+            if (format.contains("1080")) h = 1080;
+            else if (format.contains("720") || format.contains("hd")) h = 720;
+            else if (format.contains("480")) h = 480;
+            else if (format.contains("360") || format.contains("sd")) h = 360;
+
+            if (chosenUrl.isEmpty() || h > bestHeight) {
+                bestHeight = h;
+                chosenUrl = decoded;
+            }
+        }
+
+        if (!chosenUrl.isEmpty()) {
+            if (chosenUrl.startsWith("//")) {
+                chosenUrl = "https:" + chosenUrl;
+            } else if (chosenUrl.startsWith("/")) {
+                chosenUrl = baseUrl.resolved(QUrl(chosenUrl)).toString();
+            }
+            setupStreamMediaInfo(chosenUrl, title, baseUrl.host(), thumb, baseUrl.toString());
+            return;
+        }
+
+        // Fallback to yt-dlp probe if KVS resolve found no URLs
+        startYtDlpProbe(baseUrl.toString());
+    });
 }
 
 void UrlAnalyzer::setupStreamMediaInfo(const QString &streamUrl, const QString &title, const QString &sourceName, const QString &thumbnail, const QString &referer) {
@@ -903,7 +1053,9 @@ void UrlAnalyzer::startYtDlpProbe(const QString &rawUrl) {
     args << "--no-check-certificates";
     args << "--socket-timeout" << "25";
     args << "--retries" << "5";
-    args << "--impersonate" << "Chrome";
+    if (!m_ytDlpRetried) {
+        args << "--impersonate" << "Chrome";
+    }
 
     QString lower = rawUrl.toLower();
     bool isYouTube = lower.contains("youtube.com") || lower.contains("youtu.be");
@@ -985,6 +1137,15 @@ void UrlAnalyzer::onYtDlpFinished(int exitCode, QProcess::ExitStatus exitStatus)
             emit analysisSuccess(m_currentInfo);
             return;
         }
+    }
+
+    // Dual-stage fallback: If failed with --impersonate Chrome (e.g. DNS or TLS drop), retry once without impersonate
+    if (!m_ytDlpRetried) {
+        m_ytDlpRetried = true;
+        m_isAnalyzing = true;
+        emit analyzingChanged();
+        startYtDlpProbe(m_analyzingUrl);
+        return;
     }
 
     // Fallback to oEmbed probe if yt-dlp failed on YouTube

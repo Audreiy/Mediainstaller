@@ -61,6 +61,7 @@ private:
     int m_speedLimitMBps = 0;
     bool m_isRunning = false;
     bool m_isPaused = false;
+    bool m_impersonateRetried = false;
     double m_progress = 0.0;
     QString m_speedString;
     QString m_etaString;

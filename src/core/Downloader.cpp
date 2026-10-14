@@ -263,7 +263,21 @@ void Downloader::onFinished() {
     bool isOk = (m_reply->error() == QNetworkReply::NoError) && (statusCode == 200 || statusCode == 206 || statusCode == 0);
     qint64 fileSize = m_outputFile.isOpen() ? m_outputFile.size() : QFileInfo(m_targetPath).size();
 
-    if (isOk && fileSize > 0) {
+    bool isInvalidMedia = false;
+    QString invalidReason;
+    if (fileSize < 8192) {
+        isInvalidMedia = true;
+        invalidReason = QString("File too small (%1 bytes). Expected media stream.").arg(fileSize);
+    } else if (m_outputFile.isOpen()) {
+        m_outputFile.seek(0);
+        QByteArray header = m_outputFile.read(256).toLower();
+        if (header.contains("<html") || header.contains("<!doctype") || header.contains("#extm3u")) {
+            isInvalidMedia = true;
+            invalidReason = "Server returned HTML error or text playlist instead of raw media file.";
+        }
+    }
+
+    if (isOk && fileSize > 0 && !isInvalidMedia) {
         m_outputFile.flush();
         m_outputFile.close();
         m_isRunning = false;
@@ -277,8 +291,8 @@ void Downloader::onFinished() {
         m_outputFile.remove();
         m_isRunning = false;
         emit runningChanged();
-        QString err = (fileSize == 0 && isOk) ? "Download failed: Server sent 0 bytes (access restricted or expired link)." : QString("HTTP error (Status %1)").arg(statusCode);
-        QString details = QString("HTTP Status: %1\nURL: %2\nOutput File: %3\nFile Size: %4 bytes").arg(statusCode).arg(m_url, m_targetPath).arg(fileSize);
+        QString err = isInvalidMedia ? invalidReason : ((fileSize == 0 && isOk) ? "Download failed: Server sent 0 bytes (access restricted or expired link)." : QString("HTTP error (Status %1)").arg(statusCode));
+        QString details = QString("HTTP Status: %1\nURL: %2\nOutput File: %3\nFile Size: %4 bytes\nReason: %5").arg(statusCode).arg(m_url, m_targetPath).arg(fileSize).arg(err);
         emit downloadFailed(m_id, err, details);
     }
     cleanup();

@@ -11,7 +11,7 @@ QtObject {
         "en": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.5 Pro",
+            "appVersion": "v1.1.6 Pro",
             "appSubtitle": "Media Downloader & Converter",
             
             // Sidebar
@@ -121,7 +121,7 @@ QtObject {
             "missingStatus": "Missing",
             "aboutTitle": "About YuYuInstaller",
             "aboutDesc": "YuYuInstaller is a modern Windows media downloader and converter built with C++20, Qt 6 Quick / QML, FFmpeg, and yt-dlp for high-performance direct streaming and 320 kbps audio extraction.",
-            "aboutVersion": "Version 1.1.5 Pro • Hardware-Accelerated QML Interface",
+            "aboutVersion": "Version 1.1.6 Pro • Hardware-Accelerated QML Interface",
             "updateSection": "Application Updates",
             "updateSubtitle": "Keep YuYuInstaller updated with the latest improvements.",
             "currentVersionLabel": "Installed Version",
@@ -137,6 +137,10 @@ QtObject {
             "updateBannerAction": "Update Now",
             "updateLogTitle": "Release Notes & Changelog",
             "updateLogSubtitle": "Detailed history of improvements and release notes",
+            "log116_1": "Dual-Stage TLS & DNS Recovery: Automatic fallback mechanism for Instagram Reels and social media seamlessly bypasses c-ares host resolution drops, ensuring reliable metadata extraction and download",
+            "log116_2": "Kernel Video Sharing (KVS) Decoder: Native base164 decoding engine for xmilf, stiefmutter, doeda, and modern SPA video streaming architectures",
+            "log116_3": "Turkish Character & Typography Fix: Fully corrected font rendering to Segoe UI across all dialogs, preventing Turkish glyphs from displaying as question marks (?)",
+            "log116_4": "Corrupt Stream & Flash Filter: Enforced 8KB minimum stream integrity check and filtered legacy flash/player artifacts to eliminate invalid 0.6KB downloads",
             "log115_1": "Universal Stream Sniffer: Automatically detects and extracts HLS (.m3u8), MP4/WebM, and JavaScript video player configurations (mediaDefinition, videoUrl) from embedded web pages",
             "log115_2": "Browser TLS Impersonation: Emulates authentic Chrome TLS handshakes and headers for Instagram Reels and social media, eliminating TCP connection resets and host resolution drops",
             "log115_3": "Referer & CDN Protection: Automatic originating page referer propagation prevents 403 Forbidden errors when fetching media segments from protected streaming hosts",
@@ -189,7 +193,7 @@ QtObject {
         "tr": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.5 Pro",
+            "appVersion": "v1.1.6 Pro",
             "appSubtitle": "Medya İndirici & Dönüştürücü",
 
             // Sidebar
@@ -299,7 +303,7 @@ QtObject {
             "missingStatus": "Bulunamadı",
             "aboutTitle": "YuYuİnstaller Hakkında",
             "aboutDesc": "YuYuİnstaller; C++20, Qt 6 Quick / QML, FFmpeg ve yt-dlp ile güçlendirilmiş, yüksek performanslı yeni nesil medya indirme ve ses dönüştürme yazılımıdır.",
-            "aboutVersion": "Sürüm 1.1.5 Pro • Donanım Hızlandırmalı QML Arayüzü",
+            "aboutVersion": "Sürüm 1.1.6 Pro • Donanım Hızlandırmalı QML Arayüzü",
             "updateSection": "Uygulama Güncellemeleri",
             "updateSubtitle": "YuYuİnstaller'ı resmi depodan en son sürümle güncel tutun.",
             "currentVersionLabel": "Yüklü Sürüm",
@@ -315,6 +319,10 @@ QtObject {
             "updateBannerAction": "Şimdi Güncelle",
             "updateLogTitle": "Güncelleme Notları & Sürüm Logları",
             "updateLogSubtitle": "Yayınlanan sürümler ve yapılan yeniliklerin detaylı listesi",
+            "log116_1": "Çift Kademeli TLS & DNS Otomatik Kurtarma: Instagram Reels ve sosyal ağlarda c-ares DNS sunucu erişim kesintilerini otomatik olarak atlayarak kesintisiz analiz ve indirme sağlar",
+            "log116_2": "Kernel Video Sharing (KVS) Akış Çözücü: xmilf, stiefmutter, doeda ve modern SPA video mimarileri için yerleşik base164 algoritması entegre edildi",
+            "log116_3": "Türkçe Karakter & Tipografi Düzeltmesi: Yazı tipi tüm pencerelerde Segoe UI olarak optimize edildi; Türkçe karakterlerin soru işareti (?) çıkma sorunu giderildi",
+            "log116_4": "Bozuk Akış & Flash Filtresi: 8KB altındaki ve HTML içeren geçersiz akışlar engellendi; Flash oynatıcı eklentileri (.swf) filtre edilerek 0.6KB indirme hatası çözüldü",
             "log115_1": "Evrensel Akış Yakalayıcı: Gömülü web sayfalarındaki HLS (.m3u8), MP4/WebM ve JavaScript oynatıcı yapılandırmalarını (mediaDefinition, videoUrl) otomatik tespit eder ve çözer",
             "log115_2": "Tarayıcı TLS İstemci Koruması: Instagram Reels ve sosyal ağlarda TCP bağlantı sıfırlama ve sunucu erişim hatalarını önlemek için gerçek Chrome TLS el sıkışması ve başlıkları kullanır",
             "log115_3": "Referer ve CDN Erişim Koruması: Kaynak sayfa yönlendirici (Referer) başlığını otomatik ileterek korumalı medya sunucularından 403 Erişim Engeli alınmasını önler",
@@ -367,7 +375,7 @@ QtObject {
         "uk": {
             // General
             "appName": "YuYuInstaller",
-            "appVersion": "v1.1.5 Pro",
+            "appVersion": "v1.1.6 Pro",
             "appSubtitle": "Завантажувач та конвертер медіа",
 
             // Sidebar
@@ -477,7 +485,7 @@ QtObject {
             "missingStatus": "Відсутній",
             "aboutTitle": "Про YuYuInstaller",
             "aboutDesc": "YuYuInstaller — це сучасний завантажувач та конвертер медіа для Windows, створений на C++20, Qt 6 Quick / QML, FFmpeg та yt-dlp для високопродуктивного прямого потокового завантаження та вилучення аудіо 320 kbps.",
-            "aboutVersion": "Версія 1.1.5 Pro • Апаратно-прискорений інтерфейс QML",
+            "aboutVersion": "Версія 1.1.6 Pro • Апаратно-прискорений інтерфейс QML",
             "updateSection": "Оновлення програми",
             "updateSubtitle": "Підтримуйте актуальність YuYuInstaller з офіційного репозиторію.",
             "currentVersionLabel": "Встановлена версія",
@@ -493,6 +501,10 @@ QtObject {
             "updateBannerAction": "Оновити зараз",
             "updateLogTitle": "Журнал оновлень та історія змін",
             "updateLogSubtitle": "Детальний список випусків та реалізованих покращень",
+            "log116_1": "Двоетапне відновлення TLS та DNS: Автоматичний механізм обходу збоїв DNS для Instagram Reels та соцмереж для надійного аналізу та завантаження",
+            "log116_2": "Декодер Kernel Video Sharing (KVS): Вбудований алгоритм base164 для сайтів xmilf, stiefmutter, doeda та сучасних SPA відеоплатформ",
+            "log116_3": "Виправлення шрифтів та турецьких символів: Оптимізація системного шрифту Segoe UI для коректного відображення всіх символів без знаків питання (?)",
+            "log116_4": "Фільтрація пошкоджених потоків і Flash: Захист від завантаження файлів менше 8 КБ та виключення застарілих .swf компонентів",
             "log115_1": "Універсальний перехоплювач потоків: Автоматично виявляє та вилучає HLS (.m3u8), MP4/WebM та конфігурації JS-плеєрів (mediaDefinition, videoUrl) із вбудованих вебсторінок",
             "log115_2": "Емуляція браузерного TLS: Використовує автентичне TLS-рукостискання Chrome для Instagram Reels та соцмереж, усуваючи скидання з'єднання TCP та збої DNS",
             "log115_3": "Захист Referer та CDN: Автоматична передача заголовка Referer вихідної сторінки запобігає помилкам 403 Forbidden на захищених хостингах",

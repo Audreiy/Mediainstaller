@@ -55,7 +55,9 @@ void YtDlpDownloader::start() {
     args << "--continue";
     args << "--socket-timeout" << "30";
     args << "--retries" << "5";
-    args << "--impersonate" << "Chrome";
+    if (!m_impersonateRetried) {
+        args << "--impersonate" << "Chrome";
+    }
 
     if (m_speedLimitMBps > 0) {
         args << "--limit-rate" << QString("%1M").arg(m_speedLimitMBps);
@@ -329,6 +331,17 @@ void YtDlpDownloader::onProcessFinished(int exitCode, QProcess::ExitStatus exitS
             emit downloadFailed(m_id, errorReason, details);
         }
     } else {
+        if (!m_impersonateRetried) {
+            m_impersonateRetried = true;
+            m_isRunning = true;
+            if (m_process) {
+                m_process->deleteLater();
+                m_process = nullptr;
+            }
+            start();
+            return;
+        }
+
         QString errorReason = m_lastErrorMessage;
         if (errorReason.isEmpty()) {
             errorReason = QString("Download failed (Process exit code: %1)").arg(exitCode);
