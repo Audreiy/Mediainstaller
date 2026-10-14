@@ -1,6 +1,6 @@
 # YuYuInstaller
 
-[English](README_en.md) | [Українська](README_uk.md)
+[English](docs/README_en.md) | [Українська](docs/README_uk.md)
 
 YuYuInstaller, modern ve yüksek performanslı bir Windows medya indirme ve dönüştürme yazılımıdır. 4K'ya kadar video indirme, tek tıkla 320 kbps MP3 dönüştürme ve akıcı bir anime arayüzü sunar.
 
@@ -16,7 +16,6 @@ YuYuInstaller, modern ve yüksek performanslı bir Windows medya indirme ve dön
 - **320 kbps MP3:** FFmpeg motoru ile stüdyo kalitesinde kayıpsız ses ayıklama.
 - **Akıllı Kuyruk:** İndirme hız sınırı (MB/s), eşzamanlı / sıralı indirme modları ve duraklat/devam et kontrolleri.
 - **Çok Dilli:** Türkçe, İngilizce ve Ukraynaca arayüz desteği.
-- **Sessiz Güncelleme:** Masaüstü kısayol yerini koruyan, sıfır UAC arka plan güncelleyicisi.
 
 ---
 
@@ -42,4 +41,4 @@ cd Mediainstaller
 
 ## Lisans
 
-Bu proje [MIT Lisansı](../LICENSE) ile korunmaktadır.
+Bu proje [MIT Lisansı](LICENSE) ile korunmaktadır.
